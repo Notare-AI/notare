@@ -1,7 +1,6 @@
 import { useReactFlow, Handle, Position } from '@xyflow/react';
-import { useState, useEffect, useMemo } from 'react';
 import NodeToolbarComponent from './NodeToolbar';
-import { colorMap } from '@/lib/colors';
+import { useNodeLogic } from '@/hooks/useNodeLogic';
 
 interface CustomNodeData {
   label?: string;
@@ -15,62 +14,7 @@ type CustomNodeProps = {
 };
 
 function CustomNode({ id, data, selected }: CustomNodeProps) {
-  const { setNodes, getNodes, fitView } = useReactFlow();
-  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  const handleDelete = (nodeId: string) => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== nodeId));
-  };
-
-  const handleColorChange = (nodeId: string, color: string) => {
-    setNodes((nodes) =>
-      nodes.map((node) => {
-        if (node.id === nodeId) {
-          const newData = { ...node.data };
-          if (color === 'default') {
-            delete newData.color;
-          } else {
-            newData.color = color;
-          }
-          return { ...node, data: newData };
-        }
-        return node;
-      })
-    );
-  };
-
-  const handleZoomToNode = (nodeId: string) => {
-    const node = getNodes().find((n) => n.id === nodeId);
-    if (node) {
-      fitView({
-        nodes: [node],
-        duration: 800,
-        padding: 0.2,
-      });
-    }
-  };
-
-  const nodeStyles = useMemo(() => {
-    if (!data.color || !colorMap[data.color]) {
-      return {
-        backgroundColor: 'hsl(var(--card))',
-        borderColor: 'hsl(var(--border))',
-      };
-    }
-    const themeColors = isDarkMode ? colorMap[data.color].dark : colorMap[data.color].light;
-    return {
-      backgroundColor: themeColors.background,
-      borderColor: themeColors.border,
-    };
-  }, [data.color, isDarkMode]);
+  const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
 
   return (
     <>
@@ -81,15 +25,15 @@ function CustomNode({ id, data, selected }: CustomNodeProps) {
       <NodeToolbarComponent
         nodeId={id}
         isVisible={selected}
-        onDelete={handleDelete}
+        onDelete={() => handleDelete()}
         onColorChange={handleColorChange}
-        onZoomToNode={handleZoomToNode}
+        onZoomToNode={() => handleZoomToNode()}
       />
       <div
         className="border border-solid rounded-sm p-2.5"
         style={{
           color: 'hsl(var(--foreground))',
-          backgroundColor: nodeStyles.backgroundColor,
+          backgroundColor: nodeStyles.background,
           borderColor: nodeStyles.borderColor,
         }}
       >

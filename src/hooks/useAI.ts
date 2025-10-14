@@ -4,8 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // --- Configuration ---
 const AI_MODE = import.meta.env.VITE_AI_MODE || 'ollama'; // Default to ollama
-
-const OLLAMA_URL = 'http://localhost:11434/api/generate';
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434/api/generate';
 
 // --- Type Definitions ---
 type AiMode = 'ollama' | 'openai';
@@ -58,14 +57,29 @@ export const useAI = () => {
 
   const _generateOllamaPrompt = (prompt: string) => ({ prompt });
 
-  const generateTLDR = useCallback(async (text: string): Promise<string> => {
-    const prompt = `Summarize the following text in 100 words or less. Provide only the summary, with no introductory text.\n\nText:\n"""\n${text}\n"""`;
-    const payload = {
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-    };
-    return _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
-  }, [_generateContent, aiMode]);
+  const _parseJsonResponse = (responseText: string, objectKey: string) => {
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('AI did not return a valid JSON object.');
+      }
+      
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (objectKey === 'tldr' && typeof parsed.summary === 'string' && Array.isArray(parsed.sources)) {
+        return parsed;
+      }
+      if (objectKey === 'keyPoints' && Array.isArray(parsed.points) && Array.isArray(parsed.sources)) {
+        return parsed;
+      }
+      if (objectKey === 'note' && typeof parsed.note === 'string') {
+        return parsed.note;
+      }
+      throw new Error('Parsed JSON does not match the expected format.');
+    } catch (parseError: any) {
+      console.error('AI JSON parsing error:', parseError, 'Raw response:', responseText);
+      throw new Error(`Failed to parse AI response: ${parseError.message}`);
+    }
+  };
 
   const generateTLDRWithSources = useCallback(async (text: string): Promise<{ summary: string; sources: string[] }> => {
     const prompt = `Analyze the following text and provide a concise summary (TLDR) of 100 words or less. Also, extract the original sentences from the text that directly support your summary.
@@ -86,23 +100,7 @@ export const useAI = () => {
       response_format: { type: "json_object" },
     };
     const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
-
-    try {
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('AI did not return a valid JSON object.');
-      }
-      
-      const parsed = JSON.parse(jsonMatch[0]);
-      if (typeof parsed.summary === 'string' && Array.isArray(parsed.sources) && parsed.sources.every((s: any) => typeof s === 'string')) {
-        return parsed;
-      }
-      throw new Error('Parsed JSON does not match the expected format.');
-    } catch (parseError: any) {
-      setError(`Failed to parse TLDR from AI response: ${parseError.message}`);
-      console.error('TLDR parsing error:', parseError, 'Raw response:', responseText);
-      return { summary: responseText, sources: [] };
-    }
+    return _parseJsonResponse(responseText, 'tldr');
   }, [_generateContent, aiMode]);
 
   const extractKeyPoints = useCallback(async (text: string): Promise<{ points: string[]; sources: string[] }> => {
@@ -124,23 +122,7 @@ export const useAI = () => {
       response_format: { type: "json_object" },
     };
     const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
-
-    try {
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('AI did not return a valid JSON object.');
-      }
-      
-      const parsed = JSON.parse(jsonMatch[0]);
-      if (Array.isArray(parsed.points) && parsed.points.every((p: any) => typeof p === 'string') && Array.isArray(parsed.sources) && parsed.sources.every((s: any) => typeof s === 'string')) {
-        return parsed;
-      }
-      throw new Error('Parsed JSON does not match the expected format.');
-    } catch (parseError: any) {
-      setError(`Failed to parse key points from AI response: ${parseError.message}`);
-      console.error('Key points parsing error:', parseError, 'Raw response:', responseText);
-      return { points: [responseText], sources: [] };
-    }
+    return _parseJsonResponse(responseText, 'keyPoints');
   }, [_generateContent, aiMode]);
 
   const generateNoteFromSelection = useCallback(async (text: string): Promise<string> => {
@@ -161,23 +143,7 @@ export const useAI = () => {
       response_format: { type: "json_object" },
     };
     const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
-
-    try {
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('AI did not return a valid JSON object.');
-      }
-      
-      const parsed = JSON.parse(jsonMatch[0]);
-      if (typeof parsed.note === 'string') {
-        return parsed.note;
-      }
-      throw new Error('Parsed JSON does not match the expected format.');
-    } catch (parseError: any) {
-      setError(`Failed to parse note from AI response: ${parseError.message}`);
-      console.error('Note parsing error:', parseError, 'Raw response:', responseText);
-      return responseText;
-    }
+    return _parseJsonResponse(responseText, 'note');
   }, [_generateContent, aiMode]);
 
   const generateChatResponse = useCallback(async (
@@ -223,7 +189,6 @@ Updated Note Content:`;
   }, [_generateContent, aiMode]);
 
   return {
-    generateTLDR,
     generateTLDRWithSources,
     extractKeyPoints,
     generateNoteFromSelection,

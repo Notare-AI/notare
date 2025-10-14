@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Pencil } from 'lucide-react';
@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
-import { colorMap } from '@/lib/colors';
+import { useNodeLogic } from '@/hooks/useNodeLogic';
 
 interface EditableNoteData {
   label: string;
@@ -24,18 +24,10 @@ type EditableNoteProps = {
 function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
-  const { setNodes, getNodes, fitView } = useReactFlow();
+  const { setNodes } = useReactFlow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen } = useHighlight();
-  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
+  const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
 
   useEffect(() => {
     setLabel(data.label || '');
@@ -55,38 +47,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
     }
   }, [isEditing]);
-
-  const handleDelete = (nodeId: string) => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== nodeId));
-  };
-
-  const handleColorChange = (nodeId: string, color: string) => {
-    setNodes((nodes) =>
-      nodes.map((node) => {
-        if (node.id === nodeId) {
-          const newData = { ...node.data };
-          if (color === 'default') {
-            delete newData.color;
-          } else {
-            newData.color = color;
-          }
-          return { ...node, data: newData };
-        }
-        return node;
-      })
-    );
-  };
-
-  const handleZoomToNode = (nodeId: string) => {
-    const node = getNodes().find((n) => n.id === nodeId);
-    if (node) {
-      fitView({
-        nodes: [node],
-        duration: 800,
-        padding: 0.2,
-      });
-    }
-  };
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -133,20 +93,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     }
   };
 
-  const nodeStyles = useMemo(() => {
-    if (!data.color || !colorMap[data.color]) {
-      return {
-        background: 'hsl(var(--card))',
-        borderColor: 'hsl(var(--border))',
-      };
-    }
-    const themeColors = isDarkMode ? colorMap[data.color].dark : colorMap[data.color].light;
-    return {
-      background: themeColors.background,
-      borderColor: themeColors.border,
-    };
-  }, [data.color, isDarkMode]);
-
   return (
     <>
       <Handle type="source" position={Position.Top} id="top-source" />
@@ -156,9 +102,9 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
       <NodeToolbarComponent
         nodeId={id}
         isVisible={selected}
-        onDelete={handleDelete}
+        onDelete={() => handleDelete()}
         onColorChange={handleColorChange}
-        onZoomToNode={handleZoomToNode}
+        onZoomToNode={() => handleZoomToNode()}
       />
       <div
         style={{

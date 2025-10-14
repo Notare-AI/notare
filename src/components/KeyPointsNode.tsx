@@ -1,11 +1,10 @@
-import { NodeResizer, useReactFlow, Handle, Position } from '@xyflow/react';
-import { useState, useEffect, useMemo } from 'react';
+import { NodeResizer, Handle, Position } from '@xyflow/react';
 import { ListChecks, Eye } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import NodeToolbarComponent from './NodeToolbar';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
-import { colorMap } from '@/lib/colors';
+import { useNodeLogic } from '@/hooks/useNodeLogic';
 
 interface KeyPointsNodeData {
   label: string;
@@ -21,48 +20,7 @@ type KeyPointsNodeProps = {
 
 function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen } = useHighlight();
-  const { setNodes, getNodes, fitView } = useReactFlow();
-  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  const handleDelete = (nodeId: string) => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== nodeId));
-  };
-
-  const handleColorChange = (nodeId: string, color: string) => {
-    setNodes((nodes) =>
-      nodes.map((node) => {
-        if (node.id === nodeId) {
-          const newData = { ...node.data };
-          if (color === 'default') {
-            delete newData.color;
-          } else {
-            newData.color = color;
-          }
-          return { ...node, data: newData };
-        }
-        return node;
-      })
-    );
-  };
-
-  const handleZoomToNode = (nodeId: string) => {
-    const node = getNodes().find((n) => n.id === nodeId);
-    if (node) {
-      fitView({
-        nodes: [node],
-        duration: 800,
-        padding: 0.2,
-      });
-    }
-  };
+  const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
 
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(data.sources);
   const isActive = isPdfSidebarOpen && isCurrentlyHighlighted;
@@ -81,20 +39,6 @@ function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
     }
   };
 
-  const nodeStyles = useMemo(() => {
-    if (!data.color || !colorMap[data.color]) {
-      return {
-        background: 'hsl(var(--card))',
-        borderColor: 'hsl(var(--border))',
-      };
-    }
-    const themeColors = isDarkMode ? colorMap[data.color].dark : colorMap[data.color].light;
-    return {
-      background: themeColors.background,
-      borderColor: themeColors.border,
-    };
-  }, [data.color, isDarkMode]);
-
   return (
     <>
       <Handle type="source" position={Position.Top} id="top-source" />
@@ -104,9 +48,9 @@ function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
       <NodeToolbarComponent
         nodeId={id}
         isVisible={selected}
-        onDelete={handleDelete}
+        onDelete={() => handleDelete()}
         onColorChange={handleColorChange}
-        onZoomToNode={handleZoomToNode}
+        onZoomToNode={() => handleZoomToNode()}
       />
       <div
         style={{

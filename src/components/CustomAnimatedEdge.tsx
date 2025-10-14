@@ -21,9 +21,15 @@ export default function CustomAnimatedEdge({
     targetPosition,
   });
 
+  const edgeStyle = {
+    ...style,
+    stroke: 'hsl(var(--primary))',
+    strokeWidth: 2,
+  };
+
   return (
     <>
-      <BaseEdge path={edgePath} markerEnd={markerEnd} style={{ ...style, stroke: 'blue', strokeWidth: 2 }} />
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={edgeStyle} />
       {animated && (
         <>
           <path
@@ -37,7 +43,7 @@ export default function CustomAnimatedEdge({
             height="8"
             x="-4"
             y="-4"
-            fill="blue"
+            fill="hsl(var(--primary))"
             rx="1"
             ry="1"
           >
