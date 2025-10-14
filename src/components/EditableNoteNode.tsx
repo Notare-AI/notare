@@ -13,6 +13,7 @@ interface EditableNoteData {
   label: string;
   sources?: string[];
   color?: string;
+  isAiGenerated?: boolean;
 }
 
 type EditableNoteProps = {
@@ -28,6 +29,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen } = useHighlight();
   const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
+
+  const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
     setLabel(data.label || '');
@@ -119,7 +122,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         <div className="flex items-center justify-between p-2 border-b border-[hsl(var(--border))] bg-black/5 dark:bg-card-header rounded-t-[7px] cursor-move">
           <span className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-800 dark:text-white bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
             <Pen size={14} />
-            Note
+            {title}
           </span>
           <div className="flex items-center gap-1">
             {data.sources && data.sources.length > 0 && (

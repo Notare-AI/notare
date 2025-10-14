@@ -38,11 +38,12 @@ const NodeAIEditor = ({ nodeId, currentContent }: NodeAIEditorProps) => {
       const newNodeId = `node_${+new Date()}`;
       const newNode = {
         id: newNodeId,
-        type: parentNode.type,
+        type: 'editableNote',
         position: newNodePosition,
         data: { 
           label: newContent,
           color: parentNode.data.color, // Preserve color from parent
+          isAiGenerated: true,
         },
         style: { ...parentNode.style }, // Preserve style from parent
       };
