@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useReactFlow } from '@xyflow/react';
+import { useReactFlow, addEdge } from '@xyflow/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ interface NodeAIEditorProps {
 const NodeAIEditor = ({ nodeId, currentContent }: NodeAIEditorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const { setNodes } = useReactFlow();
+  const { getNode, setNodes, setEdges } = useReactFlow();
   const { generateUpdatedNodeContent, isGenerating } = useAI();
 
   const handleGenerate = async () => {
@@ -23,14 +23,41 @@ const NodeAIEditor = ({ nodeId, currentContent }: NodeAIEditorProps) => {
 
     try {
       const newContent = await generateUpdatedNodeContent(currentContent, prompt);
-      setNodes((nodes) =>
-        nodes.map((node) => {
-          if (node.id === nodeId) {
-            return { ...node, data: { ...node.data, label: newContent } };
-          }
-          return node;
-        })
-      );
+      
+      const parentNode = getNode(nodeId);
+      if (!parentNode) {
+        showError('Could not find the source node.');
+        return;
+      }
+
+      const newNodePosition = {
+        x: parentNode.position.x + (parentNode.width || 200) + 50,
+        y: parentNode.position.y,
+      };
+
+      const newNodeId = `node_${+new Date()}`;
+      const newNode = {
+        id: newNodeId,
+        type: parentNode.type,
+        position: newNodePosition,
+        data: { 
+          label: newContent,
+          color: parentNode.data.color, // Preserve color from parent
+        },
+        style: { ...parentNode.style }, // Preserve style from parent
+      };
+
+      const newEdge = {
+        id: `e-${nodeId}-${newNodeId}`,
+        source: nodeId,
+        target: newNodeId,
+        type: 'customAnimated',
+        animated: true,
+      };
+
+      setNodes((nodes) => nodes.concat(newNode));
+      setEdges((edges) => addEdge(newEdge, edges));
+
       setIsOpen(false);
       setPrompt('');
     } catch (error) {
@@ -43,7 +70,7 @@ const NodeAIEditor = ({ nodeId, currentContent }: NodeAIEditorProps) => {
       <PopoverTrigger asChild>
         <button
           className="p-1 text-gray-400 rounded hover:bg-gray-700 hover:text-white"
-          title="Edit with AI"
+          title="Generate from this node"
         >
           <MessageSquare size={16} />
         </button>
