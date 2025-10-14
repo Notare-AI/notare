@@ -15,6 +15,7 @@ import BlogIndex from "./pages/BlogIndex";
 import BlogPost from "./pages/BlogPost";
 import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Analytics />
           </UserProfileProvider>
         </BrowserRouter>
       </HighlightProvider>
