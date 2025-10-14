@@ -54,7 +54,7 @@ function NodeToolbarComponent({
             className="w-auto p-2 bg-[#363636] border-gray-500"
             onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="flex gap-1">
+          <div className="grid grid-cols-8 gap-1">
             <button
               onClick={() => onColorChange('default')}
               className="w-5 h-5 rounded-full border-2 border-gray-400 bg-white flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-all"
@@ -71,6 +71,16 @@ function NodeToolbarComponent({
                 title={`Change color to ${color}`}
               />
             ))}
+          </div>
+          <div className="mt-2 pt-2 border-t border-gray-500">
+            <label htmlFor="color-picker" className="text-xs text-gray-400 mb-1 block text-center">Custom Color</label>
+            <input
+              id="color-picker"
+              type="color"
+              defaultValue="#ffffff"
+              onChange={(e) => onColorChange(e.target.value)}
+              className="w-full h-8 p-0 border-none rounded cursor-pointer bg-transparent"
+            />
           </div>
         </PopoverContent>
       </Popover>

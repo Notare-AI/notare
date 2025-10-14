@@ -1,6 +1,7 @@
 import { useReactFlow } from '@xyflow/react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { colorMap } from '@/lib/colors';
+import { hexToHsl } from '@/lib/utils';
 
 export const useNodeLogic = (nodeId: string, color?: string) => {
   const { setNodes, getNodes, fitView } = useReactFlow();
@@ -47,17 +48,36 @@ export const useNodeLogic = (nodeId: string, color?: string) => {
   }, [nodeId, getNodes, fitView]);
 
   const nodeStyles = useMemo(() => {
-    if (!color || !colorMap[color]) {
+    const defaultStyles = {
+      background: 'hsl(var(--card))',
+      borderColor: 'hsl(var(--border))',
+    };
+
+    if (!color || color === 'default') {
+      return defaultStyles;
+    }
+
+    if (colorMap[color]) {
+      const themeColors = isDarkMode ? colorMap[color].dark : colorMap[color].light;
       return {
-        background: 'hsl(var(--card))',
-        borderColor: 'hsl(var(--border))',
+        background: themeColors.background,
+        borderColor: themeColors.border,
       };
     }
-    const themeColors = isDarkMode ? colorMap[color].dark : colorMap[color].light;
-    return {
-      background: themeColors.background,
-      borderColor: themeColors.border,
-    };
+
+    if (/^#[0-9A-F]{6}$/i.test(color)) {
+      const hsl = hexToHsl(color);
+      if (hsl) {
+        const lightBg = `hsl(${hsl.h}, ${hsl.s}%, 95%)`;
+        const darkBg = `hsl(${hsl.h}, ${hsl.s}%, 15%)`;
+        return {
+          background: isDarkMode ? darkBg : lightBg,
+          borderColor: color,
+        };
+      }
+    }
+
+    return defaultStyles;
   }, [color, isDarkMode]);
 
   return {
