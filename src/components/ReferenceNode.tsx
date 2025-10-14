@@ -80,11 +80,10 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
       <Handle type="source" position={Position.Left} id="left-source" />
       <Handle type="target" position={Position.Left} id="left-target" />
       <NodeToolbarComponent
-        nodeId={id}
         isVisible={selected}
-        onDelete={() => handleDelete()}
+        onDelete={handleDelete}
         onColorChange={handleColorChange}
-        onZoomToNode={() => handleZoomToNode()}
+        onZoomToNode={handleZoomToNode}
       />
       <div
         style={{
