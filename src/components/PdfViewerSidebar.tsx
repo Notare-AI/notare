@@ -113,7 +113,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   const [scale, setScale] = useState(1.0);
   const [pdfText, setPdfText] = useState('');
   const [pdfMetadata, setPdfMetadata] = useState<any>(null);
-  const { generateTLDRWithSources, extractKeyPoints, generateNoteFromSelection, isGenerating } = useAI();
+  const { generateTLDRWithSources, extractKeyPoints, isGenerating } = useAI();
   const { setIsPdfSidebarOpen, highlightedText } = useHighlight();
   const [selection, setSelection] = useState<{ text: string; top: number; left: number } | null>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
@@ -307,23 +307,17 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     setIsReferencePopoverOpen(false);
   };
 
-  const handleCreateNoteFromSelection = async () => {
+  const handleCreateNoteFromSelection = () => {
     if (!selection) return;
-    const toastId = showLoading('Creating note with AI...');
-    try {
-      const noteContent = await generateNoteFromSelection(selection.text);
-      onAddNode({
-        type: 'Note',
-        content: noteContent,
-        sources: [selection.text],
-      });
-      showSuccess('AI note created!');
-    } catch (e: any) {
-      showError(e.message || 'Failed to create note.');
-    } finally {
-      dismissToast(toastId);
-      setSelection(null);
-    }
+
+    onAddNode({
+      type: 'Note',
+      content: selection.text,
+      sources: [selection.text],
+    });
+    showSuccess('Note created from selection!');
+    
+    setSelection(null);
   };
 
   const handleMouseUp = () => {
