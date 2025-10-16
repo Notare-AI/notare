@@ -6,7 +6,7 @@ const Hero = () => {
   return (
     <section className="container flex flex-col items-center justify-center py-20 md:py-32 text-center">
       <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
-        Turn Your Research Into Knowledge
+        Turn Your Research Into Knowledgee
       </h1>
       <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
         Notare is an intelligent canvas that connects your documents, notes, and ideas.
