@@ -411,11 +411,15 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
       .map(sentence => {
         const cleanSentence = sentence.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").replace(/\s+/g, ' ').trim();
         const words = cleanSentence.split(' ');
+        
         if (words.length < 3) return null;
 
-        const phraseLength = Math.min(5, Math.floor(words.length / 2));
-        const start = Math.floor(words.length / 2) - Math.floor(phraseLength / 2);
-        const phrase = words.slice(start, start + phraseLength).join(' ');
+        const start = Math.floor(words.length / 2) - 1;
+        const phraseWords = words.slice(start, start + 3);
+        
+        if (phraseWords.every(w => w.length < 4)) return null;
+
+        const phrase = phraseWords.join(' ');
 
         if (!phrase) return null;
 
