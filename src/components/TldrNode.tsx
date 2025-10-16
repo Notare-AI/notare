@@ -25,7 +25,7 @@ type TldrNodeProps = {
 
 function TldrNode({ id, data, selected }: TldrNodeProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
-  const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
+  const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
@@ -48,6 +48,13 @@ function TldrNode({ id, data, selected }: TldrNodeProps) {
     } else {
       setHighlightedText(textsToHighlight);
     }
+  };
+
+  const handleDelete = () => {
+    if (isCurrentlyHighlighted) {
+      setHighlightedText(null);
+    }
+    originalHandleDelete();
   };
 
   return (

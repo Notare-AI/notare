@@ -33,7 +33,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { setNodes } = useReactFlow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
-  const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
+  const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -105,6 +105,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     } else {
       setHighlightedText(textsToHighlight);
     }
+  };
+
+  const handleDelete = () => {
+    if (isCurrentlyHighlighted) {
+      setHighlightedText(null);
+    }
+    originalHandleDelete();
   };
 
   return (
