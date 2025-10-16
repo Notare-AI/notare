@@ -409,7 +409,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     if (!highlightedText) return null;
 
     const words = new Set<string>();
-    highlightedText.forEach(sentence => {
+    highlightedText.filter(Boolean).forEach(sentence => {
       sentence.split(/\s+/).forEach(word => {
         const cleanWord = normalize(word).replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
         if (cleanWord.length > 3) {
