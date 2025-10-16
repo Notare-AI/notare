@@ -283,8 +283,12 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
 
       if (isPaste) {
         if (clipboardRef.current.length === 0) {
+          // No nodes in our internal clipboard, so let the native paste event handle it (e.g., for images).
           return;
         }
+
+        // We have nodes to paste, so handle it and prevent the native paste event.
+        event.preventDefault();
 
         const pastedNodes = clipboardRef.current.map((node: Node) => {
           const newNode: Node = {
