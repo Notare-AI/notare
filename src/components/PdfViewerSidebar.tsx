@@ -406,30 +406,31 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   const highlightRegex = useMemo(() => {
     if (!highlightedText) return null;
 
-    const patterns = highlightedText
-      .filter(s => s && s.trim().length > 10)
-      .map(sentence => {
-        const cleanSentence = sentence.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").replace(/\s+/g, ' ').trim();
+    const allPhrases = new Set<string>();
+
+    highlightedText
+      .filter(s => s && s.trim().length > 0)
+      .forEach(sentence => {
+        const cleanSentence = sentence.replace(/\s+/g, ' ').trim();
         const words = cleanSentence.split(' ');
         
-        if (words.length < 3) return null;
+        if (words.length < 3) {
+          if (cleanSentence) allPhrases.add(cleanSentence);
+          return;
+        }
 
-        const start = Math.floor(words.length / 2) - 1;
-        const phraseWords = words.slice(start, start + 3);
-        
-        if (phraseWords.every(w => w.length < 4)) return null;
+        // Create overlapping 3-word phrases
+        for (let i = 0; i <= words.length - 3; i++) {
+          const phrase = words.slice(i, i + 3).join(' ');
+          allPhrases.add(phrase);
+        }
+      });
 
-        const phrase = phraseWords.join(' ');
+    if (allPhrases.size === 0) return null;
 
-        if (!phrase) return null;
-
-        return phrase
-          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          .replace(/\s+/g, '\\s+');
-      })
-      .filter((p): p is string => !!p);
-
-    if (patterns.length === 0) return null;
+    const patterns = Array.from(allPhrases).map(phrase =>
+      phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
 
     const combinedPattern = `(${patterns.join('|')})`;
     return new RegExp(combinedPattern, 'gi');
