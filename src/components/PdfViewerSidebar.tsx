@@ -310,6 +310,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
       onAddNode({ type: 'TLDR', content: summary, sources });
     } catch (e: any) {
       showError(e.message || 'Failed to generate TLDR.');
+      setActiveGenerator(null);
     }
   };
 
@@ -323,6 +324,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
       onAddNode({ type: 'Key Points', content, sources });
     } catch (e: any) {
       showError(e.message || 'Failed to extract key points.');
+      setActiveGenerator(null);
     }
   };
 

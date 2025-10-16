@@ -521,6 +521,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         minZoom={0.1}
         snapToGrid={true}
         snapGrid={[15, 15]}
+        multiSelectionKeyCode="Shift"
         className={
           activeTool === 'pan'
             ? 'cursor-grab'
