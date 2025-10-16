@@ -3,36 +3,33 @@ import axios from 'axios';
 import { supabase } from '@/integrations/supabase/client';
 
 // --- Configuration ---
-const AI_MODE = import.meta.env.VITE_AI_MODE || 'openai'; // This now effectively means 'gemini' or 'ollama'
+const AI_MODE = import.meta.env.VITE_AI_MODE || 'openai'; // Default to openai
 const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434/api/generate';
 
 // --- Type Definitions ---
-type AiMode = 'ollama' | 'gemini';
+type AiMode = 'ollama' | 'openai';
 
 // --- Hook Definition ---
 export const useAI = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const aiMode: AiMode = AI_MODE === 'ollama' ? 'ollama' : 'gemini';
+  const aiMode: AiMode = AI_MODE === 'openai' ? 'openai' : 'ollama';
 
   const _generateContent = useCallback(async (payload: any): Promise<string> => {
     setIsGenerating(true);
     setError(null);
 
     try {
-      if (aiMode === 'gemini') {
-        const { data, error } = await supabase.functions.invoke('ai-proxy', {
+      if (aiMode === 'openai') {
+        const { data, error } = await supabase.functions.invoke('openai-proxy', {
           body: { payload },
         });
 
         if (error) {
+          // Check for a specific credit-related error from the edge function
           if (error.context && error.context.status === 429) {
             const errorBody = await error.context.json();
             throw new Error(errorBody.error || 'You have run out of AI credits for this month.');
-          }
-          if (error.context && error.context.status === 500) {
-            const errorBody = await error.context.json();
-            throw new Error(errorBody.error || 'AI service is not configured.');
           }
           throw new Error(error.message);
         }
@@ -47,7 +44,7 @@ export const useAI = () => {
           OLLAMA_URL,
           {
             model: 'mistral',
-            prompt: payload.prompt,
+            prompt: payload.prompt, // Ollama needs a simple prompt string
             stream: false,
           }
         );
@@ -95,7 +92,7 @@ export const useAI = () => {
     1. "summary": A string containing the summary.
     2. "sources": An array of strings, where each string is an exact quote from the original text that was used to create the summary.
     
-    IMPORTANT: Provide only the raw JSON object and nothing else. Do not wrap it in markdown backticks.
+    Provide only the JSON object and nothing else.
     
     Text:
     """
@@ -103,9 +100,11 @@ export const useAI = () => {
     """`;
     
     const payload = {
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
+      response_format: { type: "json_object" },
     };
-    const responseText = await _generateContent(aiMode === 'gemini' ? payload : _generateOllamaPrompt(prompt));
+    const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
     return _parseJsonResponse(responseText, 'tldr');
   }, [_generateContent, aiMode]);
 
@@ -115,7 +114,7 @@ export const useAI = () => {
     1. "points": An array of strings, where each string is a key point.
     2. "sources": An array of strings, where each string is an exact quote from the original text that was used to create the key points.
     
-    IMPORTANT: Provide only the raw JSON object and nothing else. Do not wrap it in markdown backticks.
+    Provide only the JSON object and nothing else.
     
     Text:
     """
@@ -123,9 +122,11 @@ export const useAI = () => {
     """`;
     
     const payload = {
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
+      response_format: { type: "json_object" },
     };
-    const responseText = await _generateContent(aiMode === 'gemini' ? payload : _generateOllamaPrompt(prompt));
+    const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
     return _parseJsonResponse(responseText, 'keyPoints');
   }, [_generateContent, aiMode]);
 
@@ -134,7 +135,7 @@ export const useAI = () => {
     Return your response as a single, valid JSON object with one key:
     1. "note": A string containing the generated note.
     
-    IMPORTANT: Provide only the raw JSON object and nothing else. Do not wrap it in markdown backticks.
+    Provide only the JSON object and nothing else.
     
     Text:
     """
@@ -142,9 +143,11 @@ export const useAI = () => {
     """`;
     
     const payload = {
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
+      response_format: { type: "json_object" },
     };
-    const responseText = await _generateContent(aiMode === 'gemini' ? payload : _generateOllamaPrompt(prompt));
+    const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
     return _parseJsonResponse(responseText, 'note');
   }, [_generateContent, aiMode]);
 
@@ -152,9 +155,12 @@ export const useAI = () => {
     prompt: string, 
     history: { role: 'user' | 'assistant', content: string }[]
   ): Promise<string> => {
-    if (aiMode === 'gemini') {
+    if (aiMode === 'openai') {
       const messages = [...history, { role: 'user', content: prompt }];
-      const payload = { messages };
+      const payload = {
+        model: 'gpt-4o-mini',
+        messages,
+      };
       return _generateContent(payload);
     } else { // ollama
       const fullPrompt = history.map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`).join('\n\n') + `\n\nUser: ${prompt}\n\nAssistant:`;
@@ -181,9 +187,10 @@ User's Prompt:
 Updated Note Content:`;
     
     const payload = {
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: fullPrompt }],
     };
-    return _generateContent(aiMode === 'gemini' ? payload : _generateOllamaPrompt(fullPrompt));
+    return _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(fullPrompt));
   }, [_generateContent, aiMode]);
 
   return {
