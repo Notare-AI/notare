@@ -14,13 +14,14 @@ import {
   MiniMap,
 } from '@xyflow/react';
 import { supabase } from '@/integrations/supabase/client';
-import { showError } from '@/utils/toast';
+import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import { Loader2, Settings, Map, Minimize2 } from 'lucide-react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
 import TldrNode from './TldrNode';
 import KeyPointsNode from './KeyPointsNode';
 import ReferenceNode from './ReferenceNode';
+import ImageNode from './ImageNode';
 import CanvasToolbar, { Tool } from './CanvasToolbar';
 import { useDnD } from './DnDContext';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
@@ -33,6 +34,7 @@ const nodeTypes = {
   tldr: TldrNode,
   keyPoints: KeyPointsNode,
   reference: ReferenceNode,
+  image: ImageNode,
 };
 
 const edgeTypes = {
@@ -112,6 +114,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [isDragOver, setIsDragOver] = useState(false);
   const dragLeaveTimer = useRef<number | null>(null);
   const clipboardRef = useRef<Node[]>([]);
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   // --- UNDO/REDO STATE ---
   const history = useRef<{ nodes: Node[]; edges: Edge[] }[]>([{ nodes: [], edges: [] }]);
@@ -310,6 +313,88 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   }, [getNodes, setNodes, setEdges]);
 
   useEffect(() => {
+    const handlePaste = async (event: ClipboardEvent) => {
+      if (!canvasId) return;
+
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      let imageFile: File | null = null;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          imageFile = item.getAsFile();
+          break;
+        }
+      }
+
+      if (!imageFile) return;
+
+      event.preventDefault();
+      const toastId = showLoading('Uploading image...');
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be logged in to upload images.');
+
+        const fileExt = imageFile.name.split('.').pop() || 'png';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+        const filePath = `${user.id}/${canvasId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage.from('canvas_images').upload(filePath, imageFile);
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage.from('canvas_images').getPublicUrl(filePath);
+        if (!publicUrl) throw new Error('Could not get public URL for the image.');
+
+        const pane = reactFlowWrapper.current?.querySelector('.react-flow__pane');
+        if (!pane) throw new Error("Could not determine paste location.");
+        
+        const { top, left, width, height } = pane.getBoundingClientRect();
+        const position = screenToFlowPosition({ x: left + width / 2, y: top + height / 2 });
+
+        const image = new Image();
+        image.onload = () => {
+          const aspectRatio = image.width / image.height;
+          const defaultWidth = 300;
+          const defaultHeight = defaultWidth / aspectRatio;
+
+          const newNode: Node = {
+            id: getId(), type: 'image', position,
+            data: { src: publicUrl, alt: imageFile?.name },
+            style: { width: defaultWidth, height: defaultHeight },
+          };
+          setNodes((nds) => nds.concat(newNode));
+          dismissToast(toastId);
+          showSuccess('Image pasted successfully!');
+        };
+        image.onerror = () => {
+          const newNode: Node = {
+            id: getId(), type: 'image', position,
+            data: { src: publicUrl, alt: imageFile?.name },
+            style: { width: 300, height: 200 },
+          };
+          setNodes((nds) => nds.concat(newNode));
+          dismissToast(toastId);
+          showSuccess('Image pasted successfully!');
+        };
+        image.src = publicUrl;
+
+      } catch (error: any) {
+        dismissToast(toastId);
+        showError(error.message || 'Failed to paste image.');
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [canvasId, screenToFlowPosition, setNodes]);
+
+  useEffect(() => {
     return () => {
       if (dragLeaveTimer.current) {
         clearTimeout(dragLeaveTimer.current);
@@ -402,7 +487,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   }
 
   return (
-    <div className="h-full w-full relative">
+    <div className="h-full w-full relative" ref={reactFlowWrapper}>
       {isDragOver && (
         <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
           <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
