@@ -519,6 +519,8 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         deleteKeyCode={['Backspace', 'Delete']}
         proOptions={{ hideAttribution: true }}
         minZoom={0.1}
+        snapToGrid={true}
+        snapGrid={[15, 15]}
         className={
           activeTool === 'pan'
             ? 'cursor-grab'
