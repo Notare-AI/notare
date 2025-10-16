@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface Profile {
   subscription_plan: string;
@@ -23,14 +24,14 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      if (!session?.user) {
-        setLoading(false);
-      }
+      setLoading(false);
     };
     getInitialSession();
 
@@ -38,13 +39,20 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
       setUser(session?.user ?? null);
        if (_event === 'SIGNED_OUT') {
         setProfile(null);
+        navigate('/login');
       }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user && (location.pathname === '/login' || location.pathname === '/')) {
+      navigate('/dashboard');
+    }
+  }, [user, location.pathname, navigate]);
 
   const fetchProfile = useCallback(async () => {
     if (!user) {
