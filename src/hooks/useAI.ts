@@ -1,66 +1,52 @@
 import { useState, useCallback } from 'react';
-import axios from 'axios';
 import { supabase } from '@/integrations/supabase/client';
 
-// --- Configuration ---
-const AI_MODE = import.meta.env.VITE_AI_MODE || 'openai'; // Default to openai
-const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434/api/generate';
+// This hook is now exclusively for the OpenAI proxy.
+// All other AI provider logic has been removed to prevent conflicts.
 
-// --- Type Definitions ---
-type AiMode = 'ollama' | 'openai';
-
-// --- Hook Definition ---
 export const useAI = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const aiMode: AiMode = AI_MODE === 'openai' ? 'openai' : 'ollama';
 
   const _generateContent = useCallback(async (payload: any): Promise<string> => {
     setIsGenerating(true);
     setError(null);
 
     try {
-      if (aiMode === 'openai') {
-        const { data, error } = await supabase.functions.invoke('openai-proxy', {
-          body: { payload },
-        });
+      // Directly invoke the openai-proxy function.
+      const { data, error: invokeError } = await supabase.functions.invoke('openai-proxy', {
+        body: { payload },
+      });
 
-        if (error) {
-          // Check for a specific credit-related error from the edge function
-          if (error.context && error.context.status === 429) {
-            const errorBody = await error.context.json();
-            throw new Error(errorBody.error || 'You have run out of AI credits for this month.');
-          }
-          throw new Error(error.message);
+      if (invokeError) {
+        // Handle specific credit-related errors from the edge function.
+        if (invokeError.context && invokeError.context.status === 429) {
+          const errorBody = await invokeError.context.json();
+          throw new Error(errorBody.error || 'You have run out of AI credits for this month.');
         }
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        
-        return data.choices[0].message.content.trim();
-      } else { // ollama
-        const response = await axios.post(
-          OLLAMA_URL,
-          {
-            model: 'mistral',
-            prompt: payload.prompt, // Ollama needs a simple prompt string
-            stream: false,
-          }
-        );
-        return response.data.response.trim();
+        throw new Error(invokeError.message || 'An unknown error occurred while contacting the AI service.');
       }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error('Received an invalid response from the AI service.');
+      }
+      
+      return content.trim();
+
     } catch (err: any) {
-      const errorMessage = err.message || 'An unknown error occurred.';
+      const errorMessage = err.message || 'An unknown error occurred during AI generation.';
       setError(errorMessage);
       console.error('AI generation error:', err);
       throw new Error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
-  }, [aiMode]);
-
-  const _generateOllamaPrompt = (prompt: string) => ({ prompt });
+  }, []);
 
   const _parseJsonResponse = (responseText: string, objectKey: string) => {
     try {
@@ -104,9 +90,9 @@ export const useAI = () => {
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: "json_object" },
     };
-    const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
+    const responseText = await _generateContent(payload);
     return _parseJsonResponse(responseText, 'tldr');
-  }, [_generateContent, aiMode]);
+  }, [_generateContent]);
 
   const extractKeyPoints = useCallback(async (text: string): Promise<{ points: string[]; sources: string[] }> => {
     const prompt = `Extract the 5 most important key points from the following text. Also, extract the original sentences from the text that directly support these key points.
@@ -126,9 +112,9 @@ export const useAI = () => {
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: "json_object" },
     };
-    const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
+    const responseText = await _generateContent(payload);
     return _parseJsonResponse(responseText, 'keyPoints');
-  }, [_generateContent, aiMode]);
+  }, [_generateContent]);
 
   const generateNoteFromSelection = useCallback(async (text: string): Promise<string> => {
     const prompt = `You are an expert note-taker. Read the following text and create a concise, clear note that captures the key information. The note should be easy to understand at a glance.
@@ -147,26 +133,21 @@ export const useAI = () => {
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: "json_object" },
     };
-    const responseText = await _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(prompt));
+    const responseText = await _generateContent(payload);
     return _parseJsonResponse(responseText, 'note');
-  }, [_generateContent, aiMode]);
+  }, [_generateContent]);
 
   const generateChatResponse = useCallback(async (
     prompt: string, 
     history: { role: 'user' | 'assistant', content: string }[]
   ): Promise<string> => {
-    if (aiMode === 'openai') {
-      const messages = [...history, { role: 'user', content: prompt }];
-      const payload = {
-        model: 'gpt-4o-mini',
-        messages,
-      };
-      return _generateContent(payload);
-    } else { // ollama
-      const fullPrompt = history.map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`).join('\n\n') + `\n\nUser: ${prompt}\n\nAssistant:`;
-      return _generateContent(_generateOllamaPrompt(fullPrompt));
-    }
-  }, [aiMode, _generateContent]);
+    const messages = [...history, { role: 'user', content: prompt }];
+    const payload = {
+      model: 'gpt-4o-mini',
+      messages,
+    };
+    return _generateContent(payload);
+  }, [_generateContent]);
 
   const generateUpdatedNodeContent = useCallback(async (
     currentNodeContent: string,
@@ -190,8 +171,8 @@ Updated Note Content:`;
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: fullPrompt }],
     };
-    return _generateContent(aiMode === 'openai' ? payload : _generateOllamaPrompt(fullPrompt));
-  }, [_generateContent, aiMode]);
+    return _generateContent(payload);
+  }, [_generateContent]);
 
   return {
     generateTLDRWithSources,
@@ -201,6 +182,5 @@ Updated Note Content:`;
     generateUpdatedNodeContent,
     isGenerating,
     error,
-    aiMode,
   };
 };
