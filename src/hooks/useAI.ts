@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// This hook is now exclusively for the OpenAI proxy.
-// All other AI provider logic has been removed to prevent conflicts.
+interface Source {
+  text: string;
+  page: number;
+}
 
 export const useAI = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -22,7 +24,6 @@ export const useAI = () => {
           model: 'mistral',
           messages: payload.messages,
           stream: false,
-          // Use JSON format if the original payload requested it
           format: payload.response_format?.type === 'json_object' ? 'json' : undefined,
         };
 
@@ -44,7 +45,6 @@ export const useAI = () => {
           throw new Error('Received an invalid response from Ollama.');
         }
         
-        // Ollama's JSON mode returns a stringified JSON, which the parser function expects.
         return content.trim();
 
       } else {
@@ -74,7 +74,6 @@ export const useAI = () => {
       }
     } catch (err: any) {
       let errorMessage = err.message || 'An unknown error occurred during AI generation.';
-      // Provide a helpful error message if Ollama isn't running
       if (isLocal && err instanceof TypeError && err.message.includes('Failed to fetch')) {
         errorMessage = 'Could not connect to Ollama. Please ensure it is running locally on port 11434.';
       }
@@ -94,10 +93,13 @@ export const useAI = () => {
       }
       
       const parsed = JSON.parse(jsonMatch[0]);
-      if (objectKey === 'tldr' && typeof parsed.summary === 'string' && Array.isArray(parsed.sources)) {
+
+      const isValidSource = (s: any): s is Source => typeof s === 'object' && s !== null && typeof s.text === 'string' && typeof s.page === 'number';
+
+      if (objectKey === 'tldr' && typeof parsed.summary === 'string' && Array.isArray(parsed.sources) && parsed.sources.every(isValidSource)) {
         return parsed;
       }
-      if (objectKey === 'keyPoints' && Array.isArray(parsed.points) && Array.isArray(parsed.sources)) {
+      if (objectKey === 'keyPoints' && Array.isArray(parsed.points) && Array.isArray(parsed.sources) && parsed.sources.every(isValidSource)) {
         return parsed;
       }
       if (objectKey === 'note' && typeof parsed.note === 'string') {
@@ -110,11 +112,11 @@ export const useAI = () => {
     }
   };
 
-  const generateTLDRWithSources = useCallback(async (text: string): Promise<{ summary: string; sources: string[] }> => {
-    const prompt = `Analyze the following text and provide a concise summary (TLDR) of 100 words or less. Also, extract the original sentences from the text that directly support your summary.
+  const generateTLDRWithSources = useCallback(async (text: string): Promise<{ summary: string; sources: Source[] }> => {
+    const prompt = `Analyze the following text, which is formatted with page markers (e.g., "--- PAGE 1 ---"). Provide a concise summary (TLDR) of 100 words or less. Also, extract the original sentences from the text that directly support your summary, noting their original page number.
     Return your response as a single, valid JSON object with two keys:
     1. "summary": A string containing the summary.
-    2. "sources": An array of strings, where each string is an exact quote from the original text that was used to create the summary.
+    2. "sources": An array of objects, where each object has two keys: "text" (the exact quote) and "page" (the integer page number it came from).
     
     Provide only the JSON object and nothing else.
     
@@ -132,11 +134,11 @@ export const useAI = () => {
     return _parseJsonResponse(responseText, 'tldr');
   }, [_generateContent]);
 
-  const extractKeyPoints = useCallback(async (text: string): Promise<{ points: string[]; sources: string[] }> => {
-    const prompt = `Extract the 5 most important key points from the following text. Also, extract the original sentences from the text that directly support these key points.
+  const extractKeyPoints = useCallback(async (text: string): Promise<{ points: string[]; sources: Source[] }> => {
+    const prompt = `Extract the 5 most important key points from the following text, which is formatted with page markers (e.g., "--- PAGE 1 ---"). Also, extract the original sentences from the text that directly support these key points, noting their original page number.
     Return your response as a single, valid JSON object with two keys:
     1. "points": An array of strings, where each string is a key point.
-    2. "sources": An array of strings, where each string is an exact quote from the original text that was used to create the key points.
+    2. "sources": An array of objects, where each object has two keys: "text" (the exact quote) and "page" (the integer page number it came from).
     
     Provide only the JSON object and nothing else.
     

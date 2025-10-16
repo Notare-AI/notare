@@ -5,6 +5,8 @@ interface HighlightContextType {
   setHighlightedText: (text: string[] | null) => void;
   isPdfSidebarOpen: boolean;
   setIsPdfSidebarOpen: (isOpen: boolean) => void;
+  targetPage: number | null;
+  setTargetPage: (page: number | null) => void;
 }
 
 const HighlightContext = createContext<HighlightContextType | undefined>(undefined);
@@ -12,9 +14,10 @@ const HighlightContext = createContext<HighlightContextType | undefined>(undefin
 export const HighlightProvider = ({ children }: { children: ReactNode }) => {
   const [highlightedText, setHighlightedText] = useState<string[] | null>(null);
   const [isPdfSidebarOpen, setIsPdfSidebarOpen] = useState(false);
+  const [targetPage, setTargetPage] = useState<number | null>(null);
 
   return (
-    <HighlightContext.Provider value={{ highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen }}>
+    <HighlightContext.Provider value={{ highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, targetPage, setTargetPage }}>
       {children}
     </HighlightContext.Provider>
   );

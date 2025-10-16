@@ -33,6 +33,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 type ReferenceType = 'Book' | 'Journal Article' | 'Website';
 
+interface Source {
+  text: string;
+  page: number;
+}
+
 const referenceTemplates: Record<ReferenceType, string> = {
   'Book': '[Author Surname], [Initial(s)]. ([Year of publication]). *[Title of book]*. [Edition (if not first)]. [Place of publication]: [Publisher].',
   'Journal Article': '[Author Surname], [Initial(s)]. ([Year of publication]). \'[Title of article]\'. *[Title of Journal]*, [Volume number]([Issue number]), pp. [Page range].',
@@ -99,9 +104,14 @@ interface PdfFile {
   storage_path: string;
 }
 
+interface PdfPageContent {
+  pageNumber: number;
+  text: string;
+}
+
 interface PdfViewerSidebarProps {
   canvasId: string | null;
-  onAddNode: (nodeData: { type: string; content: string; sources?: string[] }) => void;
+  onAddNode: (nodeData: { type: string; content: string; sources?: Source[] }) => void;
 }
 
 const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
@@ -111,10 +121,10 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageInput, setPageInput] = useState('1');
   const [scale, setScale] = useState(1.0);
-  const [pdfText, setPdfText] = useState('');
+  const [pdfPagesContent, setPdfPagesContent] = useState<PdfPageContent[]>([]);
   const [pdfMetadata, setPdfMetadata] = useState<any>(null);
   const { generateTLDRWithSources, extractKeyPoints, isGenerating } = useAI();
-  const { setIsPdfSidebarOpen, highlightedText } = useHighlight();
+  const { setIsPdfSidebarOpen, highlightedText, targetPage, setTargetPage } = useHighlight();
   const [selection, setSelection] = useState<{ text: string; top: number; left: number } | null>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
   const [activeGenerator, setActiveGenerator] = useState<string | null>(null);
@@ -153,6 +163,13 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   }, [canvasId]);
 
   useEffect(() => {
+    if (targetPage && targetPage !== pageNumber) {
+      setPageNumber(targetPage);
+      setTargetPage(null);
+    }
+  }, [targetPage, pageNumber, setTargetPage]);
+
+  useEffect(() => {
     if (!isGenerating) {
       setActiveGenerator(null);
     }
@@ -161,7 +178,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   useEffect(() => {
     setPageNumber(1);
     setScale(1.0);
-    setPdfText('');
+    setPdfPagesContent([]);
     setPdfMetadata(null);
     setSelection(null);
   }, [activePdf]);
@@ -203,14 +220,17 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
       const { info } = await pdf.getMetadata();
       setPdfMetadata(info);
 
-      const textPromises = Array.from({ length: pdf.numPages }, (_, i) =>
-        pdf.getPage(i + 1).then((page: any) => page.getTextContent())
-      );
-      const textContents = await Promise.all(textPromises);
-      const fullText = textContents.map(content =>
-        content.items.map((item: any) => item.str).join(' ')
-      ).join('\n\n');
-      setPdfText(fullText);
+      const pagePromises = Array.from({ length: pdf.numPages }, async (_, i) => {
+        const page = await pdf.getPage(i + 1);
+        const textContent = await page.getTextContent();
+        return {
+          pageNumber: i + 1,
+          text: textContent.items.map((item: any) => item.str).join(' '),
+        };
+      });
+      
+      const pagesContent = await Promise.all(pagePromises);
+      setPdfPagesContent(pagesContent);
       dismissToast(toastId);
       showSuccess('PDF analysis complete.');
     } catch (e) {
@@ -277,11 +297,16 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     }
   };
 
+  const getFormattedPdfTextForAI = () => {
+    return pdfPagesContent.map(p => `--- PAGE ${p.pageNumber} ---\n${p.text}`).join('\n\n');
+  };
+
   const handleTldr = async () => {
-    if (!pdfText) return;
+    if (pdfPagesContent.length === 0) return;
     setActiveGenerator('tldr');
     try {
-      const { summary, sources } = await generateTLDRWithSources(pdfText);
+      const formattedText = getFormattedPdfTextForAI();
+      const { summary, sources } = await generateTLDRWithSources(formattedText);
       onAddNode({ type: 'TLDR', content: summary, sources });
     } catch (e: any) {
       showError(e.message || 'Failed to generate TLDR.');
@@ -289,10 +314,11 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   };
 
   const handleKeyPoints = async () => {
-    if (!pdfText) return;
+    if (pdfPagesContent.length === 0) return;
     setActiveGenerator('keyPoints');
     try {
-      const { points, sources } = await extractKeyPoints(pdfText);
+      const formattedText = getFormattedPdfTextForAI();
+      const { points, sources } = await extractKeyPoints(formattedText);
       const content = points.map(p => `- ${p}`).join('\n');
       onAddNode({ type: 'Key Points', content, sources });
     } catch (e: any) {
@@ -313,7 +339,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     onAddNode({
       type: 'Note',
       content: selection.text,
-      sources: [selection.text],
+      sources: [{ text: selection.text, page: pageNumber }],
     });
     showSuccess('Note created from selection!');
     
@@ -379,10 +405,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
 
   const sentencesToHighlight = useMemo(() => {
     if (!highlightedText) return [];
-    // This regex splits text into sentences, trying to be smart about abbreviations.
     const splitRegex = /(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|!)\s/;
-    // 1. Flatten all source blocks into a single array of sentences.
-    // 2. Filter out any very short or empty strings that result from splitting.
     return highlightedText
       .flatMap(block => block.split(splitRegex))
       .filter(s => s && s.trim().length > 5);
@@ -394,16 +417,13 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     }
     const trimmedStr = textItem.str.trim();
     
-    // Avoid highlighting very short, common text chunks.
     if (trimmedStr.length < 4) {
       return textItem.str;
     }
 
-    // Normalize both the source sentence and the text chunk for a more reliable, case-insensitive comparison.
     const normalize = (str: string) => str.replace(/\s+/g, ' ').toLowerCase();
     const normalizedItem = normalize(trimmedStr);
 
-    // Check if the current text chunk is a substring of any of the target sentences.
     const shouldHighlight = sentencesToHighlight.some(sentence => {
         return normalize(sentence).includes(normalizedItem);
     });
@@ -459,7 +479,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
               <div className="flex items-center justify-center gap-2 mb-4 flex-shrink-0">
                 <Button
                   onClick={handleTldr}
-                  disabled={isGenerating || !pdfText}
+                  disabled={isGenerating || pdfPagesContent.length === 0}
                   variant="outline"
                   className="bg-white dark:bg-[#212121] border-purple-500 text-purple-500 dark:text-purple-400 hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-300 disabled:opacity-50 flex-1"
                 >
@@ -472,7 +492,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                 </Button>
                 <Button
                   onClick={handleKeyPoints}
-                  disabled={isGenerating || !pdfText}
+                  disabled={isGenerating || pdfPagesContent.length === 0}
                   variant="outline"
                   className="bg-white dark:bg-[#212121] border-blue-500 text-blue-500 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 disabled:opacity-50 flex-1"
                 >

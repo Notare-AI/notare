@@ -9,9 +9,14 @@ import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 
+interface Source {
+  text: string;
+  page: number;
+}
+
 interface EditableNoteData {
   label: string;
-  sources?: string[];
+  sources?: Source[];
   color?: string;
   isAiGenerated?: boolean;
 }
@@ -27,7 +32,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const [label, setLabel] = useState(data.label || '');
   const { setNodes } = useReactFlow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen } = useHighlight();
+  const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
@@ -80,19 +85,25 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     }
   };
 
-  const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(data.sources);
+  const textsToHighlight = data.sources?.map(s => s.text) || [];
+  const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
   const isActive = isPdfSidebarOpen && isCurrentlyHighlighted;
 
   const handleViewSourcesClick = () => {
+    const targetPage = data.sources?.[0]?.page;
+    if (targetPage) {
+      setTargetPage(targetPage);
+    }
+
     if (!isPdfSidebarOpen) {
       setIsPdfSidebarOpen(true);
-      setHighlightedText(data.sources || null);
+      setHighlightedText(textsToHighlight);
       return;
     }
     if (isCurrentlyHighlighted) {
       setHighlightedText(null);
     } else {
-      setHighlightedText(data.sources || null);
+      setHighlightedText(textsToHighlight);
     }
   };
 
