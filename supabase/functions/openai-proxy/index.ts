@@ -9,22 +9,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const FREE_CREDITS = 10;
-const PREMIUM_CREDITS = 500;
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Use the admin client for all database operations for reliability
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 1. Create a user-scoped client to get the authenticated user
     const supabaseUserClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -39,7 +34,6 @@ serve(async (req) => {
       })
     }
 
-    // 2. Check for OpenAI API Key
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY not set in environment variables.');
       return new Response(JSON.stringify({ error: 'AI service is not configured correctly.' }), {
@@ -48,53 +42,25 @@ serve(async (req) => {
       })
     }
 
-    // 3. Credit Check Logic using the admin client
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('ai_credits, credits_reset_at, subscription_plan')
-      .eq('id', user.id)
-      .single();
+    // 1. Attempt to decrement credits. This RPC handles resets and checks atomically.
+    const { data: decrementSuccess, error: decrementError } = await supabaseAdmin.rpc('decrement_ai_credits', {
+      user_id_param: user.id,
+      decrement_amount: 1,
+    });
 
-    if (profileError) {
-      if (profileError.code === 'PGRST116') {
-        return new Response(JSON.stringify({ error: 'Your user profile is still being set up. Please try again in a few moments.' }), {
-          status: 409,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      console.error('Supabase profile fetch error:', profileError);
-      return new Response(JSON.stringify({ error: 'Could not retrieve your profile to check AI credits.' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    if (decrementError) {
+      console.error('Error checking/decrementing credits:', decrementError);
+      throw new Error('Could not verify AI credits.');
     }
 
-    let currentCredits = profile.ai_credits;
-    let newResetDate = profile.credits_reset_at;
-    let needsDBUpdate = false;
-
-    const now = new Date();
-    const resetDate = new Date(profile.credits_reset_at);
-
-    // Check if credits need to be reset
-    if (now >= resetDate) {
-      needsDBUpdate = true;
-      // FIX: Correctly assign credits based on subscription plan
-      currentCredits = profile.subscription_plan === 'premium' ? PREMIUM_CREDITS : FREE_CREDITS;
-      
-      const nextReset = new Date(now);
-      nextReset.setMonth(nextReset.getMonth() + 1);
-      newResetDate = nextReset.toISOString();
-    }
-
-    if (currentCredits <= 0) {
+    if (!decrementSuccess) {
       return new Response(JSON.stringify({ error: 'You have run out of AI credits for this month.' }), {
         status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // 4. Call OpenAI API
+    // 2. Call OpenAI API
     const { payload } = await req.json();
     const res = await fetch(OPENAI_URL, {
       method: 'POST',
@@ -108,32 +74,19 @@ serve(async (req) => {
     const data = await res.json();
 
     if (!res.ok) {
-      const errorMessage = data.error?.message || 'An error occurred with the AI service.';
-      console.error('OpenAI API Error:', errorMessage);
-      return new Response(JSON.stringify({ error: errorMessage }), {
-        status: res.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      // 3. If OpenAI fails, refund the credit.
+      const { error: incrementError } = await supabaseAdmin.rpc('increment_ai_credits', {
+        user_id_param: user.id,
+        increment_amount: 1,
       });
+      if (incrementError) {
+        console.error('CRITICAL: Failed to refund credit after OpenAI failure:', incrementError);
+      }
+      const errorMessage = data.error?.message || 'An error occurred with the AI service.';
+      throw new Error(errorMessage);
     }
 
-    // 5. Decrement Credits on Success using the admin client
-    const updatePayload: { ai_credits: number; credits_reset_at?: string } = {
-      ai_credits: currentCredits - 1,
-    };
-    if (needsDBUpdate) {
-      updatePayload.credits_reset_at = newResetDate;
-    }
-
-    const { error: updateError } = await supabaseAdmin
-      .from('profiles')
-      .update(updatePayload)
-      .eq('id', user.id);
-    
-    if (updateError) {
-      console.error('Failed to decrement user credits:', updateError);
-    }
-
-    // 6. Return successful response
+    // 4. Return successful response
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
@@ -141,7 +94,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Edge function uncaught error:', error);
-    return new Response(JSON.stringify({ error: 'An unexpected error occurred in the AI function.' }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
