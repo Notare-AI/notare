@@ -403,33 +403,37 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     goToPage(pageInput);
   };
 
-  const sentencesToHighlight = useMemo(() => {
-    if (!highlightedText) return [];
-    const splitRegex = /(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|!)\s/;
-    return highlightedText
-      .flatMap(block => block.split(splitRegex))
-      .filter(s => s && s.trim().length > 5);
+  const normalize = (str: string) => str.replace(/\s+/g, ' ').toLowerCase();
+
+  const highlightRegex = useMemo(() => {
+    if (!highlightedText) return null;
+
+    const words = new Set<string>();
+    highlightedText.forEach(sentence => {
+      sentence.split(/\s+/).forEach(word => {
+        const cleanWord = normalize(word).replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
+        if (cleanWord.length > 3) {
+          words.add(cleanWord);
+        }
+      });
+    });
+
+    if (words.size === 0) return null;
+
+    const escapedWords = Array.from(words).map(word =>
+      word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+
+    const pattern = `\\b(${escapedWords.join('|')})\\b`;
+    return new RegExp(pattern, 'gi');
   }, [highlightedText]);
 
   const textRenderer = useCallback((textItem: any) => {
-    if (!sentencesToHighlight || sentencesToHighlight.length === 0) {
+    if (!highlightRegex) {
       return textItem.str;
     }
-    const trimmedStr = textItem.str.trim();
-    
-    if (trimmedStr.length < 4) {
-      return textItem.str;
-    }
-
-    const normalize = (str: string) => str.replace(/\s+/g, ' ').toLowerCase();
-    const normalizedItem = normalize(trimmedStr);
-
-    const shouldHighlight = sentencesToHighlight.some(sentence => {
-        return normalize(sentence).includes(normalizedItem);
-    });
-    
-    return shouldHighlight ? `<mark>${textItem.str}</mark>` : textItem.str;
-  }, [sentencesToHighlight]);
+    return textItem.str.replace(highlightRegex, (match: string) => `<mark>${match}</mark>`);
+  }, [highlightRegex]);
 
   return (
     <div className="h-full w-full bg-white dark:bg-[#212121] text-black dark:text-white">

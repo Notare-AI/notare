@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 interface HighlightContextType {
   highlightedText: string[] | null;
@@ -16,8 +16,17 @@ export const HighlightProvider = ({ children }: { children: ReactNode }) => {
   const [isPdfSidebarOpen, setIsPdfSidebarOpen] = useState(false);
   const [targetPage, setTargetPage] = useState<number | null>(null);
 
+  const value = useMemo(() => ({
+    highlightedText,
+    setHighlightedText,
+    isPdfSidebarOpen,
+    setIsPdfSidebarOpen,
+    targetPage,
+    setTargetPage
+  }), [highlightedText, isPdfSidebarOpen, targetPage]);
+
   return (
-    <HighlightContext.Provider value={{ highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, targetPage, setTargetPage }}>
+    <HighlightContext.Provider value={value}>
       {children}
     </HighlightContext.Provider>
   );
