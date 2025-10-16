@@ -26,6 +26,11 @@ export const useAI = () => {
         });
 
         if (error) {
+          // Check for a specific credit-related error from the edge function
+          if (error.context && error.context.status === 429) {
+            const errorBody = await error.context.json();
+            throw new Error(errorBody.error || 'You have run out of AI credits for this month.');
+          }
           throw new Error(error.message);
         }
 
