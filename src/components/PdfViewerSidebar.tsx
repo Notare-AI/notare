@@ -403,29 +403,32 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     goToPage(pageInput);
   };
 
-  const normalize = (str: string) => str.replace(/\s+/g, ' ').toLowerCase();
-
   const highlightRegex = useMemo(() => {
     if (!highlightedText) return null;
 
-    const words = new Set<string>();
-    highlightedText.filter(Boolean).forEach(sentence => {
-      sentence.split(/\s+/).forEach(word => {
-        const cleanWord = normalize(word).replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
-        if (cleanWord.length > 3) {
-          words.add(cleanWord);
-        }
-      });
-    });
+    const patterns = highlightedText
+      .filter(s => s && s.trim().length > 10)
+      .map(sentence => {
+        const cleanSentence = sentence.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").replace(/\s+/g, ' ').trim();
+        const words = cleanSentence.split(' ');
+        if (words.length < 3) return null;
 
-    if (words.size === 0) return null;
+        const phraseLength = Math.min(5, Math.floor(words.length / 2));
+        const start = Math.floor(words.length / 2) - Math.floor(phraseLength / 2);
+        const phrase = words.slice(start, start + phraseLength).join(' ');
 
-    const escapedWords = Array.from(words).map(word =>
-      word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    );
+        if (!phrase) return null;
 
-    const pattern = `\\b(${escapedWords.join('|')})\\b`;
-    return new RegExp(pattern, 'gi');
+        return phrase
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          .replace(/\s+/g, '\\s+');
+      })
+      .filter((p): p is string => !!p);
+
+    if (patterns.length === 0) return null;
+
+    const combinedPattern = `(${patterns.join('|')})`;
+    return new RegExp(combinedPattern, 'gi');
   }, [highlightedText]);
 
   const textRenderer = useCallback((textItem: any) => {
