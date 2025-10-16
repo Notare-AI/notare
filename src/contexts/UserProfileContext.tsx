@@ -11,6 +11,8 @@ interface Profile {
 }
 
 interface UserProfileContextType {
+  user: User | null;
+  sessionLoading: boolean;
   profile: Profile | null;
   loading: boolean;
   error: string | null;
@@ -22,25 +24,31 @@ const UserProfileContext = createContext<UserProfileContextType | undefined>(und
 export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
-    getInitialSession();
-
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-       if (_event === 'SIGNED_OUT') {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setSessionLoading(false);
+
+      if (_event === 'SIGNED_IN') {
+        navigate('/dashboard');
+      } else if (_event === 'SIGNED_OUT') {
         setProfile(null);
         navigate('/login');
       }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setSessionLoading(false);
+      }
+      // The onAuthStateChange listener will handle the user state and redirection
     });
 
     return () => {
@@ -48,19 +56,14 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [navigate]);
 
-  useEffect(() => {
-    if (user && (location.pathname === '/login' || location.pathname === '/')) {
-      navigate('/dashboard');
-    }
-  }, [user, location.pathname, navigate]);
-
   const fetchProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
-      setLoading(false);
+      setProfileLoading(false);
       return;
     }
     
+    setProfileLoading(true);
     setError(null);
 
     const { data, error } = await supabase
@@ -76,12 +79,11 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setProfile(data);
     }
-    setLoading(false);
+    setProfileLoading(false);
   }, [user]);
 
   useEffect(() => {
     if (user) {
-      setLoading(true);
       fetchProfile();
 
       const channel = supabase
@@ -105,12 +107,12 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
       };
     } else {
       setProfile(null);
-      setLoading(false);
+      setProfileLoading(false);
     }
   }, [user, fetchProfile]);
 
   return (
-    <UserProfileContext.Provider value={{ profile, loading, error, refetchProfile: fetchProfile }}>
+    <UserProfileContext.Provider value={{ user, sessionLoading, profile, loading: profileLoading, error, refetchProfile: fetchProfile }}>
       {children}
     </UserProfileContext.Provider>
   );
