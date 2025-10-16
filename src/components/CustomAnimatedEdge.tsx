@@ -11,6 +11,7 @@ export default function CustomAnimatedEdge({
   style = {},
   markerEnd,
   animated,
+  selected,
 }: EdgeProps) {
   const [edgePath] = getSmoothStepPath({
     sourceX,
@@ -21,10 +22,13 @@ export default function CustomAnimatedEdge({
     targetPosition,
   });
 
+  const strokeColor = selected ? '#3b82f6' : 'hsl(var(--primary))';
+  const strokeWidth = selected ? 3 : 2;
+
   const edgeStyle = {
     ...style,
-    stroke: 'hsl(var(--primary))',
-    strokeWidth: 2,
+    stroke: strokeColor,
+    strokeWidth: strokeWidth,
   };
 
   return (
@@ -43,7 +47,7 @@ export default function CustomAnimatedEdge({
             height="8"
             x="-4"
             y="-4"
-            fill="hsl(var(--primary))"
+            fill={strokeColor}
             rx="1"
             ry="1"
           >
