@@ -3,7 +3,7 @@ import axios from 'axios';
 import { supabase } from '@/integrations/supabase/client';
 
 // --- Configuration ---
-const AI_MODE = import.meta.env.VITE_AI_MODE || 'ollama'; // Default to ollama
+const AI_MODE = import.meta.env.VITE_AI_MODE || 'openai'; // Default to openai
 const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434/api/generate';
 
 // --- Type Definitions ---
