@@ -15,12 +15,12 @@ serve(async (req) => {
   }
 
   try {
+    // 1. Create Supabase client and get user
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
-
     const { data: { user } } = await supabaseClient.auth.getUser()
 
     if (!user) {
@@ -30,14 +30,16 @@ serve(async (req) => {
       })
     }
 
+    // 2. Check for OpenAI API Key
     if (!OPENAI_API_KEY) {
-      return new Response(JSON.stringify({ error: 'OpenAI API key not configured.' }), {
+      console.error('OPENAI_API_KEY not set in environment variables.');
+      return new Response(JSON.stringify({ error: 'AI service is not configured correctly.' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // --- Credit Check Logic ---
+    // 3. Credit Check Logic
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('ai_credits, credits_reset_at, subscription_plan')
@@ -45,7 +47,18 @@ serve(async (req) => {
       .single();
 
     if (profileError) {
-      throw new Error('Could not retrieve user profile.');
+      if (profileError.code === 'PGRST116') {
+        // This can happen for new users if the profile creation trigger has a slight delay.
+        return new Response(JSON.stringify({ error: 'Your user profile is still being set up. Please try again in a few moments.' }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      console.error('Supabase profile fetch error:', profileError);
+      return new Response(JSON.stringify({ error: 'Could not retrieve your profile to check AI credits.' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     let currentCredits = profile.ai_credits;
@@ -57,8 +70,7 @@ serve(async (req) => {
 
     if (now >= resetDate) {
       needsDBUpdate = true;
-      // For now, we only have a free plan. This can be expanded later.
-      currentCredits = 10; 
+      currentCredits = 10; // Reset for free plan
       const nextReset = new Date(now);
       nextReset.setMonth(nextReset.getMonth() + 1);
       newResetDate = nextReset.toISOString();
@@ -70,10 +82,9 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    // --- End Credit Check Logic ---
 
-    const { payload } = await req.json()
-
+    // 4. Call OpenAI API
+    const { payload } = await req.json();
     const res = await fetch(OPENAI_URL, {
       method: 'POST',
       headers: {
@@ -81,15 +92,20 @@ serve(async (req) => {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify(payload),
-    })
+    });
 
-    const data = await res.json()
+    const data = await res.json();
 
-    if (data.error) {
-      throw new Error(data.error.message)
+    if (!res.ok) {
+      const errorMessage = data.error?.message || 'An error occurred with the AI service.';
+      console.error('OpenAI API Error:', errorMessage);
+      return new Response(JSON.stringify({ error: errorMessage }), {
+        status: res.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // --- Decrement Credits on Success ---
+    // 5. Decrement Credits on Success
     const updatePayload: { ai_credits: number; credits_reset_at?: string } = {
       ai_credits: currentCredits - 1,
     };
@@ -97,19 +113,27 @@ serve(async (req) => {
       updatePayload.credits_reset_at = newResetDate;
     }
 
-    await supabaseClient
+    const { error: updateError } = await supabaseClient
       .from('profiles')
       .update(updatePayload)
       .eq('id', user.id);
-    // --- End Decrement ---
+    
+    if (updateError) {
+      // This is not a critical failure for the user, so we log it and continue.
+      console.error('Failed to decrement user credits:', updateError);
+    }
 
+    // 6. Return successful response
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+      status: 200,
+    });
+
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Edge function uncaught error:', error);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred in the AI function.' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    });
   }
 })
