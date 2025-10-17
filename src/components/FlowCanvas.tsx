@@ -72,35 +72,6 @@ const getNodeTypeFromRequest = (requestType: string): string => {
   }
 };
 
-const calculateNodeSize = (content: string | undefined) => {
-  if (!content) {
-    return { width: 200, height: 150 }; // Default size for empty nodes
-  }
-
-  const baseWidth = 250;
-  const headerHeight = 40;
-  const padding = 24;
-  const baseHeight = headerHeight + padding;
-  
-  const charsPerLine = 35; // Approximate characters per line for a 250px width with 14px font
-  const lineHeight = 20; // Approximate line height for text-sm
-
-  // Estimate lines from both explicit newlines and wrapping
-  const lines = content.split('\n').reduce((acc, line) => {
-    return acc + Math.max(1, Math.ceil(line.length / charsPerLine));
-  }, 0);
-
-  let calculatedHeight = baseHeight + lines * lineHeight;
-
-  // Clamp the height between min and max values
-  const minHeight = 150;
-  const maxHeight = 600;
-  calculatedHeight = Math.max(minHeight, calculatedHeight);
-  calculatedHeight = Math.min(maxHeight, calculatedHeight);
-
-  return { width: baseWidth, height: calculatedHeight };
-};
-
 const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: FlowCanvasProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -137,14 +108,12 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         y: window.innerHeight / 3,
       });
 
-      const { width, height } = calculateNodeSize(content);
-
       const newNode: Node = {
         id: getId(),
         type: getNodeTypeFromRequest(type),
         position,
         data: { label: content, sources: sources || [] },
-        style: { width, height },
+        style: { width: 250 }, // Nodes will now auto-determine their height
       };
 
       setNodes((nds) => nds.concat(newNode));

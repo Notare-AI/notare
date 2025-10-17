@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
-import { Pen, Eye, Pencil, Download } from 'lucide-react';
+import { Pen, Eye, Pencil } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
+import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 
 interface Source {
   text: string;
@@ -34,6 +35,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
+  const contentRef = useAutoResizeNode(id, data.label);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -170,7 +172,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         </div>
 
         {/* Body */}
-        <div className="flex-grow p-3 overflow-y-auto" onDoubleClick={handleEditClick}>
+        <div ref={contentRef} className="flex-grow p-3 overflow-y-auto" onDoubleClick={handleEditClick}>
           {isEditing ? (
             <textarea
               ref={textareaRef}

@@ -5,6 +5,7 @@ import NodeAIEditor from './NodeAIEditor';
 import { Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
+import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 
 interface Source {
   text: string;
@@ -26,6 +27,7 @@ type TldrNodeProps = {
 function TldrNode({ id, data, selected }: TldrNodeProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
+  const contentRef = useAutoResizeNode(id, data.label);
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
@@ -103,7 +105,7 @@ function TldrNode({ id, data, selected }: TldrNodeProps) {
         </div>
 
         {/* Body */}
-        <div className="flex-grow p-3 overflow-y-auto text-sm" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>
+        <div ref={contentRef} className="flex-grow p-3 overflow-y-auto text-sm" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>
           {data.label}
         </div>
       </div>
