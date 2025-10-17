@@ -50,7 +50,7 @@ const Login = () => {
           localization={{
             variables: {
               sign_in: {
-                button_label: 'Log in',
+                button_label: 'Sign Up',
               },
               sign_up: {
                 link_text: 'Already have an account? Log in',
