@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
-const Hero = () => {
+export const Hero = () => {
   return (
     <section className="relative bg-background text-foreground">
       <div className="container mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32">
@@ -14,7 +14,7 @@ const Hero = () => {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Button asChild size="lg">
-            <Link to="/dashboard">
+            <Link href="/dashboard">
               Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
@@ -23,5 +23,3 @@ const Hero = () => {
     </section>
   );
 };
-
-export default Hero;
