@@ -148,3 +148,31 @@
     @apply bg-yellow-300 text-black px-0.5 rounded-sm;
   }
 }
+
+/* Custom override for Supabase Auth UI to show Microsoft icon and text */
+button[aria-label="Continue with Azure"] {
+  font-size: 0; /* Hide original text content */
+}
+
+button[aria-label="Continue with Azure"] svg {
+  display: none; /* Hide original Azure icon */
+}
+
+button[aria-label="Continue with Azure"]::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  vertical-align: middle;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21"><path fill="%23f25022" d="M1 1h9v9H1z"/><path fill="%2300a4ef" d="M1 11h9v9H1z"/><path fill="%237fba00" d="M11 1h9v9h-9z"/><path fill="%23ffb900" d="M11 11h9v9h-9z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+button[aria-label="Continue with Azure"]::after {
+  content: 'Continue with Microsoft';
+  font-size: 14px; /* Restore font size for new text */
+  vertical-align: middle;
+}
