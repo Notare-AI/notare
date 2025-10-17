@@ -44,7 +44,7 @@ const Login = () => {
             },
           }}
           theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
-          providers={['google', 'apple', 'azure']}
+          providers={['google', 'azure']}
           redirectTo={`${window.location.origin}/dashboard`}
           socialLayout="horizontal"
         />
