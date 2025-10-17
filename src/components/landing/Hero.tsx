@@ -1,31 +1,25 @@
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import HeroPreviewImage from '@/images/hero-preview.png';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
-const Hero = () => {
+export const Hero = () => {
   return (
-    <section className="container flex flex-col items-center justify-center py-20 md:py-32 text-center">
-      <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
-        Speed Up Learning With Network Note-Taking?
-      </h1>
-      <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-        Notare is an intelligent canvas that connects your documents, notes, and ideas.
-        Upload PDFs, generate insights with AI, and build visual knowledge maps to supercharge your learning.
-      </p>
-      <div className="mt-12 w-full max-w-5xl">
-        <img 
-          src={HeroPreviewImage} 
-          alt="Notare application preview showing a visual knowledge map with connected nodes and a PDF document" 
-          className="rounded-lg shadow-2xl border border-border/20"
-        />
-      </div>
-      <div className="mt-12">
-        <Button size="lg" asChild>
-          <Link to="/login">Get Started for Free</Link>
-        </Button>
+    <section className="relative bg-background text-foreground">
+      <div className="container mx-auto flex max-w-5xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32">
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+          From Information Overload to Organized Insight
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+          Tired of juggling scattered notes and endless PDFs? Notare is the visual workspace for deep thinking. It's the smarter way to connect ideas and accelerate your learning.
+        </p>
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <Button asChild size="lg">
+            <Link href="/dashboard">
+              Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
 };
-
-export default Hero;
