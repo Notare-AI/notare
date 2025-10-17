@@ -22,12 +22,9 @@ export const ThemeSwitcher = () => {
     localStorage.setItem('theme', selectedTheme);
 
     if (selectedTheme === 'system') {
-      // Remove explicit theme to defer to system preference
-      localStorage.removeItem('theme');
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.classList.toggle('dark', systemPrefersDark);
     } else {
-      localStorage.setItem('theme', selectedTheme);
       document.documentElement.classList.toggle('dark', selectedTheme === 'dark');
     }
   };
