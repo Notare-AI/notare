@@ -47,6 +47,16 @@ const Login = () => {
           providers={['google', 'azure']}
           redirectTo={`${window.location.origin}/dashboard`}
           socialLayout="horizontal"
+          localization={{
+            variables: {
+              sign_in: {
+                button_label: 'Log in',
+              },
+              sign_up: {
+                link_text: 'Already have an account? Log in',
+              },
+            },
+          }}
         />
       </div>
     </div>
