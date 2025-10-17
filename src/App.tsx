@@ -15,7 +15,6 @@ import BlogComingSoon from "./pages/BlogComingSoon";
 import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
 import { Analytics } from "@vercel/analytics/react";
-import GuiDemoPage from "./pages/GuiDemo";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +41,6 @@ const App = () => (
               <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
               <Route path="/blog" element={<LandingLayout><BlogComingSoon /></LandingLayout>} />
               <Route path="/blog/:slug" element={<LandingLayout><BlogComingSoon /></LandingLayout>} />
-              <Route path="/gui-demo" element={<GuiDemoPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
