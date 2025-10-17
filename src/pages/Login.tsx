@@ -1,14 +1,15 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { PenSquare } from 'lucide-react';
 
 const Login = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#212121]">
-      <div className="w-full max-w-md p-8 rounded-lg bg-[#363636] border border-gray-700">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">Welcome to Notare</h1>
-          <p className="text-gray-400">Sign in or create an account to continue</p>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="w-full max-w-sm p-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+        <div className="text-center">
+          <PenSquare className="mx-auto h-8 w-8 text-gray-800 dark:text-gray-200" />
+          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Log in to Notare</h1>
         </div>
         <Auth
           supabaseClient={supabase}
@@ -19,27 +20,33 @@ const Login = () => {
                 colors: {
                   brand: '#4f46e5',
                   brandAccent: '#4338ca',
-                  defaultButtonBackground: '#424242',
-                  defaultButtonBackgroundHover: '#525252',
-                  inputBackground: '#212121',
-                  inputBorder: '#424242',
-                  inputBorderHover: '#626262',
-                  inputText: 'white',
-                  inputLabelText: '#a1a1aa',
-                  anchorTextColor: '#a7a7a7',
-                  anchorTextHoverColor: 'white',
                 },
                 radii: {
-                    borderRadiusButton: '8px',
-                    buttonBorderRadius: '8px',
-                    inputBorderRadius: '8px',
+                  borderRadiusButton: '8px',
+                  buttonBorderRadius: '8px',
+                  inputBorderRadius: '8px',
                 }
               },
+              dark: {
+                colors: {
+                  brand: '#4f46e5',
+                  brandAccent: '#6d28d9',
+                  defaultButtonBackground: '#27272a',
+                  defaultButtonBackgroundHover: '#3f3f46',
+                  inputBackground: '#18181b',
+                  inputBorder: '#3f3f46',
+                  inputText: 'white',
+                  inputLabelText: '#a1a1aa',
+                  anchorTextColor: '#a1a1aa',
+                  anchorTextHoverColor: 'white',
+                }
+              }
             },
           }}
-          theme="dark"
-          providers={[]}
+          theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+          providers={['google', 'apple', 'azure']}
           redirectTo={`${window.location.origin}/dashboard`}
+          socialLayout="horizontal"
         />
       </div>
     </div>
