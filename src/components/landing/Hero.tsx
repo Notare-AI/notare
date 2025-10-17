@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 export const Hero = () => {
   return (
@@ -14,7 +14,7 @@ export const Hero = () => {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Button asChild size="lg">
-            <Link href="/dashboard">
+            <Link to="/dashboard">
               Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
