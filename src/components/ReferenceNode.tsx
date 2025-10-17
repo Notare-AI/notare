@@ -23,7 +23,7 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
   const [label, setLabel] = useState(data.label || '');
   const { setNodes } = useReactFlow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { handleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
+  const { handleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
 
   useEffect(() => {
     setLabel(data.label || '');
@@ -84,6 +84,7 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
         onDelete={handleDelete}
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
+        onDownload={() => handleDownloadAsMarkdown(data.label)}
       />
       <div
         style={{

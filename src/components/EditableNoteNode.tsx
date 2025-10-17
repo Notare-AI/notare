@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
-import { Pen, Eye, Pencil } from 'lucide-react';
+import { Pen, Eye, Pencil, Download } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -33,7 +33,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { setNodes } = useReactFlow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
-  const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
+  const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -125,6 +125,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         onDelete={handleDelete}
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
+        onDownload={() => handleDownloadAsMarkdown(data.label)}
       />
       <div
         style={{

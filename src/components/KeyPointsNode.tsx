@@ -25,7 +25,7 @@ type KeyPointsNodeProps = {
 
 function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
-  const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, nodeStyles } = useNodeLogic(id, data.color);
+  const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
@@ -68,6 +68,7 @@ function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
         onDelete={handleDelete}
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
+        onDownload={() => handleDownloadAsMarkdown(data.label)}
       />
       <div
         style={{

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NodeToolbar, Position } from '@xyflow/react';
-import { Trash2, Palette, ZoomIn, Ban } from 'lucide-react';
+import { Trash2, Palette, ZoomIn, Ban, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { colors } from '@/lib/colors';
@@ -10,13 +10,15 @@ interface NodeToolbarComponentProps {
   onDelete: () => void;
   onColorChange: (color: string) => void;
   onZoomToNode: () => void;
+  onDownload?: () => void;
 }
 
 function NodeToolbarComponent({ 
   isVisible, 
   onDelete, 
   onColorChange, 
-  onZoomToNode 
+  onZoomToNode,
+  onDownload
 }: NodeToolbarComponentProps) {
   return (
     <NodeToolbar 
@@ -74,6 +76,19 @@ function NodeToolbarComponent({
           </div>
         </PopoverContent>
       </Popover>
+
+      {/* Download Button */}
+      {onDownload && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onDownload}
+          className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+          title="Download as Markdown"
+        >
+          <Download size={14} />
+        </Button>
+      )}
 
       {/* Zoom to Node Button */}
       <Button

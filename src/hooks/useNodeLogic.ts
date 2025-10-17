@@ -2,6 +2,17 @@ import { useReactFlow } from '@xyflow/react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { colorMap } from '@/lib/colors';
 
+const generateFilename = (content: string) => {
+  if (!content) {
+    return 'note.md';
+  }
+  const sanitized = content
+    .substring(0, 30)
+    .replace(/[^a-z0-9]/gi, '_')
+    .toLowerCase();
+  return `${sanitized || 'note'}.md`;
+};
+
 export const useNodeLogic = (nodeId: string, color?: string) => {
   const { setNodes, getNodes, fitView } = useReactFlow();
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
@@ -46,6 +57,20 @@ export const useNodeLogic = (nodeId: string, color?: string) => {
     }
   }, [nodeId, getNodes, fitView]);
 
+  const handleDownloadAsMarkdown = useCallback((content: string) => {
+    const filename = generateFilename(content);
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, []);
+
   const nodeStyles = useMemo(() => {
     if (!color || !colorMap[color]) {
       return {
@@ -64,6 +89,7 @@ export const useNodeLogic = (nodeId: string, color?: string) => {
     handleDelete,
     handleColorChange,
     handleZoomToNode,
+    handleDownloadAsMarkdown,
     nodeStyles,
   };
 };
