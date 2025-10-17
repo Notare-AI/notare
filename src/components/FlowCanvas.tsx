@@ -25,6 +25,7 @@ import ImageNode from './ImageNode';
 import CanvasToolbar, { Tool } from './CanvasToolbar';
 import { useDnD } from './DnDContext';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
+import { CanvasActionsProvider } from '@/contexts/CanvasActionsContext';
 
 import '@xyflow/react/dist/style.css';
 
@@ -451,6 +452,68 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     }, 100);
   }, []);
 
+  const downloadNodeBranch = useCallback((startNodeId: string) => {
+    const startNode = nodes.find(n => n.id === startNodeId);
+    if (!startNode) {
+      showError("Could not find the starting node.");
+      return;
+    }
+
+    const queue: string[] = [startNodeId];
+    const visited = new Set<string>([startNodeId]);
+    const branchNodes: Node[] = [startNode];
+
+    while (queue.length > 0) {
+      const currentNodeId = queue.shift()!;
+      
+      const connectedEdges = edges.filter(edge => edge.source === currentNodeId || edge.target === currentNodeId);
+
+      for (const edge of connectedEdges) {
+        const neighborId = edge.source === currentNodeId ? edge.target : edge.source;
+        if (!visited.has(neighborId)) {
+          visited.add(neighborId);
+          queue.push(neighborId);
+          const neighborNode = nodes.find(n => n.id === neighborId);
+          if (neighborNode) {
+            branchNodes.push(neighborNode);
+          }
+        }
+      }
+    }
+
+    const textNodes = branchNodes.filter(n => n.type !== 'image');
+    const startTextNode = textNodes.find(n => n.id === startNodeId);
+
+    if (!startTextNode) {
+        showError("The selected node has no text content to export.");
+        return;
+    }
+
+    let markdownContent = `# ${startTextNode.data.label || 'Untitled Note'}\n\n`;
+    
+    const otherNodes = textNodes.filter(n => n.id !== startNodeId);
+
+    otherNodes.forEach(node => {
+      const title = node.data.label?.split('\n')[0] || 'Untitled';
+      const type = node.type?.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()) || 'Note';
+      markdownContent += `---\n\n## ${type}: ${title}\n\n${node.data.label || ''}\n\n`;
+    });
+
+    const filename = `${(startNode.data.label || 'canvas_branch').substring(0, 30).replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+    const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showSuccess("Branch downloaded successfully!");
+  }, [nodes, edges]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -461,65 +524,67 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
 
   return (
     <div className="h-full w-full relative" ref={reactFlowWrapper}>
-      {isDragOver && (
-        <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
-          <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
-            Drop to create note
+      <CanvasActionsProvider value={{ downloadNodeBranch }}>
+        {isDragOver && (
+          <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
+              Drop to create note
+            </div>
           </div>
-        </div>
-      )}
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onPaneClick={onPaneClick}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        fitView
-        zoomOnDoubleClick={false}
-        panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
-        selectionOnDrag={activeTool === 'select'}
-        nodesDraggable={activeTool === 'select'}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        deleteKeyCode={['Backspace', 'Delete']}
-        proOptions={{ hideAttribution: true }}
-        minZoom={0.1}
-        snapToGrid={true}
-        snapGrid={[15, 15]}
-        multiSelectionKeyCode="Shift"
-        className={
-          activeTool === 'pan'
-            ? 'cursor-grab'
-            : activeTool === 'note'
-            ? 'cursor-crosshair'
-            : ''
-        }
-      >
-        <Controls>
-          <ControlButton onClick={onSettingsClick} title="Settings" className="order-first">
-            <Settings size={16} />
-          </ControlButton>
-        </Controls>
-        <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
-        {isMinimapOpen && (
-          <MiniMap 
-            style={{
-              backgroundColor: 'hsl(var(--card))',
-              border: '1px solid hsl(var(--border))',
-            }}
-            nodeColor={(node) => {
-              if (node.style?.backgroundColor) return node.style.backgroundColor;
-              return 'hsl(var(--accent))';
-            }}
-            nodeStrokeColor={'hsl(var(--border))'}
-            maskColor={'hsla(var(--background), 0.8)'}
-          />
         )}
-      </ReactFlow>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onPaneClick={onPaneClick}
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          fitView
+          zoomOnDoubleClick={false}
+          panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
+          selectionOnDrag={activeTool === 'select'}
+          nodesDraggable={activeTool === 'select'}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          deleteKeyCode={['Backspace', 'Delete']}
+          proOptions={{ hideAttribution: true }}
+          minZoom={0.1}
+          snapToGrid={true}
+          snapGrid={[15, 15]}
+          multiSelectionKeyCode="Shift"
+          className={
+            activeTool === 'pan'
+              ? 'cursor-grab'
+              : activeTool === 'note'
+              ? 'cursor-crosshair'
+              : ''
+          }
+        >
+          <Controls>
+            <ControlButton onClick={onSettingsClick} title="Settings" className="order-first">
+              <Settings size={16} />
+            </ControlButton>
+          </Controls>
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
+          {isMinimapOpen && (
+            <MiniMap 
+              style={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+              }}
+              nodeColor={(node) => {
+                if (node.style?.backgroundColor) return node.style.backgroundColor;
+                return 'hsl(var(--accent))';
+              }}
+              nodeStrokeColor={'hsl(var(--border))'}
+              maskColor={'hsla(var(--background), 0.8)'}
+            />
+          )}
+        </ReactFlow>
+      </CanvasActionsProvider>
       <div 
         className="absolute right-4 z-10 transition-all duration-200 ease-in-out"
         style={{ bottom: isMinimapOpen ? '170px' : '1rem' }}

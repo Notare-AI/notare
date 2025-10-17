@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
+import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 
 interface ReferenceNodeData {
   label: string;
@@ -26,6 +27,7 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { handleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
+  const { downloadNodeBranch } = useCanvasActions();
 
   useEffect(() => {
     setLabel(data.label || '');
@@ -87,6 +89,7 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
         onDownload={() => handleDownloadAsMarkdown(data.label)}
+        onDownloadBranch={() => downloadNodeBranch(id)}
       />
       <div
         style={{

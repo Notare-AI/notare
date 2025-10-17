@@ -9,6 +9,7 @@ import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
+import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 
 interface Source {
   text: string;
@@ -36,6 +37,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
+  const { downloadNodeBranch } = useCanvasActions();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -128,6 +130,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
         onDownload={() => handleDownloadAsMarkdown(data.label)}
+        onDownloadBranch={() => downloadNodeBranch(id)}
       />
       <div
         style={{

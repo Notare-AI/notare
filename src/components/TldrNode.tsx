@@ -6,6 +6,7 @@ import { Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
+import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 
 interface Source {
   text: string;
@@ -28,6 +29,7 @@ function TldrNode({ id, data, selected }: TldrNodeProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
+  const { downloadNodeBranch } = useCanvasActions();
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
@@ -71,6 +73,7 @@ function TldrNode({ id, data, selected }: TldrNodeProps) {
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
         onDownload={() => handleDownloadAsMarkdown(data.label)}
+        onDownloadBranch={() => downloadNodeBranch(id)}
       />
       <div
         style={{
