@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import HeroPreviewImage from '@/images/hero-preview.png';
 
-export const Hero = () => {
+const Hero = () => {
   return (
     <section className="relative bg-background text-foreground pb-20">
       <div className="container mx-auto flex max-w-5xl flex-col items-center justify-center px-4 pt-24 pb-16 text-center sm:pt-32 sm:pb-20">
@@ -31,3 +31,5 @@ export const Hero = () => {
     </section>
   );
 };
+
+export default Hero;
