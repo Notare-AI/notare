@@ -21,6 +21,9 @@ const Header = () => {
           <Button variant="ghost" asChild>
             <Link to="/blog">Blog</Link>
           </Button>
+          <Button variant="ghost" asChild>
+            <Link to="/gui-demo">GUI Demo</Link>
+          </Button>
         </nav>
 
         <div className="flex items-center gap-4">
