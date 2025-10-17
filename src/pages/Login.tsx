@@ -9,7 +9,7 @@ const Login = () => {
       <div className="w-full max-w-sm p-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div className="text-center">
           <PenSquare className="mx-auto h-8 w-8 text-gray-800 dark:text-gray-200" />
-          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Log in to Notare</h1>
+          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Welcome to Notare</h1>
         </div>
         <Auth
           supabaseClient={supabase}
