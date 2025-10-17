@@ -5,28 +5,53 @@ import { Link } from 'react-router-dom';
 const pricingTiers = [
   {
     name: 'Free',
-    price: '$0',
-    description: 'For individuals getting started with Scribe.',
+    price: '£0',
+    description: 'For getting started with the core features.',
     features: [
+      'Synced notes across devices',
+      'Privacy - no data training!',
+      '500mb of storage',
+      '10 AI credits',
+      'Unlimited notes',
       '3 Canvases',
-      '10 PDF uploads',
-      '10 AI credits per month',
+      '1 PDF upload per canvas',
     ],
     cta: 'Start for Free',
     isFeatured: false,
   },
   {
-    name: 'Pro',
-    price: '$15',
-    description: 'For power users who need unlimited access.',
+    name: 'Personal',
+    price: '£8',
+    description: 'For individuals who need more power and flexibility.',
     features: [
-      'Unlimited Canvases',
-      'Unlimited PDF uploads',
-      '500 AI credits per month',
-      'Priority support',
+      'Synced notes across devices',
+      'Privacy - no data training!',
+      '1GB of storage',
+      '500 AI credits',
+      'Unlimited Notes',
+      'Unlimited Canvas',
+      '10 PDFs per canvas',
+      'Downloadable markdown notes',
     ],
-    cta: 'Upgrade to Pro',
+    cta: 'Upgrade to Personal',
     isFeatured: true,
+  },
+  {
+    name: 'Professional',
+    price: '£15',
+    description: 'For power users who need advanced features.',
+    features: [
+      'Synced notes across devices',
+      'Privacy - no data training!',
+      '5GB of storage',
+      '1,000 AI credits',
+      'Unlimited Notes',
+      'Unlimited Canvas',
+      '50 PDFs per canvas',
+      'Downloadable markdown notes',
+    ],
+    cta: 'Go Professional',
+    isFeatured: false,
   },
 ];
 
@@ -39,18 +64,18 @@ const Pricing = () => {
           Choose the plan that's right for you.
         </p>
       </div>
-      <div className="mt-12 grid max-w-4xl mx-auto grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="mt-12 grid max-w-6xl mx-auto grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {pricingTiers.map((tier) => (
           <div
             key={tier.name}
-            className={`rounded-lg border p-8 flex flex-col ${tier.isFeatured ? 'border-primary' : 'border-border'}`}
+            className={`rounded-lg border p-8 flex flex-col ${tier.isFeatured ? 'border-primary ring-2 ring-primary' : 'border-border'}`}
           >
             <h3 className="text-2xl font-semibold">{tier.name}</h3>
             <p className="mt-4">
               <span className="text-4xl font-bold">{tier.price}</span>
               <span className="text-muted-foreground">/ month</span>
             </p>
-            <p className="mt-4 text-muted-foreground">{tier.description}</p>
+            <p className="mt-4 text-muted-foreground h-12">{tier.description}</p>
             <ul className="mt-8 space-y-4 flex-grow">
               {tier.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-3">
