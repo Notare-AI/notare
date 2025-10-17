@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
-import { Pen, Eye, Pencil } from 'lucide-react';
+import { Pen, Eye, Pencil, Expand } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -37,7 +37,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
-  const { downloadNodeBranch } = useCanvasActions();
+  const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -161,6 +161,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
                 <Eye size={16} />
               </button>
             )}
+            <button
+              onClick={() => openNodeInEditor(id, data.label)}
+              className="p-1 text-gray-500 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
+              title="Open in editor"
+            >
+              <Expand size={16} />
+            </button>
             <NodeAIEditor nodeId={id} currentContent={data.label} />
             {!isEditing && (
               <button

@@ -26,6 +26,7 @@ import CanvasToolbar, { Tool } from './CanvasToolbar';
 import { useDnD } from './DnDContext';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
 import { CanvasActionsProvider } from '@/contexts/CanvasActionsContext';
+import NoteEditorModal from './NoteEditorModal';
 
 import '@xyflow/react/dist/style.css';
 
@@ -87,6 +88,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const dragLeaveTimer = useRef<number | null>(null);
   const clipboardRef = useRef<Node[]>([]);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [editingNode, setEditingNode] = useState<{ id: string; content: string } | null>(null);
 
   // --- UNDO/REDO STATE ---
   const history = useRef<{ nodes: Node[]; edges: Edge[] }[]>([{ nodes: [], edges: [] }]);
@@ -514,6 +516,24 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     showSuccess("Branch downloaded successfully!");
   }, [nodes, edges]);
 
+  const openNodeInEditor = useCallback((nodeId: string, content: string) => {
+    setEditingNode({ id: nodeId, content });
+  }, []);
+
+  const handleSaveFromEditor = (newContent: string) => {
+    if (!editingNode) return;
+
+    setNodes((nodes) =>
+      nodes.map((n) => {
+        if (n.id === editingNode.id) {
+          return { ...n, data: { ...n.data, label: newContent } };
+        }
+        return n;
+      })
+    );
+    setEditingNode(null);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -524,7 +544,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
 
   return (
     <div className="h-full w-full relative" ref={reactFlowWrapper}>
-      <CanvasActionsProvider value={{ downloadNodeBranch }}>
+      <CanvasActionsProvider value={{ downloadNodeBranch, openNodeInEditor }}>
         {isDragOver && (
           <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
             <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
@@ -598,6 +618,12 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         </button>
       </div>
       <CanvasToolbar activeTool={activeTool} onToolChange={setActiveTool} />
+      <NoteEditorModal
+        isOpen={!!editingNode}
+        onOpenChange={(isOpen) => !isOpen && setEditingNode(null)}
+        initialContent={editingNode?.content || ''}
+        onSave={handleSaveFromEditor}
+      />
     </div>
   );
 };
