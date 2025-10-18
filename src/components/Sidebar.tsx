@@ -136,8 +136,6 @@ const Sidebar = ({
     const { error } = await supabase.auth.signOut();
     if (error) {
       showError("Failed to sign out.");
-    } else {
-      navigate("/login");
     }
   };
 

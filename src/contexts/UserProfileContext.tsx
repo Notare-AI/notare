@@ -40,7 +40,7 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
         navigate('/dashboard');
       } else if (_event === 'SIGNED_OUT') {
         setProfile(null);
-        navigate('/login');
+        navigate('/');
       }
     });
 

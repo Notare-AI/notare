@@ -74,7 +74,10 @@ const SettingsModal = ({ isOpen, onOpenChange }: SettingsModalProps) => {
       showSuccess("Your account has been successfully deleted.");
       onOpenChange(false); 
       setIsDeleteConfirmOpen(false);
-      // Auth listener will handle redirect to /login
+      
+      // This will clear the local session and trigger the onAuthStateChange listener,
+      // which will then redirect the user to the landing page.
+      await supabase.auth.signOut();
 
     } catch (error: any) {
       showError(error.message || "Could not delete your account.");
