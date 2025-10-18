@@ -15,6 +15,7 @@ import BlogComingSoon from "./pages/BlogComingSoon";
 import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
 import { Analytics } from "@vercel/analytics/react";
+import AuthConfirmPage from "./pages/AuthConfirm";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/confirm" element={<AuthConfirmPage />} />
               <Route path="/checkout" element={<AuthLayout><CheckoutPage /></AuthLayout>} />
               <Route
                 path="/dashboard"

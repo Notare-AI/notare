@@ -1,9 +1,33 @@
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { PenSquare } from 'lucide-react';
+import { PenSquare, MailCheck } from 'lucide-react';
 
 const Login = () => {
+  const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
+
+  const handleSignUp = async () => {
+    setShowConfirmationMessage(true);
+  };
+
+  if (showConfirmationMessage) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="w-full max-w-sm p-8 space-y-6 text-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <MailCheck className="mx-auto h-12 w-12 text-primary" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Check your email</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            We've sent a verification link to your email address. Please click the link to confirm your account.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-500">
+            You may need to check your spam folder.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-sm p-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
@@ -45,6 +69,7 @@ const Login = () => {
           }}
           theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
           providers={['google', 'azure']}
+          onSignUp={handleSignUp}
           redirectTo={`${window.location.origin}/dashboard`}
           socialLayout="horizontal"
           localization={{
