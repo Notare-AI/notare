@@ -35,6 +35,8 @@ const SettingsModal = ({ isOpen, onOpenChange }: SettingsModalProps) => {
   const { profile, loading, refetchProfile } = useUserProfile();
   const [isBillingLoading, setIsBillingLoading] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   const handleCancelSubscription = async () => {
@@ -60,6 +62,24 @@ const SettingsModal = ({ isOpen, onOpenChange }: SettingsModalProps) => {
     } else {
       navigate('/checkout');
       onOpenChange(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-user');
+      if (error) throw error;
+      
+      showSuccess("Your account has been successfully deleted.");
+      onOpenChange(false); 
+      setIsDeleteConfirmOpen(false);
+      // Auth listener will handle redirect to /login
+
+    } catch (error: any) {
+      showError(error.message || "Could not delete your account.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -96,14 +116,29 @@ const SettingsModal = ({ isOpen, onOpenChange }: SettingsModalProps) => {
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : profile ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium">Username</h3>
-                    <p className="text-sm text-gray-400">{profile.username}</p>
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium">Username</h3>
+                      <p className="text-sm text-gray-400">{profile.username}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Subscription Plan</h3>
+                      <p className="text-sm text-gray-400 capitalize">{profile.subscription_plan}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium">Subscription Plan</h3>
-                    <p className="text-sm text-gray-400 capitalize">{profile.subscription_plan}</p>
+                  <div className="p-4 rounded-lg bg-red-900/20 border border-red-500/30">
+                    <h4 className="font-semibold text-red-400">Delete Account</h4>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Permanently delete your account and all associated data. This action cannot be undone.
+                    </p>
+                    <Button 
+                      variant="destructive" 
+                      className="mt-4"
+                      onClick={() => setIsDeleteConfirmOpen(true)}
+                    >
+                      Delete My Account
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -170,6 +205,27 @@ const SettingsModal = ({ isOpen, onOpenChange }: SettingsModalProps) => {
             >
               {isBillingLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirm Cancellation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <AlertDialogContent className="bg-[#363636] text-white border-gray-500">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              This action cannot be undone. This will permanently delete your account, canvases, and all other associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent hover:bg-gray-700">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Yes, delete my account
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
