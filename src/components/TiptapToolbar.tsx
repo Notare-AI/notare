@@ -16,6 +16,7 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  Highlighter,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -159,6 +160,15 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         title="Strikethrough"
       >
         <Strikethrough className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleHighlight().run()}
+        className={cn('h-8 w-8', editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Highlight"
+      >
+        <Highlighter className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"

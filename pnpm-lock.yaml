@@ -110,6 +110,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.56.2
         version: 5.74.4(react@18.3.1)
+      '@tiptap/extension-highlight':
+        specifier: ^3.7.2
+        version: 3.7.2(@tiptap/core@3.7.2(@tiptap/pm@3.7.2))
       '@tiptap/extension-placeholder':
         specifier: ^3.7.2
         version: 3.7.2(@tiptap/extensions@3.7.2(@tiptap/core@3.7.2(@tiptap/pm@3.7.2))(@tiptap/pm@3.7.2))
@@ -1763,6 +1766,11 @@ packages:
 
   '@tiptap/extension-heading@3.7.2':
     resolution: {integrity: sha512-eH/G66FIRlTQz4MhEmlNNNQgVTxhoqlkyFzgeG5aipIplYOdYa5Y6Wl0NF4xqr1jAHGLAK6LaYS4FXp3TE7LyA==}
+    peerDependencies:
+      '@tiptap/core': ^3.7.2
+
+  '@tiptap/extension-highlight@3.7.2':
+    resolution: {integrity: sha512-+R10j0BaN3J8XeZM/RHIiYNpEHBetTtZQVDsEwmG5QBPzOTItvCc4qNaJjpoCPhkwTd5EQdmW7feUDPsTW+bgw==}
     peerDependencies:
       '@tiptap/core': ^3.7.2
 
@@ -5587,6 +5595,10 @@ snapshots:
       '@tiptap/core': 3.7.2(@tiptap/pm@3.7.2)
 
   '@tiptap/extension-heading@3.7.2(@tiptap/core@3.7.2(@tiptap/pm@3.7.2))':
+    dependencies:
+      '@tiptap/core': 3.7.2(@tiptap/pm@3.7.2)
+
+  '@tiptap/extension-highlight@3.7.2(@tiptap/core@3.7.2(@tiptap/pm@3.7.2))':
     dependencies:
       '@tiptap/core': 3.7.2(@tiptap/pm@3.7.2)
 

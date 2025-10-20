@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
 import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
@@ -41,6 +42,7 @@ const TiptapEditor = ({
       Placeholder.configure({
         placeholder,
       }),
+      Highlight,
     ],
     content: '', // Initial content is set via useEffect
     editable: isEditable,
