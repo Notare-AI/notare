@@ -69,6 +69,23 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     }
   };
 
+  const handleOpenInEditor = () => {
+    // Save current changes before opening modal
+    if (isEditing && label !== data.label) {
+      setNodes((nodes) =>
+        nodes.map((n) => {
+          if (n.id === id) {
+            return { ...n, data: { ...n.data, label } };
+          }
+          return n;
+        })
+      );
+    }
+    // Exit editing mode
+    setIsEditing(false);
+    openNodeInEditor(id, label);
+  };
+
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
   const isActive = isPdfSidebarOpen && isCurrentlyHighlighted;
@@ -148,7 +165,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                openNodeInEditor(id, data.label);
+                handleOpenInEditor();
               }}
               className="p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground"
               title="Open in editor"
