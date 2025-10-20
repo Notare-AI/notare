@@ -33,6 +33,7 @@ const TiptapEditor = ({
 }: TiptapEditorProps) => {
   const editorRef = useRef<any>(null);
   const lastValueRef = useRef<string>('');
+  const isInternalUpdate = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -71,6 +72,7 @@ const TiptapEditor = ({
       } : {}, // Empty when not editable, allowing events to propagate for selection
     },
     onUpdate: ({ editor }) => {
+      isInternalUpdate.current = true;
       const html = editor.getHTML();
       const markdown = turndownService.turndown(html);
       onChange(markdown);
@@ -80,6 +82,10 @@ const TiptapEditor = ({
   useEffect(() => {
     if (editor && value !== lastValueRef.current) {
       lastValueRef.current = value;
+      if (isInternalUpdate.current) {
+        isInternalUpdate.current = false;
+        return;
+      }
       try {
         const html = showdownConverter.makeHtml(value);
         // Only update if the content has actually changed to avoid loops
