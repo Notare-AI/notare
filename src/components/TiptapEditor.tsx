@@ -16,7 +16,7 @@ const showdownConverter = new Showdown.Converter();
 
 interface TiptapEditorProps {
   value: string;
-  onChange: (html: string) => void;
+  onChange: (content: string) => void;
   placeholder?: string;
   className?: string;
   isEditable?: boolean;
@@ -73,7 +73,12 @@ const TiptapEditor = ({
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      onChange(html);
+      if (isMarkdownInput) {
+        const markdown = turndownService.turndown(html);
+        onChange(markdown);
+      } else {
+        onChange(html);
+      }
     },
   });
 
