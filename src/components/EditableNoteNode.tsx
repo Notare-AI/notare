@@ -29,6 +29,7 @@ type EditableNoteProps = {
 };
 
 function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
   const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
@@ -39,23 +40,38 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
-    // Only update internal state if the external data.label changes
-    // and the node is not selected (to avoid overriding user input).
-    if (!selected) {
-      setLabel(data.label || '');
+    // When data from the parent (React Flow state) changes, update the local state.
+    // This is important for external updates, like from AI.
+    // We don't check for `isEditing` to ensure external updates are always reflected.
+    // The editor's state will be preserved correctly by Tiptap internally.
+    setLabel(data.label || '');
+  }, [data.label]);
+
+  useEffect(() => {
+    // If the node is deselected, exit editing mode.
+    if (!selected && isEditing) {
+      setIsEditing(false);
     }
-  }, [data.label, selected]);
+  }, [selected, isEditing]);
 
   const handleBlur = () => {
+    setIsEditing(false);
+    // Persist changes to the global state when the editor loses focus.
     if (label !== data.label) {
       setNodes((nodes) =>
         nodes.map((n) => {
           if (n.id === id) {
-            n.data = { ...n.data, label };
+            return { ...n, data: { ...n.data, label } };
           }
           return n;
         })
       );
+    }
+  };
+
+  const handleDoubleClick = () => {
+    if (selected) {
+      setIsEditing(true);
     }
   };
 
@@ -109,6 +125,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           background: nodeStyles.background,
         }}
         className="w-full h-full box-border flex flex-col rounded-lg"
+        onDoubleClick={handleDoubleClick}
       >
         <NodeResizer isVisible={selected} minWidth={200} minHeight={150} />
 
@@ -148,8 +165,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             value={label}
             onChange={setLabel}
             onBlur={handleBlur}
-            isEditable={selected}
-            placeholder={!label ? 'Click to start typing...' : ''}
+            isEditable={isEditing}
+            placeholder={!label ? 'Double-click to edit...' : ''}
             className="w-full h-full flex flex-col"
           />
         </div>

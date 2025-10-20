@@ -38,32 +38,32 @@ const NoteEditorModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#363636] text-white border-gray-500 sm:max-w-[80vw] h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-3xl w-full h-[90vh] flex flex-col bg-muted p-0">
+        <DialogHeader className="p-6 border-b bg-background rounded-t-lg">
           <DialogTitle>Edit Note</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription>
             Make changes to your note content. Changes will be saved to the canvas.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow py-4 overflow-hidden">
-          <TiptapEditor
-            value={content}
-            onChange={setContent}
-            className="w-full h-full flex flex-col bg-[#2A2A2A] border border-gray-500 rounded-md"
-            placeholder="Start writing..."
-          />
+        <div className="flex-grow p-4 md:p-8 overflow-y-auto">
+          <div className="bg-background shadow-sm rounded-md w-full h-full p-6 md:p-10">
+            <TiptapEditor
+              value={content}
+              onChange={setContent}
+              className="w-full h-full flex flex-col"
+              placeholder="Start writing..."
+            />
+          </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="p-6 border-t bg-background rounded-b-lg">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-gray-400 hover:text-white hover:bg-gray-700"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            className="bg-gray-800 text-white hover:bg-gray-900 dark:bg-[#424242] dark:text-gray-300 dark:hover:bg-gray-600"
           >
             Save Changes
           </Button>
