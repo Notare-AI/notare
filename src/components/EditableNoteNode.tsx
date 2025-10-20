@@ -1,15 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Pencil, Expand } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
+import TiptapEditor from './TiptapEditor';
 
 interface Source {
   text: string;
@@ -33,7 +32,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
   const { setNodes } = useReactFlow();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
@@ -44,21 +42,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   useEffect(() => {
     setLabel(data.label || '');
   }, [data.label]);
-
-  useEffect(() => {
-    if (isEditing && textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [isEditing, label]);
-
-  useEffect(() => {
-    if (isEditing && textareaRef.current) {
-      const textarea = textareaRef.current;
-      textarea.focus();
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    }
-  }, [isEditing]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -75,17 +58,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           return n;
         })
       );
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-      handleBlur();
-      return;
-    }
-    if (event.key === 'Escape') {
-      setIsEditing(false);
-      setLabel(data.label || '');
     }
   };
 
@@ -182,33 +154,15 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         </div>
 
         {/* Body */}
-        <div ref={contentRef} className="flex-grow p-3 overflow-y-auto" onDoubleClick={handleEditClick}>
-          {isEditing ? (
-            <textarea
-              ref={textareaRef}
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              className="nodrag prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block"
-              style={{ overflowWrap: 'break-word', overflow: 'hidden' }}
-            />
-          ) : (
-            <div
-              className={cn(
-                'prose prose-sm w-full h-full max-w-none dark:prose-invert',
-                !label && 'text-gray-500 dark:text-gray-400'
-              )}
-            >
-              {label ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {label}
-                </ReactMarkdown>
-              ) : (
-                'Double click or use the edit icon to add text...'
-              )}
-            </div>
-          )}
+        <div ref={contentRef} className="flex-grow overflow-y-auto" onDoubleClick={handleEditClick}>
+          <TiptapEditor
+            value={label}
+            onChange={setLabel}
+            onBlur={handleBlur}
+            isEditable={isEditing}
+            placeholder={!label ? 'Double click or use the edit icon to add text...' : ''}
+            className="w-full h-full flex flex-col"
+          />
         </div>
       </div>
       <Handle type="source" position={Position.Right} id="right-source" />

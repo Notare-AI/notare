@@ -149,6 +149,17 @@
   }
 }
 
+/* Tiptap Editor Styles */
+@layer components {
+  .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    @apply text-gray-500 dark:text-gray-400;
+  }
+}
+
 /* Custom override for Supabase Auth UI to show Microsoft icon and text */
 button[aria-label="Continue with Azure"] {
   font-size: 0; /* Hide original text content */

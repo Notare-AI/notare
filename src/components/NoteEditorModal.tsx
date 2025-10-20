@@ -7,8 +7,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import TiptapEditor from './TiptapEditor';
 
 interface NoteEditorModalProps {
   isOpen: boolean;
@@ -45,11 +45,11 @@ const NoteEditorModal = ({
             Make changes to your note content. Changes will be saved to the canvas.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow py-4">
-          <Textarea
+        <div className="flex-grow py-4 overflow-hidden">
+          <TiptapEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full h-full bg-[#2A2A2A] border-gray-500 resize-none text-base p-4"
+            onChange={setContent}
+            className="w-full h-full flex flex-col bg-[#2A2A2A] border border-gray-500 rounded-md"
             placeholder="Start writing..."
           />
         </div>
