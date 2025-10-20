@@ -165,7 +165,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           ref={contentRef}
           className={cn(
             'flex-grow overflow-y-auto',
-            { 'cursor-grab': !isEditing }
+            { 'cursor-grab': !isEditing },
+            selected && !isEditing && 'hover:cursor-text' // Change cursor to I-Beam on hover when selected and not editing
           )}
         >
           <TiptapEditor

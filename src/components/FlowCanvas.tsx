@@ -95,7 +95,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     (event: React.MouseEvent) => {
       if (activeTool === 'note') {
         addNodeOnPaneClick(event);
-        setActiveTool('select');
       }
     },
     [activeTool, addNodeOnPaneClick]
@@ -155,6 +154,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           zoomOnDoubleClick={false}
           panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
           selectionOnDrag={activeTool === 'select'}
+          selectionMode="partial"
           nodesDraggable={activeTool === 'select'}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
