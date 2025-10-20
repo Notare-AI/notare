@@ -1,5 +1,9 @@
 import { Check, LayoutDashboard, Brain, FileText, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import visualMaps from '@/images/visual-maps.png';
+import aiNoteInsights from '@/images/ai-note-insights.png';
+import pdfNoteTaking from '@/images/pdf-note-taking.png';
+import dataOwnershipDownload from '@/images/data-ownership-download.png';
 
 const features = [
   {
@@ -12,6 +16,7 @@ const features = [
     ],
     icon: LayoutDashboard,
     color: "text-blue-500",
+    image: visualMaps,
   },
   {
     title: "AI Note Taking – Extract Insights Without the Effort",
@@ -23,6 +28,7 @@ const features = [
     ],
     icon: Brain,
     color: "text-purple-500",
+    image: aiNoteInsights,
   },
   {
     title: "Seamless PDF Note Taking – Annotate and Connect Directly",
@@ -34,6 +40,7 @@ const features = [
     ],
     icon: FileText,
     color: "text-green-500",
+    image: pdfNoteTaking,
   },
   {
     title: "Own Your Data – Download and Export with Ease",
@@ -45,6 +52,7 @@ const features = [
     ],
     icon: Download,
     color: "text-orange-500",
+    image: dataOwnershipDownload,
   },
 ];
 
@@ -77,6 +85,14 @@ const Features = () => {
                 </li>
               ))}
             </ul>
+          </div>
+          <div className="relative">
+            <img 
+              src={feature.image} 
+              alt={feature.title} 
+              className="rounded-xl shadow-lg w-full h-auto object-cover"
+              loading="lazy"
+            />
           </div>
         </div>
       ))}
