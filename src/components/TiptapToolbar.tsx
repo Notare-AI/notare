@@ -54,7 +54,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
     <div 
       className="flex items-center flex-wrap gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700"
       onMouseDown={(e) => {
-        e.preventDefault(); // Prevent text selection
+        e.preventDefault(); // Prevent text selection and editor blur
         e.stopPropagation(); // Prevent node deselection
       }}
     >
@@ -62,6 +62,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().undo().run()}
+        onMouseDown={(e) => e.preventDefault()}
         disabled={!editor.can().undo()}
         className="h-8 w-8"
         title="Undo"
@@ -72,6 +73,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().redo().run()}
+        onMouseDown={(e) => e.preventDefault()}
         disabled={!editor.can().redo()}
         className="h-8 w-8"
         title="Redo"
@@ -86,6 +88,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
           <Button
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             className={cn(
               'h-8 w-8',
               editor.isActive('heading') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -101,6 +104,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         >
           <DropdownMenuItem
             onClick={() => editor.chain().focus().setParagraph().run()}
+            onMouseDown={(e) => e.preventDefault()}
             disabled={!editor.can().setParagraph()}
           >
             Paragraph
@@ -109,6 +113,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
             <DropdownMenuItem
               key={option.level}
               onClick={() => editor.chain().focus().toggleHeading({ level: option.level as 1 | 2 | 3 }).run()}
+              onMouseDown={(e) => e.preventDefault()}
               disabled={!editor.can().toggleHeading({ level: option.level as 1 | 2 | 3 })}
             >
               <option.icon className="mr-2 h-4 w-4" />
@@ -120,7 +125,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8" title="Text Align">
+          <Button variant="ghost" size="icon" onMouseDown={(e) => e.preventDefault()} className="h-8 w-8" title="Text Align">
             <AlignLeft className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -128,16 +133,16 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
           onPointerDownOutside={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('left').run()}>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('left').run()} onMouseDown={(e) => e.preventDefault()}>
             <AlignLeft className="mr-2 h-4 w-4" /> Left
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('center').run()}>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('center').run()} onMouseDown={(e) => e.preventDefault()}>
             <AlignCenter className="mr-2 h-4 w-4" /> Center
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('right').run()}>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('right').run()} onMouseDown={(e) => e.preventDefault()}>
             <AlignRight className="mr-2 h-4 w-4" /> Right
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('justify').run()}>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('justify').run()} onMouseDown={(e) => e.preventDefault()}>
             <AlignJustify className="mr-2 h-4 w-4" /> Justify
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -149,6 +154,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleBold().run()}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn('h-8 w-8', editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Bold"
       >
@@ -158,6 +164,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleItalic().run()}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn('h-8 w-8', editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Italic"
       >
@@ -167,6 +174,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleStrike().run()}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn('h-8 w-8', editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Strikethrough"
       >
@@ -178,6 +186,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
           <Button
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             className={cn('h-8 w-8', editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
             title="Highlight"
           >
@@ -195,6 +204,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
               variant="ghost"
               size="icon"
               onClick={() => editor.chain().focus().unsetHighlight().run()}
+              onMouseDown={(e) => e.preventDefault()}
               className="h-7 w-7 rounded-full border-2 border-muted bg-background flex items-center justify-center text-muted-foreground hover:border-foreground hover:text-foreground transition-all"
               title="Remove highlight"
             >
@@ -206,6 +216,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
                 size="icon"
                 key={color}
                 onClick={() => editor.chain().focus().toggleHighlight({ color }).run()}
+                onMouseDown={(e) => e.preventDefault()}
                 className="w-7 h-7 rounded-full border-2 border-transparent hover:border-foreground transition-all p-0"
                 style={{ backgroundColor: color }}
                 title={`Highlight ${color}`}
@@ -219,6 +230,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn('h-8 w-8', editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Bullet List"
       >
@@ -228,6 +240,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn('h-8 w-8', editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Ordered List"
       >
@@ -237,6 +250,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        onMouseDown={(e) => e.preventDefault()}
         className={cn('h-8 w-8', editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Blockquote"
       >
