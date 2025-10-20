@@ -37,6 +37,12 @@ const NoteEditorModal = ({
     }
   }, [isOpen, initialContent]);
 
+  useEffect(() => {
+    if (!isOpen && content !== initialContent) {
+      onSave(content);
+    }
+  }, [isOpen, content, initialContent, onSave]);
+
   const handleSave = () => {
     onSave(content);
     onOpenChange(false);
@@ -77,12 +83,6 @@ const NoteEditorModal = ({
           </div>
         </div>
         <DialogFooter className="p-6 border-t bg-background rounded-b-lg">
-          <Button
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
           <Button
             onClick={handleSave}
           >
