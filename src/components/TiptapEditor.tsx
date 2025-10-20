@@ -18,6 +18,7 @@ interface TiptapEditorProps {
   placeholder?: string;
   className?: string;
   isEditable?: boolean;
+  autoFocus?: boolean;
 }
 
 const turndownService = new TurndownService();
@@ -30,6 +31,7 @@ const TiptapEditor = ({
   placeholder = 'Start writing...',
   className,
   isEditable = true,
+  autoFocus = false,
 }: TiptapEditorProps) => {
   const editorRef = useRef<any>(null);
   const lastValueRef = useRef<string>('');
@@ -104,6 +106,12 @@ const TiptapEditor = ({
       editor.setEditable(isEditable);
     }
   }, [isEditable, editor]);
+
+  useEffect(() => {
+    if (editor && autoFocus) {
+      editor.commands.focus('end');
+    }
+  }, [editor, autoFocus]);
 
   useEffect(() => {
     editorRef.current = editor;

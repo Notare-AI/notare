@@ -176,6 +176,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             placeholder={!label ? 'Double-click to edit...' : ''}
             className="w-full h-full flex flex-col"
             isEditable={isEditing}
+            autoFocus={isEditing}
           />
         </div>
       </div>
