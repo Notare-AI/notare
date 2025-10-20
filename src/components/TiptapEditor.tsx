@@ -5,6 +5,7 @@ import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
 import { useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface TiptapEditorProps {
   value: string;
@@ -42,7 +43,7 @@ const TiptapEditor = ({
     editorProps: {
       attributes: {
         class:
-          'nodrag prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
+          'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
       },
     },
     onUpdate: ({ editor }) => {
@@ -69,6 +70,17 @@ const TiptapEditor = ({
   useEffect(() => {
     if (editor) {
       editor.setEditable(isEditable);
+      // Update editor props to conditionally apply 'nodrag'
+      editor.setOptions({
+        editorProps: {
+          attributes: {
+            class: cn(
+              'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
+              { 'nodrag': isEditable }
+            ),
+          },
+        },
+      });
     }
   }, [isEditable, editor]);
 
