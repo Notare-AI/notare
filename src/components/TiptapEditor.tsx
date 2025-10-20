@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
+import TextStyle from '@tiptap/extension-text-style';
 import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
@@ -42,7 +43,8 @@ const TiptapEditor = ({
       Placeholder.configure({
         placeholder,
       }),
-      Highlight,
+      TextStyle,
+      Highlight.configure({ multicolor: true }),
     ],
     content: '', // Initial content is set via useEffect
     editable: isEditable,

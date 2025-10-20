@@ -17,6 +17,7 @@ import {
   AlignRight,
   AlignJustify,
   Highlighter,
+  Ban,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface TiptapToolbarProps {
   editor: Editor | null;
@@ -41,6 +47,8 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
     { level: 2, icon: Heading2, label: 'Heading 2' },
     { level: 3, icon: Heading3, label: 'Heading 3' },
   ];
+
+  const highlightColors = ['#facc15', '#a3e635', '#67e8f9', '#c4b5fd', '#f9a8d4'];
 
   return (
     <div 
@@ -161,15 +169,49 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
       >
         <Strikethrough className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => editor.chain().focus().toggleHighlight().run()}
-        className={cn('h-8 w-8', editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
-        title="Highlight"
-      >
-        <Highlighter className="h-4 w-4" />
-      </Button>
+      
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn('h-8 w-8', editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+            title="Highlight"
+          >
+            <Highlighter className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent 
+            side="bottom" 
+            align="center" 
+            className="w-auto p-2 bg-popover border-border"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => editor.chain().focus().unsetHighlight().run()}
+              className="h-7 w-7 rounded-full border-2 border-muted bg-background flex items-center justify-center text-muted-foreground hover:border-foreground hover:text-foreground transition-all"
+              title="Remove highlight"
+            >
+              <Ban size={14} />
+            </Button>
+            {highlightColors.map((color) => (
+              <Button
+                variant="ghost"
+                size="icon"
+                key={color}
+                onClick={() => editor.chain().focus().toggleHighlight({ color }).run()}
+                className="w-7 h-7 rounded-full border-2 border-transparent hover:border-foreground transition-all p-0"
+                style={{ backgroundColor: color }}
+                title={`Highlight ${color}`}
+              />
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+
       <Button
         variant="ghost"
         size="icon"
