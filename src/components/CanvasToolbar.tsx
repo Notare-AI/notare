@@ -1,4 +1,4 @@
-import { MousePointer2, Hand, FilePlus2 } from 'lucide-react';
+import { MousePointer2, Hand, FilePlus2, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useDnD } from './DnDContext';
@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export type Tool = 'select' | 'pan' | 'note';
+export type Tool = 'select' | 'pan' | 'note' | 'group';
 
 interface CanvasToolbarProps {
   activeTool: Tool;
@@ -19,6 +19,7 @@ const tools = [
   { id: 'select' as const, icon: MousePointer2, label: 'Select', draggable: false, tooltip: 'Select and move items' },
   { id: 'pan' as const, icon: Hand, label: 'Pan', draggable: false, tooltip: 'Pan the canvas' },
   { id: 'note' as const, icon: FilePlus2, label: 'New Note', draggable: true, tooltip: 'Click to add a new note' },
+  { id: 'group' as const, icon: Square, label: 'New Group', draggable: true, tooltip: 'Click to add a new group' },
 ];
 
 const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
@@ -54,7 +55,7 @@ const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
                 size="icon"
                 onClick={() => onToolChange(tool.id)}
                 draggable={tool.draggable || false}
-                onDragStart={(event) => tool.draggable && onDragStart(event, 'editableNote')}
+                onDragStart={(event) => tool.draggable && onDragStart(event, tool.id === 'group' ? 'Group' : 'editableNote')}
                 onDragEnd={onDragEnd}
                 className={cn(
                   'h-10 w-10 rounded-md',

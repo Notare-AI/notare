@@ -27,6 +27,8 @@ const getNodeTypeFromRequest = (requestType: string): string => {
     case 'Note':
     case 'AI Note':
       return 'editableNote';
+    case 'Group':
+      return 'group';
     default:
       return 'editableNote';
   }
@@ -63,6 +65,18 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
       style: { width: 250, ...parentNodeStyle }, // Apply parent style if available
       selected: true,
     };
+
+    // If this is a group node, set default dimensions and styling
+    if (newNode.type === 'group') {
+      newNode.extent = 'parent'; // Groups can contain children
+      newNode.style = {
+        ...newNode.style,
+        width: 300,
+        height: 200,
+        background: 'transparent',
+        border: '2px dashed hsl(var(--border))',
+      };
+    }
 
     setNodes((nds) => nds.map(n => ({...n, selected: false})).concat(newNode));
     onNodeAdded();

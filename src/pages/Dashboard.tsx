@@ -1,256 +1,161 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Settings, ChevronLeft, ChevronRight, Search, LogOut } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import CanvasSettings from '@/components/CanvasSettings';
-import FlowCanvas from '@/components/FlowCanvas';
-import { useAuth } from '@/hooks/useAuth';
-import { useSubscription } from '@/hooks/useSubscription';
-import { useCanvasActions } from '@/hooks/useCanvasActions';
-import { CanvasActionsProvider } from '@/contexts/CanvasActionsContext';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import FlowDiagram from "@/components/FlowDiagram";
+import Sidebar from "@/components/Sidebar";
+import { Button } from "@/components/ui/button";
+import { PanelLeftOpen, FileText } from "lucide-react";
+import PdfViewerSidebar from "@/components/PdfViewerSidebar";
+import PdfToggleButton from "@/components/PdfToggleButton";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+import { useHighlight } from "@/contexts/HighlightContext";
+import SettingsModal from "@/components/SettingsModal";
+import { showSuccess, showLoading, dismissToast, showError } from "@/utils/toast";
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Canvas {
   id: string;
   title: string;
-  created_at: string;
-  updated_at: string;
 }
 
-const Dashboard = () => {
-  const { canvasId } = useParams<{ canvasId: string }>();
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
-  const [canvases, setCanvases] = useState<Canvas[]>([]);
+interface NewNodeRequest {
+  type: string;
+  content: string;
+  sources?: string[];
+}
+
+const Index = () => {
+  const [selectedCanvas, setSelectedCanvas] = useState<Canvas | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [newNodeRequest, setNewNodeRequest] = useState<null | { type: string; content: string; sources?: string[] }>(null);
+  const { isPdfSidebarOpen, setIsPdfSidebarOpen } = useHighlight();
+  const [newNodeRequest, setNewNodeRequest] = useState<NewNodeRequest | null>(
+    null,
+  );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { subscriptionPlan, aiCredits } = useSubscription();
+  const [activeSettingsTab, setActiveSettingsTab] = useState('account');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { refetchProfile } = useUserProfile();
 
   useEffect(() => {
-    if (user) {
-      fetchCanvases();
-    }
-  }, [user]);
+    const verifySession = async (sessionId: string) => {
+      const toastId = showLoading('Finalizing your subscription...');
+      try {
+        const { error } = await supabase.functions.invoke('verify-checkout-session', {
+          body: { session_id: sessionId },
+        });
 
-  const fetchCanvases = async () => {
-    const { data, error } = await supabase
-      .from('canvases')
-      .select('*')
-      .eq('owner_id', user?.id)
-      .order('updated_at', { ascending: false });
+        if (error) {
+          throw error;
+        }
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch canvases",
-        variant: "destructive",
-      });
-      return;
-    }
+        await refetchProfile();
+        dismissToast(toastId);
+        showSuccess("Upgrade successful! Welcome to Pro.");
 
-    setCanvases(data || []);
-    
-    // If no canvasId in URL and there are canvases, navigate to the first one
-    if (!canvasId && data?.length) {
-      navigate(`/dashboard/${data[0].id}`);
+      } catch (error: any) {
+        dismissToast(toastId);
+        showError(error.message || 'Failed to verify your subscription. Please contact support.');
+      } finally {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('session_id');
+        setSearchParams(newParams, { replace: true });
+      }
+    };
+
+    const sessionId = searchParams.get('session_id');
+    if (sessionId) {
+      verifySession(sessionId);
     }
+  }, [searchParams, setSearchParams, refetchProfile]);
+
+  const handleAddNode = (nodeData: NewNodeRequest) => {
+    setNewNodeRequest(nodeData);
   };
 
-  const createNewCanvas = async () => {
-    if (!user) return;
-
-    const canCreate = await supabase.functions.invoke('can_create_canvas', {
-      body: { user_id: user.id }
-    });
-
-    if (!canCreate.data) {
-      toast({
-        title: "Limit Reached",
-        description: "You've reached the maximum number of canvases for your plan. Upgrade to create more.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('canvases')
-      .insert({
-        owner_id: user.id,
-        title: 'New Canvas',
-        canvas_data: { nodes: [], edges: [] }
-      })
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create new canvas",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setCanvases([data, ...canvases]);
-    navigate(`/dashboard/${data.id}`);
-    toast({
-      title: "Success",
-      description: "New canvas created",
-    });
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
-  const filteredCanvases = canvases.filter(canvas => 
-    canvas.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleNodeAdded = () => {
-    setNewNodeRequest(null);
-  };
-
-  const handleSettingsClick = () => {
+  const openSettings = (tab: 'account' | 'billing' | 'theme' = 'account') => {
+    setActiveSettingsTab(tab);
     setIsSettingsOpen(true);
   };
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <div className={cn(
-        "flex flex-col border-r border-border transition-all duration-300 ease-in-out",
-        isSidebarCollapsed ? "w-14" : "w-64"
-      )}>
-        {/* Header */}
-        <div className="flex items-center p-2 border-b border-border text-foreground flex-shrink-0 h-[57px]">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="mr-2"
-          >
-            {isSidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
-          {!isSidebarCollapsed && (
-            <h1 className="text-lg font-semibold truncate">My Canvases</h1>
-          )}
-        </div>
-
-        {/* Search */}
-        {!isSidebarCollapsed && (
-          <div className="p-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search canvases..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 text-sm"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Canvas List */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {filteredCanvases.map((canvas) => (
-            <Tooltip key={canvas.id} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={canvas.id === canvasId ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start h-8 px-2",
-                    isSidebarCollapsed && "justify-center px-0"
+    <>
+      <div className="flex h-screen w-screen bg-background text-foreground">
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          onCollapse={() => setIsSidebarCollapsed(true)}
+          selectedCanvasId={selectedCanvas?.id || null}
+          onSelectCanvas={(canvas) => setSelectedCanvas(canvas)}
+          onUpgradeClick={() => openSettings('billing')}
+        />
+        <ResizablePanelGroup direction="horizontal" className="flex-grow">
+          <ResizablePanel defaultSize={isPdfSidebarOpen ? 70 : 100}>
+            <main className="flex-grow flex flex-col relative h-full">
+              {isSidebarCollapsed && (
+                <div className="flex items-center p-2 border-b border-gray-700 text-white flex-shrink-0 h-[57px]">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsSidebarCollapsed(false)}
+                    className="mr-2 hover:bg-gray-700"
+                  >
+                    <PanelLeftOpen size={20} />
+                  </Button>
+                  {selectedCanvas && (
+                    <div className="flex items-center gap-2">
+                      <FileText size={16} />
+                      <span className="font-medium">{selectedCanvas.title}</span>
+                    </div>
                   )}
-                  onClick={() => navigate(`/dashboard/${canvas.id}`)}
-                >
-                  {isSidebarCollapsed ? (
-                    <FileIcon className="h-4 w-4" />
-                  ) : (
-                    <span className="truncate">{canvas.title}</span>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              {!isSidebarCollapsed && (
-                <TooltipContent side="right">
-                  <div className="text-sm">
-                    <p>Created: {new Date(canvas.created_at).toLocaleDateString()}</p>
-                    <p>Updated: {new Date(canvas.updated_at).toLocaleDateString()}</p>
+                </div>
+              )}
+              <div className="flex-grow">
+                {selectedCanvas ? (
+                  <FlowDiagram
+                    canvasId={selectedCanvas.id}
+                    key={selectedCanvas.id}
+                    newNodeRequest={newNodeRequest}
+                    onNodeAdded={() => setNewNodeRequest(null)}
+                    onSettingsClick={() => openSettings('account')}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    <p>Select a canvas to start or create a new one.</p>
                   </div>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          ))}
-        </div>
+                )}
+              </div>
 
-        {/* Footer */}
-        <div className="p-2 border-t border-border flex-shrink-0">
-          <div className={cn(
-            "flex items-center justify-between",
-            isSidebarCollapsed && "flex-col gap-2"
-          )}>
-            <Button
-              variant="ghost"
-              size={isSidebarCollapsed ? "icon" : "default"}
-              onClick={createNewCanvas}
-              className={cn(
-                "flex-1",
-                isSidebarCollapsed && "w-full"
-              )}
-            >
-              <Plus className="h-4 w-4" />
-              {!isSidebarCollapsed && <span className="ml-2">New Canvas</span>}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-          {!isSidebarCollapsed && (
-            <div className="mt-2 text-xs text-muted-foreground">
-              <p>Plan: {subscriptionPlan}</p>
-              <p>AI Credits: {aiCredits}</p>
-            </div>
+              <div className="fixed top-4 right-4 z-20">
+                <PdfToggleButton
+                  onClick={() => setIsPdfSidebarOpen(!isPdfSidebarOpen)}
+                  isActive={isPdfSidebarOpen}
+                />
+              </div>
+            </main>
+          </ResizablePanel>
+          {isPdfSidebarOpen && (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={30} minSize={28} maxSize={50}>
+                <PdfViewerSidebar
+                  canvasId={selectedCanvas?.id || null}
+                  onAddNode={handleAddNode}
+                />
+              </ResizablePanel>
+            </>
           )}
-        </div>
+        </ResizablePanelGroup>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {canvasId ? (
-          <CanvasActionsProvider>
-            <FlowCanvas
-              canvasId={canvasId}
-              newNodeRequest={newNodeRequest}
-              onNodeAdded={handleNodeAdded}
-              onSettingsClick={handleSettingsClick}
-            />
-          </CanvasActionsProvider>
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select or create a canvas to get started
-          </div>
-        )}
-      </div>
-
-      <CanvasSettings
-        isOpen={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-        canvasId={canvasId}
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onOpenChange={setIsSettingsOpen} 
+        activeTab={activeSettingsTab}
       />
-    </div>
+    </>
   );
 };
 
-export default Dashboard;
+export default Index;

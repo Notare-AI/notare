@@ -40,6 +40,7 @@ const nodeTypes = {
   keyPoints: KeyPointsNode,
   reference: ReferenceNode,
   image: ImageNode,
+  group: () => null, // Built-in group type, no custom component needed unless styling
 };
 
 const edgeTypes = {
@@ -75,6 +76,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded });
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions({ nodes, edges, setEditingNodeId, setEditingNodeContent });
+  const { screenToFlowPosition } = useReactFlow();
 
   // --- Effects ---
   useEffect(() => {
@@ -96,9 +98,15 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     (event: React.MouseEvent) => {
       if (activeTool === 'note') {
         addNodeOnPaneClick(event);
+      } else if (activeTool === 'group') {
+        const position = screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+        addNode('Group', '', position);
       }
     },
-    [activeTool, addNodeOnPaneClick]
+    [activeTool, addNodeOnPaneClick, addNode, screenToFlowPosition]
   );
 
   const handleDrop = useCallback((event: React.DragEvent) => {
@@ -164,7 +172,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           className={
             activeTool === 'pan'
               ? 'cursor-grab'
-              : activeTool === 'note'
+              : activeTool === 'note' || activeTool === 'group'
               ? 'cursor-crosshair'
               : activeTool === 'select'
               ? 'cursor-pointer'
