@@ -92,6 +92,7 @@ const TiptapEditor = ({
           'flex-grow overflow-y-auto p-3',
           { 'nodrag': isEditable }
         )}
+        onPointerDown={(e) => e.stopPropagation()} // Prevent node deselection on editor content click
       />
     </div>
   );
