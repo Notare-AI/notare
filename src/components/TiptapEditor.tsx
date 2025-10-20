@@ -116,7 +116,8 @@ const TiptapEditor = ({
         editor={editor}
         className={cn(
           'flex-grow overflow-y-auto p-3',
-          { 'nodrag': isEditable }
+          { 'nodrag': isEditable },
+          isEditable && 'cursor-text' // Explicitly set text cursor when editable
         )}
       />
     </div>

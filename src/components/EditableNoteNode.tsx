@@ -165,7 +165,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           ref={contentRef}
           className={cn(
             'flex-grow overflow-y-auto',
-            { 'cursor-move': !isEditing }
+            { 'cursor-move': !isEditing },
+            isEditing && 'cursor-text' // Explicitly set text cursor when editing
           )}
         >
           <TiptapEditor
