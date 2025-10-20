@@ -118,9 +118,11 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     setEditingNodeId(null);
   };
 
-  const currentEditingNodeContent = editingNodeId 
-    ? (nodes.find(n => n.id === editingNodeId)?.data.label || '') 
-    : '';
+  const getCurrentEditingNodeContent = () => {
+    if (!editingNodeId) return '';
+    const node = nodes.find(n => n.id === editingNodeId);
+    return node?.data.label || '';
+  };
 
   if (isLoading) {
     return (
@@ -180,10 +182,10 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         </ReactFlow>
       </CanvasActionsProvider>
       <CanvasToolbar activeTool={activeTool} onToolChange={setActiveTool} />
-      <NoteEditorModal
-        isOpen={!!editingNodeId}
+      <NoteEditorModal 
+        isOpen={!!editingNodeId} 
         onOpenChange={(isOpen) => !isOpen && setEditingNodeId(null)}
-        initialContent={currentEditingNodeContent}
+        initialContent={getCurrentEditingNodeContent()}
         onSave={handleSaveFromEditor}
       />
     </div>

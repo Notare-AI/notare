@@ -38,7 +38,7 @@ const NoteEditorModal = ({
       setHtmlContent(initialHtml);
       setIsLoading(false);
     }
-  }, [isOpen, initialContent]);
+  }, [isOpen, initialContent]); // Added initialContent dependency to refresh if it changes while open
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -53,7 +53,7 @@ const NoteEditorModal = ({
 
   const handleSave = () => {
     const newMarkdown = turndownService.turndown(htmlContent).trim();
-    const trimmedInitial = initialContent.trim();
+    const trimmedInitial = initialContent.trim(); // Use latest initialContent
     if (newMarkdown !== trimmedInitial && newMarkdown !== '') {
       onSave(newMarkdown);
     }
