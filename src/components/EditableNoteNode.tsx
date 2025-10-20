@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useReactFlow, NodeResizer, Handle, Position, useNodes } from '@xyflow/react';
+import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Expand } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
@@ -9,7 +9,6 @@ import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 import TiptapEditor from './TiptapEditor';
-import { useNavigate } from 'react-router-dom';
 
 interface Source {
   text: string;
@@ -38,7 +37,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
   const justSavedRef = useRef(false);
-  const navigate = useNavigate();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -78,13 +76,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   };
 
   const handleOpenInEditor = () => {
-    // Save current changes before navigating
+    // Save current changes before opening modal
     if (isEditing && label !== data.label) {
       saveChanges();
     }
     // Exit editing mode
     setIsEditing(false);
-    navigate(`/edit-note/${id}`);
+    openNodeInEditor(id, label);
   };
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
