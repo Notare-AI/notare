@@ -54,8 +54,9 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
     <div 
       className="flex items-center flex-wrap gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700"
       onMouseDown={(e) => {
-        // Only stop propagation to prevent React Flow from deselecting the node.
-        // Do NOT preventDefault, as that can interfere with Tiptap's internal focus management.
+        // Prevent default to ensure Tiptap's editor commands work correctly
+        // Stop propagation to prevent React Flow from deselecting the node
+        e.preventDefault(); 
         e.stopPropagation(); 
       }}
     >

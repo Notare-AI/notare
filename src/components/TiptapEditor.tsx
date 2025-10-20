@@ -69,9 +69,10 @@ const TiptapEditor = ({
   });
 
   useEffect(() => {
-    if (editor && !editor.isFocused) {
+    if (editor) {
       const html = showdownConverter.makeHtml(value);
-      if (html !== editor.getHTML()) {
+      // Update content if editor is not focused OR if it's empty (to ensure initial content loads)
+      if ((!editor.isFocused || editor.isEmpty) && html !== editor.getHTML()) {
         editor.commands.setContent(html, false);
       }
     }
@@ -92,7 +93,7 @@ const TiptapEditor = ({
           'flex-grow overflow-y-auto p-3',
           { 'nodrag': isEditable }
         )}
-        onPointerDown={(e) => e.stopPropagation()} // Prevent node deselection on editor content click
+        // Removed onPointerDown={(e) => e.stopPropagation()} to allow normal text selection and cursor placement
       />
     </div>
   );
