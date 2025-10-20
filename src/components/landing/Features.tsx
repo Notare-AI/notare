@@ -1,5 +1,9 @@
 import { Check, LayoutDashboard, Brain, FileText, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import visualMaps from '@/images/visual-maps.png';
+import aiInsights from '@/images/ai-insights.png';
+import pdfNoteTaking from '@/images/pdf-note-taking.png';
+import ownYourData from '@/images/own-your-data.png';
 
 const features = [
   {
@@ -12,6 +16,7 @@ const features = [
     ],
     icon: LayoutDashboard,
     color: "text-blue-500",
+    image: visualMaps,
   },
   {
     title: "AI Note Taking – Extract Insights Without the Effort",
@@ -23,6 +28,7 @@ const features = [
     ],
     icon: Brain,
     color: "text-purple-500",
+    image: aiInsights,
   },
   {
     title: "Seamless PDF Note Taking – Annotate and Connect Directly",
@@ -34,6 +40,7 @@ const features = [
     ],
     icon: FileText,
     color: "text-green-500",
+    image: pdfNoteTaking,
   },
   {
     title: "Own Your Data – Download and Export with Ease",
@@ -45,6 +52,7 @@ const features = [
     ],
     icon: Download,
     color: "text-orange-500",
+    image: ownYourData,
   },
 ];
 
@@ -79,10 +87,12 @@ const Features = () => {
             </ul>
           </div>
           <div className="hidden md:block">
-            {/* Placeholder for future image or graphic */}
-            <div className="h-full w-full rounded-xl bg-muted/50 flex items-center justify-center">
-              <p className="text-muted-foreground">Feature Visual</p>
-            </div>
+            <img 
+              src={feature.image} 
+              alt={`${feature.title} visual`} 
+              className="h-full w-full rounded-xl object-cover shadow-md"
+              loading="lazy"
+            />
           </div>
         </div>
       ))}
