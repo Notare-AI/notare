@@ -92,7 +92,10 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
             <Heading className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent onPointerDownOutside={(e) => e.preventDefault()}>
+        <DropdownMenuContent 
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           <DropdownMenuItem
             onClick={() => editor.chain().focus().setParagraph().run()}
             disabled={!editor.can().setParagraph()}
