@@ -37,11 +37,12 @@ const NoteEditorModal = ({
     }
   }, [isOpen, initialContent]);
 
-  useEffect(() => {
-    if (!isOpen && content !== initialContent) {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && content !== initialContent) {
       onSave(content);
     }
-  }, [isOpen, content, initialContent, onSave]);
+    onOpenChange(newOpen);
+  };
 
   const handleSave = () => {
     onSave(content);
@@ -50,7 +51,7 @@ const NoteEditorModal = ({
 
   if (isLoading) {
     return (
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-3xl w-full h-[90vh] flex flex-col bg-muted p-0">
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -64,7 +65,7 @@ const NoteEditorModal = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-3xl w-full h-[90vh] flex flex-col bg-muted p-0">
         <DialogHeader className="p-6 border-b bg-background rounded-t-lg">
           <DialogTitle>Edit Note</DialogTitle>
