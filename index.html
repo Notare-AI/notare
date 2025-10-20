@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notare</title>
+    <link rel="icon" type="image/png" href="/src/images/Notare logo.png" />
+    <script>
+      // This script is placed in the head to prevent a flash of unstyled content (FOUC).
+      // It defaults to a light theme. The React app will manage theme switching for authenticated sections.
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
