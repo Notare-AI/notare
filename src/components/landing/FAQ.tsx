@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     question: "Is my data secure and private?",
-    answer: "Yes, all your notes are stored securely with end-to-end encryption. You control access, and with our export features, you can always move your data offline for added peace of mind."
+    answer: "Yes, you control access, and with our export features, you can always move your data offline for added peace of mind."
   },
   {
     question: "How does Notare compare to other note-taking apps in terms of data ownership?",
