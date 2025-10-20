@@ -9,7 +9,7 @@ interface UseCanvasDragAndDropProps {
 
 export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps) => {
   const { screenToFlowPosition } = useReactFlow();
-  const [type, setType] = useDnD();
+  const [contextType, setType] = useDnD();
   const [isDragOver, setIsDragOver] = useState(false);
   const dragLeaveTimer = useRef<number | null>(null);
   const { addNode } = useNodeCreation({ setNodes: () => {}, onNodeAdded }); // setNodes will be passed from FlowCanvas
@@ -23,10 +23,10 @@ export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps)
       dragLeaveTimer.current = null;
     }
     
-    if (type && !isDragOver) {
+    if ((contextType || event.dataTransfer.types.includes('text/plain')) && !isDragOver) {
       setIsDragOver(true);
     }
-  }, [type, isDragOver]);
+  }, [contextType, isDragOver]);
 
   const onDrop = useCallback(
     (event: React.DragEvent, setNodes: (nodes: Node[] | ((nds: Node[]) => Node[])) => void) => {
@@ -36,6 +36,14 @@ export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps)
       if (dragLeaveTimer.current) {
         clearTimeout(dragLeaveTimer.current);
         dragLeaveTimer.current = null;
+      }
+
+      // Read type from dataTransfer (reliable)
+      let type = event.dataTransfer.getData('text/plain');
+      
+      // Fallback to context if dataTransfer is empty
+      if (!type && contextType) {
+        type = contextType;
       }
 
       if (!type) {
@@ -51,7 +59,7 @@ export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps)
       addNode(type, '', position);
       setType(null); // Reset DnD context type after drop
     },
-    [screenToFlowPosition, type, addNode, setType]
+    [screenToFlowPosition, contextType, addNode, setType]
   );
 
   const onDragLeave = useCallback(() => {

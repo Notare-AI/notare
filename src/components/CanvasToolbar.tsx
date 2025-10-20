@@ -25,9 +25,8 @@ const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
   const [, setType] = useDnD();
 
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
-    console.log('Drag started with type:', nodeType); // Debug log
     setType(nodeType);
-    event.dataTransfer.setData('text/plain', nodeType);
+    event.dataTransfer.setData('text/plain', nodeType); // Set dataTransfer for reliable reading on drop
     event.dataTransfer.effectAllowed = 'move';
     
     // Add visual feedback to the drag image
@@ -36,7 +35,6 @@ const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
   };
 
   const onDragEnd = (event: React.DragEvent) => {
-    console.log('Drag ended'); // Debug log
     setType(null);
     
     // Reset visual feedback
