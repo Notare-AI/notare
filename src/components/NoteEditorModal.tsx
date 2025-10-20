@@ -24,10 +24,16 @@ const NoteEditorModal = ({
   onSave,
 }: NoteEditorModalProps) => {
   const [content, setContent] = useState(initialContent);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setContent(initialContent);
+      setIsLoading(true);
+      // Small delay to ensure the editor is ready
+      setTimeout(() => {
+        setContent(initialContent);
+        setIsLoading(false);
+      }, 100);
     }
   }, [isOpen, initialContent]);
 
@@ -35,6 +41,21 @@ const NoteEditorModal = ({
     onSave(content);
     onOpenChange(false);
   };
+
+  if (isLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-3xl w-full h-[90vh] flex flex-col bg-muted p-0">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p>Loading content...</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

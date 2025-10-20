@@ -49,6 +49,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     }
   }, [selected, isEditing]);
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (selected && !isEditing) {
+      e.stopPropagation();
+      setIsEditing(true);
+    }
+  };
+
   const handleBlur = () => {
     setIsEditing(false);
     if (label !== data.label) {
@@ -60,12 +67,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           return n;
         })
       );
-    }
-  };
-
-  const handleDoubleClick = () => {
-    if (selected) {
-      setIsEditing(true);
     }
   };
 
@@ -132,7 +133,10 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           <div className="flex items-center gap-1">
             {data.sources && data.sources.length > 0 && (
               <button
-                onClick={handleViewSourcesClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewSourcesClick();
+                }}
                 className={cn(
                   "p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground",
                   isActive && "bg-blue-500/10 text-blue-600 dark:text-blue-300"
@@ -143,7 +147,10 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
               </button>
             )}
             <button
-              onClick={() => openNodeInEditor(id, data.label)}
+              onClick={(e) => {
+                e.stopPropagation();
+                openNodeInEditor(id, data.label);
+              }}
               className="p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground"
               title="Open in editor"
             >
@@ -165,9 +172,9 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             value={label}
             onChange={setLabel}
             onBlur={handleBlur}
-            isEditable={isEditing}
             placeholder={!label ? 'Double-click to edit...' : ''}
             className="w-full h-full flex flex-col"
+            isEditable={isEditing}
           />
         </div>
       </div>

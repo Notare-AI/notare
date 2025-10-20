@@ -8,7 +8,7 @@ import { Color } from '@tiptap/extension-color';
 import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface TiptapEditorProps {
@@ -31,6 +31,9 @@ const TiptapEditor = ({
   className,
   isEditable = true,
 }: TiptapEditorProps) => {
+  const editorRef = useRef<any>(null);
+  const lastValueRef = useRef<string>('');
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -55,6 +58,17 @@ const TiptapEditor = ({
         class:
           'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
       },
+      handleDOMEvents: {
+        // Prevent React Flow from handling mouse events on the editor
+        mousedown: (view, event) => {
+          event.stopPropagation();
+          return false;
+        },
+        click: (view, event) => {
+          event.stopPropagation();
+          return false;
+        },
+      },
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
@@ -69,11 +83,18 @@ const TiptapEditor = ({
   });
 
   useEffect(() => {
-    if (editor) {
-      const html = showdownConverter.makeHtml(value);
-      // Update content if editor is not focused OR if it's empty (to ensure initial content loads)
-      if ((!editor.isFocused || editor.isEmpty) && html !== editor.getHTML()) {
-        editor.commands.setContent(html, false);
+    if (editor && value !== lastValueRef.current) {
+      lastValueRef.current = value;
+      try {
+        const html = showdownConverter.makeHtml(value);
+        // Only update if the content has actually changed to avoid loops
+        if (html !== editor.getHTML()) {
+          editor.commands.setContent(html, false, { preserveWhitespace: 'full' });
+        }
+      } catch (error) {
+        console.error('Error converting markdown to HTML:', error);
+        // Fallback: set content as plain text
+        editor.commands.setContent(value, false);
       }
     }
   }, [value, editor]);
@@ -84,6 +105,10 @@ const TiptapEditor = ({
     }
   }, [isEditable, editor]);
 
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
+
   return (
     <div className={className}>
       {isEditable && <TiptapToolbar editor={editor} />}
@@ -93,7 +118,6 @@ const TiptapEditor = ({
           'flex-grow overflow-y-auto p-3',
           { 'nodrag': isEditable }
         )}
-        // Removed onPointerDown={(e) => e.stopPropagation()} to allow normal text selection and cursor placement
       />
     </div>
   );
