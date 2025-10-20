@@ -8,13 +8,13 @@ const testimonials = [
   },
   {
     quote: "The visual maps make project planning a breeze. Best AI note taking tool I've used.",
-    author: "Mike, Professional",
-    avatar: '@/images/testimonial-mike.png', // Assumed name; update if different
+    author: "Mike, Developer",
+    
   },
   {
-    quote: "Privacy-focused and powerful—perfect for research without data worries.",
+    quote: "Privacy-focused and perfect for research. I love that I can take my data & notes anywhere.",
     author: "Dr. Elena, Researcher",
-    avatar: '@/images/testimonial-elena.png', // Assumed name; update if different
+   
   },
 ];
 
