@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import HeroPreviewImage from '@/images/hero-preview.png';
 
 const Hero = () => {
   return (
@@ -21,11 +20,6 @@ const Hero = () => {
             <Link to="/pricing">View Pricing</Link>
           </Button>
         </div>
-        <img
-          src={HeroPreviewImage}
-          alt="Notare AI note taking app interface showing visual knowledge maps, PDF integration, and AI summaries for efficient note organization"
-          className="mt-12 rounded-lg shadow-2xl border border-border/20 max-w-full"
-        />
       </div>
     </section>
   );

@@ -1,8 +1,4 @@
 import { Check } from 'lucide-react';
-import Feature1Image from '@/images/feature-1.png'; // Existing: AI insights
-import Feature2Image from '@/images/feature-2.png'; // Existing: PDF canvas
-import VisualMapsImage from '@/images/visual-maps-placeholder.png'; // Placeholder for new image
-import PrivacyImage from '@/images/privacy-placeholder.png'; // Placeholder for new image
 
 const Features = () => {
   return (
@@ -13,13 +9,6 @@ const Features = () => {
       
       {/* Feature 1: Visual Knowledge Maps */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div>
-          <img
-            src={VisualMapsImage}
-            alt="Visual knowledge maps in Notare note taking app, connecting ideas on an infinite canvas for better organization"
-            className="rounded-lg shadow-xl border border-border/20"
-          />
-        </div>
         <div>
           <h3 className="text-2xl font-bold mb-4">Build Visual Knowledge Maps – Say Goodbye to Linear Notes</h3>
           <p className="text-lg text-muted-foreground mb-6">
@@ -35,13 +24,6 @@ const Features = () => {
 
       {/* Feature 2: AI-Powered Insights */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="md:order-2">
-          <img
-            src={Feature1Image}
-            alt="AI-powered summaries and key points extraction in Notare, the best AI note taking tool for PDFs and documents"
-            className="rounded-lg shadow-xl border border-border/20"
-          />
-        </div>
         <div className="md:order-1">
           <h3 className="text-2xl font-bold mb-4">AI Note Taking – Extract Insights Without the Effort</h3>
           <p className="text-lg text-muted-foreground mb-6">
@@ -58,13 +40,6 @@ const Features = () => {
       {/* Feature 3: PDF Integration */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
-          <img
-            src={Feature2Image}
-            alt="PDF annotation and note taking in Notare app, with highlights and visual connections for research"
-            className="rounded-lg shadow-xl border border-border/20"
-          />
-        </div>
-        <div>
           <h3 className="text-2xl font-bold mb-4">Seamless PDF Note Taking – Annotate and Connect Directly</h3>
           <p className="text-lg text-muted-foreground mb-6">
             PDFs are hard to navigate and extract from. Notare lets you upload, highlight, and link PDFs to your notes on the same canvas.
@@ -79,11 +54,6 @@ const Features = () => {
 
       {/* Feature 4: Privacy and Sync */}
       <div className="text-center max-w-2xl mx-auto">
-        <img
-          src={PrivacyImage}
-          alt="Privacy-focused note taking in Notare with secure sync across devices and no data training"
-          className="rounded-lg shadow-xl border border-border/20 mb-6 mx-auto max-w-md"
-        />
         <h3 className="text-2xl font-bold mb-4">Privacy-Focused Note Taking – Your Data Stays Yours</h3>
         <p className="text-lg text-muted-foreground mb-6">
           Worried about AI training on your notes? Notare guarantees no data training, with secure sync across all your devices.
