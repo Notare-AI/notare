@@ -165,6 +165,58 @@
   .tiptap h3 {
     @apply mt-4 mb-2;
   }
+
+  /* Task List Styles */
+  .tiptap ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+  }
+
+  .tiptap ul[data-type="taskList"] li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tiptap ul[data-type="taskList"] li > label {
+    flex: 0 0 auto;
+    margin-right: 0.5rem;
+    user-select: none;
+  }
+
+  .tiptap ul[data-type="taskList"] li > div {
+    flex: 1 1 auto;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"] {
+    appearance: none;
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"]:checked {
+    background-color: hsl(var(--primary));
+    border-color: hsl(var(--primary));
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: hsl(var(--primary-foreground));
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+  }
 }
 
 /* Custom override for Supabase Auth UI to show Microsoft icon and text */
