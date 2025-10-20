@@ -36,15 +36,14 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
-  const justSavedRef = useRef(false);
+  const saveTimeoutRef = useRef<number | null>(null);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
-    if (!isEditing && !justSavedRef.current) {
+    if (!isEditing) {
       setLabel(data.label || '');
     }
-    justSavedRef.current = false;
   }, [data.label, isEditing]);
 
   useEffect(() => {
@@ -56,7 +55,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
 
   const saveChanges = () => {
     if (label !== data.label) {
-      justSavedRef.current = true;
       setNodes((nodes) =>
         nodes.map((n) => {
           if (n.id === id) {
@@ -66,6 +64,17 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         })
       );
     }
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+  };
+
+  const debouncedSave = () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = window.setTimeout(saveChanges, 1000); // Save every 1 second during editing
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -81,6 +90,11 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     }
     setIsEditing(false);
     openNodeInEditor(id, label);
+  };
+
+  const handleContentChange = (newContent: string) => {
+    setLabel(newContent);
+    debouncedSave(); // Trigger debounced save on change
   };
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
@@ -182,7 +196,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         >
           <TiptapEditor
             value={label}
-            onChange={setLabel}
+            onChange={handleContentChange}
             placeholder={!label ? 'Double-click to edit...' : ''}
             className="w-full h-full flex flex-col"
             isEditable={isEditing}
