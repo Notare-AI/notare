@@ -16,6 +16,7 @@ import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
 import { Analytics } from "@vercel/analytics/react";
 import AuthConfirmPage from "./pages/AuthConfirm";
+import NoteEditor from "./pages/NoteEditor"; // New import
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                   </AuthLayout>
                 }
               />
+              <Route path="/edit-note/:nodeId" element={<AuthLayout><NoteEditor /></AuthLayout>} /> {/* New route */}
               <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
               <Route path="/blog" element={<LandingLayout><BlogComingSoon /></LandingLayout>} />
               <Route path="/blog/:slug" element={<LandingLayout><BlogComingSoon /></LandingLayout>} />
