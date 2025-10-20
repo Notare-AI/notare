@@ -64,10 +64,12 @@ const getNodeTypeFromRequest = (requestType: string): string => {
     case 'TLDR':
       return 'tldr';
     case 'Key Points':
+    case 'Key Points (AI)': // Handle both for robustness
       return 'keyPoints';
     case 'Reference':
       return 'reference';
     case 'Note':
+    case 'AI Note': // Handle both for robustness
       return 'editableNote';
     default:
       return 'editableNote';
@@ -88,7 +90,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const dragLeaveTimer = useRef<number | null>(null);
   const clipboardRef = useRef<Node[]>([]);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [editingNode, setEditingNode] = useState<{ id: string; content: string } | null>(null);
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
 
   // --- UNDO/REDO STATE ---
   const history = useRef<{ nodes: Node[]; edges: Edge[] }[]>([{ nodes: [], edges: [] }]);
@@ -518,23 +520,33 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     showSuccess("Branch downloaded successfully!");
   }, [nodes, edges]);
 
-  const openNodeInEditor = useCallback((nodeId: string, content: string) => {
-    setEditingNode({ id: nodeId, content });
-  }, []);
+  const openNodeInEditor = useCallback((nodeId: string) => {
+    // Find the latest content from the current nodes state
+    const nodeToEdit = nodes.find(n => n.id === nodeId);
+    if (nodeToEdit && typeof nodeToEdit.data.label === 'string') {
+      setEditingNodeId(nodeId);
+    } else {
+      showError("Could not find node content to edit.");
+    }
+  }, [nodes]);
 
   const handleSaveFromEditor = (newContent: string) => {
-    if (!editingNode) return;
+    if (!editingNodeId) return;
 
     setNodes((nodes) =>
       nodes.map((n) => {
-        if (n.id === editingNode.id) {
+        if (n.id === editingNodeId) {
           return { ...n, data: { ...n.data, label: newContent } };
         }
         return n;
       })
     );
-    setEditingNode(null);
+    setEditingNodeId(null);
   };
+
+  const currentEditingNodeContent = editingNodeId 
+    ? (nodes.find(n => n.id === editingNodeId)?.data.label || '') 
+    : '';
 
   if (isLoading) {
     return (
@@ -621,9 +633,9 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
       </div>
       <CanvasToolbar activeTool={activeTool} onToolChange={setActiveTool} />
       <NoteEditorModal
-        isOpen={!!editingNode}
-        onOpenChange={(isOpen) => !isOpen && setEditingNode(null)}
-        initialContent={editingNode?.content || ''}
+        isOpen={!!editingNodeId}
+        onOpenChange={(isOpen) => !isOpen && setEditingNodeId(null)}
+        initialContent={currentEditingNodeContent}
         onSave={handleSaveFromEditor}
       />
     </div>
