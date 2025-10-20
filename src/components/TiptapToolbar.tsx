@@ -75,7 +75,10 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
   ];
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700">
+    <div 
+      className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700"
+      onMouseDown={(e) => e.preventDefault()}
+    >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
