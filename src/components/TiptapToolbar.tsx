@@ -51,6 +51,25 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
 
   const highlightColors = ['#facc15', '#a3e635', '#67e8f9', '#c4b5fd', '#f9a8d4'];
 
+  const insertTaskItem = () => {
+    if (editor.isActive('taskList')) {
+      // If inside a task list, insert a new task item
+      editor.chain().focus().insertContent({
+        type: 'taskItem',
+        content: [{ type: 'paragraph' }]
+      }).run();
+    } else {
+      // If not in a task list, create a new one with one item
+      editor.chain().focus().insertContent({
+        type: 'taskList',
+        content: [{
+          type: 'taskItem',
+          content: [{ type: 'paragraph' }]
+        }]
+      }).run();
+    }
+  };
+
   return (
     <div 
       className="flex items-center flex-wrap gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700"
@@ -64,20 +83,22 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         size="icon"
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
-        className="h-8 w-8"
+        className="h-10 w-10"  // Increased size for better touch targets
         title="Undo"
+        aria-label="Undo"
       >
-        <Undo className="h-4 w-4" />
+        <Undo className="h-5 w-5" />  // Slightly larger icons
       </Button>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
-        className="h-8 w-8"
+        className="h-10 w-10"
         title="Redo"
+        aria-label="Redo"
       >
-        <Redo className="h-4 w-4" />
+        <Redo className="h-5 w-5" />
       </Button>
 
       <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
@@ -88,12 +109,13 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
             variant="ghost"
             size="icon"
             className={cn(
-              'h-8 w-8',
+              'h-10 w-10',
               editor.isActive('heading') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
             )}
             title="Headings"
+            aria-label="Headings"
           >
-            <Heading className="h-4 w-4" />
+            <Heading className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
@@ -121,8 +143,8 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8" title="Text Align">
-            <AlignLeft className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-10 w-10" title="Text Align" aria-label="Text Align">
+            <AlignLeft className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
@@ -150,28 +172,31 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={cn('h-8 w-8', editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        className={cn('h-10 w-10', editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Bold"
+        aria-label="Bold"
       >
-        <Bold className="h-4 w-4" />
+        <Bold className="h-5 w-5" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={cn('h-8 w-8', editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        className={cn('h-10 w-10', editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Italic"
+        aria-label="Italic"
       >
-        <Italic className="h-4 w-4" />
+        <Italic className="h-5 w-5" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={cn('h-8 w-8', editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        className={cn('h-10 w-10', editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Strikethrough"
+        aria-label="Strikethrough"
       >
-        <Strikethrough className="h-4 w-4" />
+        <Strikethrough className="h-5 w-5" />
       </Button>
       
       <Popover>
@@ -179,10 +204,11 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
           <Button
             variant="ghost"
             size="icon"
-            className={cn('h-8 w-8', editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+            className={cn('h-10 w-10', editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
             title="Highlight"
+            aria-label="Highlight"
           >
-            <Highlighter className="h-4 w-4" />
+            <Highlighter className="h-5 w-5" />
           </Button>
         </PopoverTrigger>
         <PopoverContent 
@@ -198,6 +224,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
               onClick={() => editor.chain().focus().unsetHighlight().run()}
               className="h-7 w-7 rounded-full border-2 border-muted bg-background flex items-center justify-center text-muted-foreground hover:border-foreground hover:text-foreground transition-all"
               title="Remove highlight"
+              aria-label="Remove highlight"
             >
               <Ban size={14} />
             </Button>
@@ -210,6 +237,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
                 className="w-7 h-7 rounded-full border-2 border-transparent hover:border-foreground transition-all p-0"
                 style={{ backgroundColor: color }}
                 title={`Highlight ${color}`}
+                aria-label={`Highlight ${color}`}
               />
             ))}
           </div>
@@ -220,49 +248,41 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={cn('h-8 w-8', editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        className={cn('h-10 w-10', editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Bullet List"
+        aria-label="Bullet List"
       >
-        <List className="h-4 w-4" />
+        <List className="h-5 w-5" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={cn('h-8 w-8', editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        className={cn('h-10 w-10', editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Ordered List"
+        aria-label="Ordered List"
       >
-        <ListOrdered className="h-4 w-4" />
+        <ListOrdered className="h-5 w-5" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => {
-          if (editor.isActive('taskList')) {
-            editor.chain().focus().toggleTaskList().run();
-          } else {
-            editor.chain().focus().insertContent({
-              type: 'taskList',
-              content: [{
-                type: 'taskItem',
-                content: [{ type: 'paragraph' }]
-              }]
-            }).run();
-          }
-        }}
-        className={cn('h-8 w-8', editor.isActive('taskList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
-        title="Task List"
+        onClick={insertTaskItem}
+        className={cn('h-10 w-10', editor.isActive('taskList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Insert Task"
+        aria-label="Insert Task"
       >
-        <CheckSquare className="h-4 w-4" />
+        <CheckSquare className="h-5 w-5" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={cn('h-8 w-8', editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        className={cn('h-10 w-10', editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Blockquote"
+        aria-label="Blockquote"
       >
-        <Quote className="h-4 w-4" />
+        <Quote className="h-5 w-5" />
       </Button>
     </div>
   );
