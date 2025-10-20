@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import heroImage from '@/images/hero-notare-app.png'; // Assumed name; update if different
 
 const Hero = () => {
   return (
@@ -20,14 +19,6 @@ const Hero = () => {
           <Button asChild size="lg" variant="outline">
             <Link to="/pricing">View Pricing</Link>
           </Button>
-        </div>
-        <div className="max-w-4xl mx-auto">
-          <img 
-            src={heroImage} 
-            alt="Notare app interface showing visual note mapping and AI features" 
-            className="w-full h-auto rounded-xl shadow-xl object-cover"
-            loading="lazy"
-          />
         </div>
       </div>
     </section>
