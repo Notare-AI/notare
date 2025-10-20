@@ -58,8 +58,8 @@ const TiptapEditor = ({
         class:
           'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
       },
-      handleDOMEvents: {
-        // Prevent React Flow from handling mouse events on the editor
+      handleDOMEvents: isEditable ? {
+        // Only apply these when editing to prevent interference with selection
         mousedown: (view, event) => {
           event.stopPropagation();
           return false;
@@ -68,7 +68,7 @@ const TiptapEditor = ({
           event.stopPropagation();
           return false;
         },
-      },
+      } : {}, // Empty when not editable, allowing events to propagate for selection
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
