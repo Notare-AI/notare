@@ -1,4 +1,52 @@
-import { Check } from 'lucide-react';
+import { Check, LayoutDashboard, Brain, FileText, Shield } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const features = [
+  {
+    title: "Build Visual Knowledge Maps – Say Goodbye to Linear Notes",
+    description: "Tired of notes that don't connect? Notare's infinite canvas lets you create visual maps of your ideas, making complex topics easy to understand and remember.",
+    points: [
+      "Drag-and-drop nodes for intuitive organization",
+      "Connect related ideas with animated edges",
+      "Perfect for mind mapping, brainstorming, and project planning"
+    ],
+    icon: LayoutDashboard,
+    color: "text-blue-500",
+  },
+  {
+    title: "AI Note Taking – Extract Insights Without the Effort",
+    description: "Manual note-taking from long documents is time-consuming. Notare's AI generates summaries, key points, and references instantly, saving you hours.",
+    points: [
+      "One-click TLDR summaries and key point extraction",
+      "Automatic references in APA, MLA, or custom formats",
+      "500+ AI credits on premium plans for unlimited productivity"
+    ],
+    icon: Brain,
+    color: "text-purple-500",
+  },
+  {
+    title: "Seamless PDF Note Taking – Annotate and Connect Directly",
+    description: "PDFs are hard to navigate and extract from. Notare lets you upload, highlight, and link PDFs to your notes on the same canvas.",
+    points: [
+      "Upload multiple PDFs (up to 50 on Pro)",
+      "Highlight text and create linked notes instantly",
+      "Sync across devices with 5GB storage on Pro"
+    ],
+    icon: FileText,
+    color: "text-green-500",
+  },
+  {
+    title: "Privacy-Focused Note Taking – Your Data Stays Yours",
+    description: "Worried about AI training on your notes? Notare guarantees no data training, with secure sync across all your devices.",
+    points: [
+      "End-to-end encryption and privacy by design",
+      "Real-time sync on mobile, web, and desktop",
+      "Export notes as Markdown anytime"
+    ],
+    icon: Shield,
+    color: "text-orange-500",
+  },
+];
 
 const Features = () => {
   return (
@@ -7,63 +55,37 @@ const Features = () => {
         Why Notare is the Best Note Taking App for Students, Professionals, and Researchers
       </h2>
       
-      {/* Feature 1: Visual Knowledge Maps */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div>
-          <h3 className="text-2xl font-bold mb-4">Build Visual Knowledge Maps – Say Goodbye to Linear Notes</h3>
-          <p className="text-lg text-muted-foreground mb-6">
-            Tired of notes that don't connect? Notare's infinite canvas lets you create visual maps of your ideas, making complex topics easy to understand and remember.
-          </p>
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Drag-and-drop nodes for intuitive organization</li>
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Connect related ideas with animated edges</li>
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Perfect for mind mapping, brainstorming, and project planning</li>
-          </ul>
+      {features.map((feature, index) => (
+        <div 
+          key={index} 
+          className={cn(
+            "grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center",
+            index % 2 === 1 && "md:flex-row-reverse"
+          )}
+        >
+          <div className="bg-background p-8 rounded-xl shadow-lg border border-border/20 hover:shadow-xl transition-shadow">
+            <div className="flex items-center justify-center mb-6">
+              <feature.icon className={cn("h-12 w-12", feature.color)} />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-center md:text-left">{feature.title}</h3>
+            <p className="text-lg text-muted-foreground mb-6 text-center md:text-left">{feature.description}</p>
+            <ul className="space-y-3">
+              {feature.points.map((point, i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <Check className={cn("h-5 w-5 flex-shrink-0", feature.color)} />
+                  <span className="text-foreground">{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="hidden md:block">
+            {/* Placeholder for future image or graphic */}
+            <div className="h-full w-full rounded-xl bg-muted/50 flex items-center justify-center">
+              <p className="text-muted-foreground">Feature Visual</p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Feature 2: AI-Powered Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="md:order-1">
-          <h3 className="text-2xl font-bold mb-4">AI Note Taking – Extract Insights Without the Effort</h3>
-          <p className="text-lg text-muted-foreground mb-6">
-            Manual note-taking from long documents is time-consuming. Notare's AI generates summaries, key points, and references instantly, saving you hours.
-          </p>
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> One-click TLDR summaries and key point extraction</li>
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Automatic references in APA, MLA, or custom formats</li>
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> 500+ AI credits on premium plans for unlimited productivity</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Feature 3: PDF Integration */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div>
-          <h3 className="text-2xl font-bold mb-4">Seamless PDF Note Taking – Annotate and Connect Directly</h3>
-          <p className="text-lg text-muted-foreground mb-6">
-            PDFs are hard to navigate and extract from. Notare lets you upload, highlight, and link PDFs to your notes on the same canvas.
-          </p>
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Upload multiple PDFs (up to 50 on Pro)</li>
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Highlight text and create linked notes instantly</li>
-            <li className="flex items-center gap-2"><Check className="text-green-500" /> Sync across devices with 5GB storage on Pro</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Feature 4: Privacy and Sync */}
-      <div className="text-center max-w-2xl mx-auto">
-        <h3 className="text-2xl font-bold mb-4">Privacy-Focused Note Taking – Your Data Stays Yours</h3>
-        <p className="text-lg text-muted-foreground mb-6">
-          Worried about AI training on your notes? Notare guarantees no data training, with secure sync across all your devices.
-        </p>
-        <ul className="space-y-2 text-left max-w-md mx-auto">
-          <li className="flex items-center gap-2"><Check className="text-green-500" /> End-to-end encryption and privacy by design</li>
-          <li className="flex items-center gap-2"><Check className="text-green-500" /> Real-time sync on mobile, web, and desktop</li>
-          <li className="flex items-center gap-2"><Check className="text-green-500" /> Export notes as Markdown anytime</li>
-        </ul>
-      </div>
+      ))}
     </section>
   );
 };
