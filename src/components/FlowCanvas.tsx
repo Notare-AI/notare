@@ -104,17 +104,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
-  const handleLiveUpdate = useCallback((nodeId: string, newContent: string) => {
-    setNodes((nodes) =>
-      nodes.map((n) => {
-        if (n.id === nodeId) {
-          return { ...n, data: { ...n.data, label: newContent } };
-        }
-        return n;
-      })
-    );
-  }, [setNodes]);
-
   const handleSaveFromEditor = (newContent: string) => {
     if (!editingNodeId) return;
 
@@ -194,10 +183,8 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
       <NoteEditorModal
         isOpen={!!editingNodeId}
         onOpenChange={(isOpen) => !isOpen && setEditingNodeId(null)}
-        currentContent={currentEditingNodeContent}
-        onLiveUpdate={(newContent) => handleLiveUpdate(editingNodeId!, newContent)}
+        initialContent={currentEditingNodeContent}
         onSave={handleSaveFromEditor}
-        nodeId={editingNodeId!}
       />
     </div>
   );

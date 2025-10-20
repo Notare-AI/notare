@@ -13,21 +13,17 @@ import TiptapEditor from './TiptapEditor';
 interface NoteEditorModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  currentContent: string;
-  onLiveUpdate: (newContent: string) => void;
+  initialContent: string;
   onSave: (newContent: string) => void;
-  nodeId: string;
 }
 
 const NoteEditorModal = ({
   isOpen,
   onOpenChange,
-  currentContent,
-  onLiveUpdate,
+  initialContent,
   onSave,
-  nodeId,
 }: NoteEditorModalProps) => {
-  const [localContent, setLocalContent] = useState(currentContent);
+  const [content, setContent] = useState(initialContent);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -35,29 +31,17 @@ const NoteEditorModal = ({
       setIsLoading(true);
       // Small delay to ensure the editor is ready
       setTimeout(() => {
-        setLocalContent(currentContent);
+        setContent(initialContent);
         setIsLoading(false);
       }, 100);
     }
-  }, [isOpen, currentContent]);
-
-  useEffect(() => {
-    // Sync external changes to local state while modal is open
-    if (isOpen && currentContent !== localContent) {
-      setLocalContent(currentContent);
-    }
-  }, [currentContent, isOpen]);
-
-  const handleContentChange = (newContent: string) => {
-    setLocalContent(newContent);
-    onLiveUpdate(newContent);
-  };
+  }, [isOpen, initialContent]);
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      const trimmedContent = localContent.trim();
-      const trimmedCurrent = currentContent.trim();
-      if (trimmedContent !== trimmedCurrent && trimmedContent !== '') {
+      const trimmedContent = content.trim();
+      const trimmedInitial = initialContent.trim();
+      if (trimmedContent !== trimmedInitial && trimmedContent !== '') {
         onSave(trimmedContent);
       }
     }
@@ -65,8 +49,8 @@ const NoteEditorModal = ({
   };
 
   const handleSave = () => {
-    const trimmedContent = localContent.trim();
-    if (trimmedContent !== currentContent.trim() && trimmedContent !== '') {
+    const trimmedContent = content.trim();
+    if (trimmedContent !== initialContent.trim() && trimmedContent !== '') {
       onSave(trimmedContent);
     }
     onOpenChange(false);
@@ -99,8 +83,8 @@ const NoteEditorModal = ({
         <div className="flex-grow p-4 md:p-8 overflow-y-auto">
           <div className="bg-background shadow-sm rounded-md w-full h-full p-6 md:p-10">
             <TiptapEditor
-              value={localContent}
-              onChange={handleContentChange}
+              value={content}
+              onChange={setContent}
               className="w-full h-full flex flex-col"
               placeholder="Start writing..."
             />
