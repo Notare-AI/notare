@@ -446,17 +446,17 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   }, [highlightRegex]);
 
   return (
-    <div className="h-full w-full bg-white dark:bg-[#212121] text-black dark:text-white">
+    <div className="h-full w-full bg-background text-foreground">
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           {pdfs.length > 0 && activePdf ? (
             <Select onValueChange={(pdfId) => setActivePdf(pdfs.find(p => p.id === pdfId) || null)} value={activePdf.id}>
-              <SelectTrigger className="w-[250px] bg-gray-100 dark:bg-[#363636] border-gray-300 dark:border-gray-500 truncate">
+              <SelectTrigger className="w-[250px] truncate">
                 <SelectValue placeholder="Select a PDF" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-[#363636] text-black dark:text-white border-gray-200 dark:border-gray-500">
+              <SelectContent>
                 {pdfs.map(pdf => (
-                  <SelectItem key={pdf.id} value={pdf.id} className="hover:!bg-gray-100 dark:hover:!bg-[#424242] focus:!bg-gray-100 dark:focus:!bg-[#424242]">
+                  <SelectItem key={pdf.id} value={pdf.id}>
                     {pdf.file_name}
                   </SelectItem>
                 ))}
@@ -467,11 +467,11 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
           )}
           <div className="flex items-center gap-1">
             {canvasId && (
-              <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)} className="hover:bg-gray-100 dark:hover:bg-gray-700" title="Upload new PDF">
+              <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)} title="Upload new PDF">
                 <FilePlus2 size={20} />
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={() => setIsPdfSidebarOpen(false)} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Button variant="ghost" size="icon" onClick={() => setIsPdfSidebarOpen(false)}>
               <X size={20} />
             </Button>
           </div>
@@ -484,7 +484,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
             <div className="flex flex-col h-full">
               {selection && !isGenerating && (
                 <div style={{ position: 'absolute', top: selection.top, left: selection.left, transform: 'translateX(-50%)', zIndex: 10 }}>
-                  <Button onClick={handleCreateNoteFromSelection} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+                  <Button onClick={handleCreateNoteFromSelection} size="sm" className="shadow-lg">
                     <MessageSquare size={16} className="mr-2" />
                     Create Note
                   </Button>
@@ -495,7 +495,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                   onClick={handleTldr}
                   disabled={isGenerating || pdfPagesContent.length === 0}
                   variant="outline"
-                  className="bg-white dark:bg-[#212121] border-purple-500 text-purple-500 dark:text-purple-400 hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-300 disabled:opacity-50 flex-1"
+                  className="border-purple-500 text-purple-500 hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 disabled:opacity-50 flex-1"
                 >
                   {activeGenerator === 'tldr' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -508,7 +508,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                   onClick={handleKeyPoints}
                   disabled={isGenerating || pdfPagesContent.length === 0}
                   variant="outline"
-                  className="bg-white dark:bg-[#212121] border-blue-500 text-blue-500 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 disabled:opacity-50 flex-1"
+                  className="border-blue-500 text-blue-500 hover:bg-blue-500/10 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 flex-1"
                 >
                   {activeGenerator === 'keyPoints' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -521,13 +521,13 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="bg-white dark:bg-[#212121] border-gray-300 dark:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-500/10 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50 flex-1"
+                      className="disabled:opacity-50 flex-1"
                     >
                       <Quote className="mr-2 h-4 w-4" />
                       Reference
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-1 bg-white dark:bg-[#363636] text-black dark:text-white border-gray-200 dark:border-gray-500">
+                  <PopoverContent className="w-auto p-1">
                     <div className="flex flex-col">
                       <Button variant="ghost" className="justify-start" onClick={() => handleCreateReferenceTemplate('Book')}>
                         <Book className="mr-2 h-4 w-4" /> Book
@@ -547,14 +547,14 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                   file={activePdf.pdf_url}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={(error) => showError(`Error loading PDF: ${error.message}`)}
-                  loading={<Loader2 className="h-8 w-8 animate-spin text-gray-500 dark:text-gray-400" />}
+                  loading={<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />}
                 >
                   <Page pageNumber={pageNumber} scale={scale} customTextRenderer={textRenderer} />
                 </Document>
               </div>
-              <div className="flex-shrink-0 pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex-shrink-0 pt-4 mt-4 border-t border-border">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <span>Page</span>
                     <Input
                       type="text"
@@ -562,32 +562,32 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                       onChange={handlePageInputChange}
                       onKeyDown={handlePageInputKeyDown}
                       onBlur={handlePageInputBlur}
-                      className="h-7 w-12 rounded-md border bg-gray-100 dark:bg-[#363636] border-gray-300 dark:border-gray-500 text-center focus:ring-1 focus:ring-gray-500 dark:focus:ring-gray-400"
+                      className="h-7 w-12 rounded-md text-center"
                       disabled={!numPages}
                     />
                     <span>of {numPages || '...'}</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
-                    <Button variant="outline" size="icon" onClick={goToPrevPage} disabled={pageNumber <= 1} className="bg-transparent border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"><ArrowLeft size={16} /></Button>
-                    <Button variant="outline" size="icon" onClick={goToNextPage} disabled={pageNumber >= (numPages || 0)} className="bg-transparent border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"><ArrowRight size={16} /></Button>
+                    <Button variant="outline" size="icon" onClick={goToPrevPage} disabled={pageNumber <= 1}><ArrowLeft size={16} /></Button>
+                    <Button variant="outline" size="icon" onClick={goToNextPage} disabled={pageNumber >= (numPages || 0)}><ArrowRight size={16} /></Button>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={zoomOut} className="hover:bg-gray-100 dark:hover:bg-gray-700" title="Zoom out"><ZoomOut size={16} /></Button>
-                    <Button variant="ghost" size="icon" onClick={zoomIn} className="hover:bg-gray-100 dark:hover:bg-gray-700" title="Zoom in"><ZoomIn size={16} /></Button>
-                    <Button variant="ghost" size="icon" onClick={removePdf} className="text-red-500 dark:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300" title="Remove PDF"><Trash2 size={16} /></Button>
+                    <Button variant="ghost" size="icon" onClick={zoomOut} title="Zoom out"><ZoomOut size={16} /></Button>
+                    <Button variant="ghost" size="icon" onClick={zoomIn} title="Zoom in"><ZoomIn size={16} /></Button>
+                    <Button variant="ghost" size="icon" onClick={removePdf} className="text-destructive hover:bg-destructive/10 hover:text-destructive" title="Remove PDF"><Trash2 size={16} /></Button>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-             <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+             <div className="flex items-center justify-center h-full text-muted-foreground">
                 <p>Select a PDF to view or upload a new one.</p>
             </div>
           )}
         </div>
       </div>
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="bg-white dark:bg-[#363636] text-black dark:text-white border-gray-200 dark:border-gray-500">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Upload PDFs</DialogTitle>
           </DialogHeader>

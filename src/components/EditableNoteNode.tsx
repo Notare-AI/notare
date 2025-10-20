@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
-import { Pen, Eye, Pencil, Expand } from 'lucide-react';
+import { Pen, Eye, Expand } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
@@ -29,7 +29,6 @@ type EditableNoteProps = {
 };
 
 function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
   const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
@@ -40,15 +39,14 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
-    setLabel(data.label || '');
-  }, [data.label]);
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
+    // Only update internal state if the external data.label changes
+    // and the node is not selected (to avoid overriding user input).
+    if (!selected) {
+      setLabel(data.label || '');
+    }
+  }, [data.label, selected]);
 
   const handleBlur = () => {
-    setIsEditing(false);
     if (label !== data.label) {
       setNodes((nodes) =>
         nodes.map((n) => {
@@ -115,8 +113,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         <NodeResizer isVisible={selected} minWidth={200} minHeight={150} />
 
         {/* Header */}
-        <div className="flex items-center justify-between p-2 border-b border-[hsl(var(--border))] bg-black/5 dark:bg-card-header rounded-t-[7px] cursor-move">
-          <span className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-800 dark:text-white bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
+        <div className="flex items-center justify-between p-2 border-b border-border bg-card-header rounded-t-[7px] cursor-move">
+          <span className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-foreground bg-muted border border-border rounded">
             <Pen size={14} />
             {title}
           </span>
@@ -125,8 +123,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
               <button
                 onClick={handleViewSourcesClick}
                 className={cn(
-                  "p-1 text-gray-500 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white",
-                  isActive && "bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300"
+                  "p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground",
+                  isActive && "bg-blue-500/10 text-blue-600 dark:text-blue-300"
                 )}
                 title="View sources in PDF"
               >
@@ -135,32 +133,23 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             )}
             <button
               onClick={() => openNodeInEditor(id, data.label)}
-              className="p-1 text-gray-500 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
+              className="p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground"
               title="Open in editor"
             >
               <Expand size={16} />
             </button>
             <NodeAIEditor nodeId={id} currentContent={data.label} />
-            {!isEditing && (
-              <button
-                onClick={handleEditClick}
-                className="p-1 text-gray-500 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
-                title="Edit note"
-              >
-                <Pencil size={16} />
-              </button>
-            )}
           </div>
         </div>
 
         {/* Body */}
-        <div ref={contentRef} className="flex-grow overflow-y-auto" onDoubleClick={handleEditClick}>
+        <div ref={contentRef} className="flex-grow overflow-y-auto">
           <TiptapEditor
             value={label}
             onChange={setLabel}
             onBlur={handleBlur}
-            isEditable={isEditing}
-            placeholder={!label ? 'Double click or use the edit icon to add text...' : ''}
+            isEditable={selected}
+            placeholder={!label ? 'Click to start typing...' : ''}
             className="w-full h-full flex flex-col"
           />
         </div>

@@ -93,15 +93,15 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-[#363636] text-white border-gray-500 max-w-4xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription>
               Manage your account and application settings.
             </DialogDescription>
           </DialogHeader>
           <Tabs defaultValue={activeTab} value={currentTab} onValueChange={(value) => setCurrentTab(value as any)} className="w-full mt-4">
-            <TabsList className="grid w-full grid-cols-3 bg-[#2A2A2A]">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="account">Account</TabsTrigger>
               <TabsTrigger value="billing">Billing</TabsTrigger>
               <TabsTrigger value="theme">Theme</TabsTrigger>
@@ -109,7 +109,7 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
             <TabsContent value="theme" className="py-4">
               <div className="space-y-2">
                 <h3 className="font-medium">Appearance</h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Customize the look and feel of the application.
                 </p>
               </div>
@@ -119,7 +119,7 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
             </TabsContent>
             <TabsContent value="account" className="py-4">
               {loading ? (
-                <div className="flex items-center justify-center h-40 text-gray-500">
+                <div className="flex items-center justify-center h-40 text-muted-foreground">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : profile ? (
@@ -127,16 +127,16 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
                   <div className="space-y-4">
                     <div>
                       <h3 className="font-medium">Username</h3>
-                      <p className="text-sm text-gray-400">{profile.username}</p>
+                      <p className="text-sm text-muted-foreground">{profile.username}</p>
                     </div>
                     <div>
                       <h3 className="font-medium">Subscription Plan</h3>
-                      <p className="text-sm text-gray-400 capitalize">{profile.subscription_plan}</p>
+                      <p className="text-sm text-muted-foreground capitalize">{profile.subscription_plan}</p>
                     </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-red-900/20 border border-red-500/30">
-                    <h4 className="font-semibold text-red-400">Delete Account</h4>
-                    <p className="text-sm text-gray-400 mt-1">
+                  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <h4 className="font-semibold text-destructive">Delete Account</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Permanently delete your account and all associated data. This action cannot be undone.
                     </p>
                     <Button 
@@ -149,25 +149,25 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-40 text-gray-500">
+                <div className="flex items-center justify-center h-40 text-muted-foreground">
                   <p>Could not load account details.</p>
                 </div>
               )}
             </TabsContent>
             <TabsContent value="billing" className="py-4 max-h-[60vh] overflow-y-auto">
               {loading ? (
-                <div className="flex items-center justify-center h-40 text-gray-500">
+                <div className="flex items-center justify-center h-40 text-muted-foreground">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : profile ? (
                 <div className="space-y-8">
                   <div>
                     <h3 className="font-semibold text-lg mb-4">Active plan</h3>
-                    <div className="p-6 rounded-lg bg-[#2A2A2A] border border-gray-700">
+                    <div className="p-6 rounded-lg bg-muted/50 border">
                       <div className="flex justify-between items-center">
                         <div>
                           <h4 className="font-semibold text-xl capitalize">{profile.subscription_plan}</h4>
-                          <p className="text-gray-400 mt-1">
+                          <p className="text-muted-foreground mt-1">
                             {plans.find(p => p.planId === profile.subscription_plan)?.description}
                           </p>
                         </div>
@@ -185,10 +185,10 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
                     <h3 className="font-semibold text-lg mb-4">All plans</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       {plans.map((plan) => (
-                        <div key={plan.planId} className={`p-6 rounded-lg bg-[#2A2A2A] border ${profile.subscription_plan === plan.planId ? 'border-purple-500' : 'border-gray-700'} flex flex-col`}>
+                        <div key={plan.planId} className={`p-6 rounded-lg bg-muted/50 border ${profile.subscription_plan === plan.planId ? 'border-primary' : ''} flex flex-col`}>
                           <h4 className="font-semibold text-xl">{plan.name}</h4>
-                          <p className="text-gray-400 mt-1">{plan.price}<span className="text-sm">/ month</span></p>
-                          <p className="text-sm text-gray-500 mt-2 flex-grow">{plan.description}</p>
+                          <p className="text-muted-foreground mt-1">{plan.price}<span className="text-sm">/ month</span></p>
+                          <p className="text-sm text-muted-foreground mt-2 flex-grow">{plan.description}</p>
                           
                           <ul className="mt-6 space-y-3 text-sm flex-grow">
                             {plan.features.slice(0, 4).map(feature => (
@@ -201,7 +201,7 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
 
                           <div className="mt-6">
                             {profile.subscription_plan === plan.planId ? (
-                              <Button disabled className="w-full bg-gray-600">Current Plan</Button>
+                              <Button disabled className="w-full">Current Plan</Button>
                             ) : (
                               <Button onClick={() => handleUpgrade(plan.planId)} className="w-full">
                                 {profile.subscription_plan === 'free' ? 'Upgrade' : 'Switch Plan'}
@@ -213,19 +213,19 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-lg bg-[#2A2A2A] border border-gray-700">
+                  <div className="p-4 rounded-lg bg-muted/50 border">
                     <h4 className="font-semibold mb-2">AI Credit Usage</h4>
                     <div className="flex items-end gap-2">
                       <p className="text-3xl font-bold">{profile.ai_credits}</p>
-                      <p className="text-gray-400">credits remaining</p>
+                      <p className="text-muted-foreground">credits remaining</p>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Resets on {format(new Date(profile.credits_reset_at), 'MMMM dd, yyyy')}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-40 text-gray-500">
+                <div className="flex items-center justify-center h-40 text-muted-foreground">
                   <p>Could not load billing details.</p>
                 </div>
               )}
@@ -234,19 +234,19 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
         </DialogContent>
       </Dialog>
       <AlertDialog open={isCancelConfirmOpen} onOpenChange={setIsCancelConfirmOpen}>
-        <AlertDialogContent className="bg-[#363636] text-white border-gray-500">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to cancel?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription>
               Your subscription will be canceled at the end of your current billing period. You will retain Pro access until that time.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent hover:bg-gray-700">Go Back</AlertDialogCancel>
+            <AlertDialogCancel>Go Back</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelSubscription}
               disabled={isBillingLoading}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {isBillingLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirm Cancellation
@@ -255,19 +255,19 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
         </AlertDialogContent>
       </AlertDialog>
       <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <AlertDialogContent className="bg-[#363636] text-white border-gray-500">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your account, canvases, and all other associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent hover:bg-gray-700">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAccount}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Yes, delete my account

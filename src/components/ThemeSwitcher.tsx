@@ -30,12 +30,12 @@ export const ThemeSwitcher = () => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#2A2A2A] p-1">
+    <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted p-1">
       <Button
         variant="ghost"
         size="sm"
         onClick={() => applyTheme('light')}
-        className={cn('flex items-center gap-2', theme === 'light' ? 'bg-[#424242] text-white' : 'hover:bg-[#424242]')}
+        className={cn('flex items-center gap-2', theme === 'light' ? 'bg-background text-foreground' : 'hover:bg-background/50')}
       >
         <Sun size={16} /> Light
       </Button>
@@ -43,7 +43,7 @@ export const ThemeSwitcher = () => {
         variant="ghost"
         size="sm"
         onClick={() => applyTheme('dark')}
-        className={cn('flex items-center gap-2', theme === 'dark' ? 'bg-[#424242] text-white' : 'hover:bg-[#424242]')}
+        className={cn('flex items-center gap-2', theme === 'dark' ? 'bg-background text-foreground' : 'hover:bg-background/50')}
       >
         <Moon size={16} /> Dark
       </Button>
@@ -51,7 +51,7 @@ export const ThemeSwitcher = () => {
         variant="ghost"
         size="sm"
         onClick={() => applyTheme('system')}
-        className={cn('flex items-center gap-2', theme === 'system' ? 'bg-[#424242] text-white' : 'hover:bg-[#424242]')}
+        className={cn('flex items-center gap-2', theme === 'system' ? 'bg-background text-foreground' : 'hover:bg-background/50')}
       >
         <Monitor size={16} /> System
       </Button>

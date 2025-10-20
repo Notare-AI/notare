@@ -395,8 +395,9 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         position,
         data: { label: '' },
         style: { width: 200, height: 150 },
+        selected: true,
       };
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) => nds.map(n => ({...n, selected: false})).concat(newNode));
       setActiveTool('select');
     },
     [activeTool, screenToFlowPosition, setNodes]
@@ -441,9 +442,10 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         position,
         data: { label: '' },
         style: { width: 200, height: 150 },
+        selected: true,
       };
 
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) => nds.map(n => ({...n, selected: false})).concat(newNode));
     },
     [screenToFlowPosition, type, setNodes]
   );

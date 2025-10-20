@@ -6,7 +6,6 @@ import {
   MoreVertical,
   PanelLeftClose,
   Sparkles,
-  Loader2,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import AddCanvasModal from "./AddCanvasModal";
@@ -201,29 +200,31 @@ const Sidebar = ({
   return (
     <>
       <div
-        className={`flex h-screen flex-col bg-white dark:bg-[#212121] text-gray-800 dark:text-gray-200 transition-all duration-300 ease-in-out ${
+        className={`flex h-screen flex-col bg-card text-foreground transition-all duration-300 ease-in-out ${
           isCollapsed ? "w-0" : "w-64"
         }`}
       >
         <div className="flex h-full flex-col overflow-hidden whitespace-nowrap">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center justify-between border-b border-border p-4">
             <div className="flex items-center gap-2">
               <PenSquare size={20} />
               <span className="font-semibold">Notare</span>
             </div>
             <div className="flex items-center">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsModalOpen(true)}
-                className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="text-muted-foreground hover:text-foreground h-8 w-8"
               >
                 <Plus size={20} />
-              </button>
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onCollapse}
-                className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 h-8 w-8 ml-1"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 ml-1"
                 title="Collapse sidebar"
               >
                 <PanelLeftClose size={18} />
@@ -243,7 +244,7 @@ const Sidebar = ({
                       onChange={handleTitleChange}
                       onBlur={handleTitleSave}
                       onKeyDown={handleKeyDown}
-                      className="h-9 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-black dark:text-white w-full"
+                      className="h-9 bg-muted border-border text-foreground w-full"
                     />
                   ) : (
                     <div
@@ -256,10 +257,10 @@ const Sidebar = ({
                           onSelectCanvas(canvas);
                         }
                       }}
-                      className={`group flex items-center justify-between rounded-md px-3 h-9 text-sm cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 ${
+                      className={`group flex items-center justify-between rounded-md px-3 h-9 text-sm cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
                         selectedCanvasId === canvas.id
-                          ? "bg-gray-100 dark:bg-gray-700"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? "bg-accent"
+                          : "hover:bg-accent"
                       }`}
                     >
                       <span className="truncate flex-grow pr-2">
@@ -273,24 +274,24 @@ const Sidebar = ({
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
-                            className="h-8 w-8 shrink-0 -mr-2 text-gray-400 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white"
+                            className="h-8 w-8 shrink-0 -mr-2 text-muted-foreground group-hover:text-foreground"
                           >
                             <MoreVertical size={16} />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-white dark:bg-[#363636] text-black dark:text-white border-gray-200 dark:border-gray-500"
+                          className="bg-popover text-popover-foreground border-border"
                         >
                           <DropdownMenuItem
                             onClick={() => handleRename(canvas)}
-                            className="hover:!bg-gray-100 dark:hover:!bg-[#424242] focus:!bg-gray-100 dark:focus:!bg-[#424242]"
+                            className="hover:!bg-accent focus:!bg-accent"
                           >
                             Rename
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => setCanvasToDelete(canvas)}
-                            className="hover:!bg-gray-100 dark:hover:!bg-[#424242] focus:!bg-gray-100 dark:focus:!bg-[#424242] text-red-500 dark:text-red-400 hover:!text-red-600 focus:!text-red-600"
+                            className="hover:!bg-accent focus:!bg-accent text-destructive focus:!text-destructive-foreground"
                           >
                             Remove
                           </DropdownMenuItem>
@@ -304,7 +305,7 @@ const Sidebar = ({
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+          <div className="border-t border-border p-4">
             <div className="mb-4">
               <CreditUsageIndicator />
             </div>
@@ -320,7 +321,7 @@ const Sidebar = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white">
+                  <AvatarFallback className="bg-muted text-muted-foreground">
                     {user?.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -335,7 +336,7 @@ const Sidebar = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleSignOut}
-                className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <LogOut size={18} />
               </Button>
@@ -352,21 +353,21 @@ const Sidebar = ({
         open={!!canvasToDelete}
         onOpenChange={(open) => !open && setCanvasToDelete(null)}
       >
-        <AlertDialogContent className="bg-white dark:bg-[#363636] text-black dark:text-white border-gray-200 dark:border-gray-500">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
+            <AlertDialogDescription>
               This will permanently delete the canvas "{canvasToDelete?.title}
               ". This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700">
+            <AlertDialogCancel>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>

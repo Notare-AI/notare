@@ -13,14 +13,14 @@ const Login = () => {
 
   if (showConfirmationMessage) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="w-full max-w-sm p-8 space-y-6 text-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="w-full max-w-sm p-8 space-y-6 text-center bg-card border border-border rounded-lg shadow-sm">
           <MailCheck className="mx-auto h-12 w-12 text-primary" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Check your email</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
+          <p className="text-muted-foreground">
             We've sent a verification link to your email address. Please click the link to confirm your account.
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">
+          <p className="text-sm text-muted-foreground/80">
             You may need to check your spam folder.
           </p>
         </div>
@@ -29,11 +29,11 @@ const Login = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-sm p-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="w-full max-w-sm p-8 space-y-6 bg-card border border-border rounded-lg shadow-sm">
         <div className="text-center">
-          <PenSquare className="mx-auto h-8 w-8 text-gray-800 dark:text-gray-200" />
-          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Welcome to Notare</h1>
+          <PenSquare className="mx-auto h-8 w-8 text-foreground" />
+          <h1 className="mt-4 text-2xl font-bold text-foreground">Welcome to Notare</h1>
         </div>
         <Auth
           supabaseClient={supabase}

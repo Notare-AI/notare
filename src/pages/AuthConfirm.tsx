@@ -48,29 +48,29 @@ const AuthConfirmPage = () => {
   }, [searchParams, navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-6 text-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="w-full max-w-md p-8 space-y-6 text-center bg-card border border-border rounded-lg shadow-sm">
         {status === 'loading' && (
           <>
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Verifying your account...</h1>
-            <p className="text-gray-600 dark:text-gray-400">Please wait a moment.</p>
+            <h1 className="text-2xl font-bold text-foreground">Verifying your account...</h1>
+            <p className="text-muted-foreground">Please wait a moment.</p>
           </>
         )}
         {status === 'success' && (
           <>
             <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Account Confirmed!</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h1 className="text-2xl font-bold text-foreground">Account Confirmed!</h1>
+            <p className="text-muted-foreground">
               Welcome! You will be redirected to your dashboard shortly.
             </p>
           </>
         )}
         {status === 'error' && (
           <>
-            <XCircle className="mx-auto h-12 w-12 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Verification Failed</h1>
-            <p className="text-red-600 dark:text-red-400">{errorMessage}</p>
+            <XCircle className="mx-auto h-12 w-12 text-destructive" />
+            <h1 className="text-2xl font-bold text-foreground">Verification Failed</h1>
+            <p className="text-destructive">{errorMessage}</p>
             <Button asChild className="mt-4">
               <Link to="/login">Return to Login</Link>
             </Button>
