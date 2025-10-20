@@ -5,37 +5,34 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
 import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
+
+interface TiptapEditorProps {
+  value: string;
+  onChange: (markdown: string) => void;
+  onBlur?: () => void;
+  placeholder?: string;
+  className?: string;
+  isEditable?: boolean;
+}
 
 const turndownService = new TurndownService();
 const showdownConverter = new Showdown.Converter();
 
-interface TiptapEditorProps {
-  value: string;
-  onChange: (content: string) => void;
-  placeholder?: string;
-  className?: string;
-  isEditable?: boolean;
-  autoFocus?: boolean;
-  isMarkdownInput?: boolean;
-}
-
 const TiptapEditor = ({
   value,
   onChange,
+  onBlur,
   placeholder = 'Start writing...',
   className,
   isEditable = true,
-  autoFocus = false,
-  isMarkdownInput = false,
 }: TiptapEditorProps) => {
-  const editorRef = useRef<any>(null);
-  const lastValueRef = useRef<string>('');
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -52,66 +49,46 @@ const TiptapEditor = ({
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
     ],
-    content: '',
+    content: '', // Initial content is set via useEffect
     editable: isEditable,
     editorProps: {
       attributes: {
         class:
           'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
       },
-      handleDOMEvents: isEditable ? {
-        mousedown: (view, event) => {
-          event.stopPropagation();
-          return false;
-        },
-        click: (view, event) => {
-          event.stopPropagation();
-          return false;
-        },
-      } : {},
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      if (isMarkdownInput) {
-        const markdown = turndownService.turndown(html);
-        onChange(markdown);
-      } else {
-        onChange(html);
+      const markdown = turndownService.turndown(html);
+      onChange(markdown);
+    },
+    onBlur: () => {
+      if (onBlur) {
+        onBlur();
       }
     },
   });
 
   useEffect(() => {
-    if (editor && value !== lastValueRef.current) {
-      lastValueRef.current = value;
-      
-      let contentToSet = value;
-      if (isMarkdownInput) {
-        contentToSet = showdownConverter.makeHtml(value);
-      }
-      
-      if (contentToSet !== editor.getHTML()) {
-        editor.commands.setContent(contentToSet, false, { preserveWhitespace: 'full' });
+    if (editor) {
+      const html = showdownConverter.makeHtml(value);
+      // Update content if editor is not focused OR if it's empty (to ensure initial content loads)
+      if ((!editor.isFocused || editor.isEmpty) && html !== editor.getHTML()) {
+        editor.commands.setContent(html, false);
       }
     }
-  }, [value, editor, isMarkdownInput]);
+  }, [value, editor]);
 
   useEffect(() => {
     if (editor) {
       editor.setEditable(isEditable);
     }
   }, [isEditable, editor]);
-
-  useEffect(() => {
-    if (editor && autoFocus) {
-      editor.commands.focus('end');
-    }
-  }, [editor, autoFocus]);
-
-  useEffect(() => {
-    editorRef.current = editor;
-  }, [editor]);
 
   return (
     <div className={className}>
@@ -120,9 +97,9 @@ const TiptapEditor = ({
         editor={editor}
         className={cn(
           'flex-grow overflow-y-auto p-3',
-          { 'nodrag': isEditable },
-          isEditable && 'cursor-text'
+          { 'nodrag': isEditable }
         )}
+        // Removed onPointerDown={(e) => e.stopPropagation()} to allow normal text selection and cursor placement
       />
     </div>
   );
