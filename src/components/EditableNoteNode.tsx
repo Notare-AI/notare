@@ -49,12 +49,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
 
   useEffect(() => {
     if (!selected && isEditing) {
+      saveChanges();
       setIsEditing(false);
     }
   }, [selected, isEditing]);
 
-  useEffect(() => {
-    if (!isEditing && label !== data.label) {
+  const saveChanges = () => {
+    if (label !== data.label) {
       justSavedRef.current = true;
       setNodes((nodes) =>
         nodes.map((n) => {
@@ -65,7 +66,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         })
       );
     }
-  }, [isEditing, label, data.label, setNodes, id]);
+  };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (selected && !isEditing) {
@@ -77,14 +78,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const handleOpenInEditor = () => {
     // Save current changes before opening modal
     if (isEditing && label !== data.label) {
-      setNodes((nodes) =>
-        nodes.map((n) => {
-          if (n.id === id) {
-            return { ...n, data: { ...n.data, label } };
-          }
-          return n;
-        })
-      );
+      saveChanges();
     }
     // Exit editing mode
     setIsEditing(false);
