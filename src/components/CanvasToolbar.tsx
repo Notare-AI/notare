@@ -16,16 +16,37 @@ interface CanvasToolbarProps {
 }
 
 const tools = [
-  { id: 'select' as const, icon: MousePointer2, label: 'Select', draggable: false, tooltip: 'Select and move items' },
-  { id: 'pan' as const, icon: Hand, label: 'Pan', draggable: false, tooltip: 'Pan the canvas' },
-  { id: 'note' as const, icon: FilePlus2, label: 'New Note', draggable: true, tooltip: 'Drag to add a new note' },
+  { 
+    id: 'select' as const, 
+    icon: MousePointer2, 
+    label: 'Select and move items', 
+    draggable: false, 
+    tooltip: 'Select and move items',
+    cursor: 'cursor-pointer'
+  },
+  { 
+    id: 'pan' as const, 
+    icon: Hand, 
+    label: 'Pan the canvas', 
+    draggable: false, 
+    tooltip: 'Pan the canvas',
+    cursor: 'cursor-grab'
+  },
+  { 
+    id: 'note' as const, 
+    icon: FilePlus2, 
+    label: 'Drag to add a new note', 
+    draggable: true, 
+    tooltip: 'Drag to add a new note',
+    cursor: 'cursor-crosshair'
+  },
 ];
 
 const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
   const [, setType] = useDnD();
 
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
-    console.log('Drag started with type:', nodeType); // Debug log
+    console.log('Drag started with type:', nodeType);
     setType(nodeType);
     event.dataTransfer.setData('text/plain', nodeType);
     event.dataTransfer.effectAllowed = 'move';
@@ -36,7 +57,7 @@ const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
   };
 
   const onDragEnd = (event: React.DragEvent) => {
-    console.log('Drag ended'); // Debug log
+    console.log('Drag ended');
     setType(null);
     
     // Reset visual feedback
@@ -59,9 +80,9 @@ const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
                 onDragStart={(event) => tool.draggable && onDragStart(event, 'editableNote')}
                 onDragEnd={onDragEnd}
                 className={cn(
-                  'h-10 w-10 rounded-md',
+                  'h-10 w-10 rounded-md transition-all duration-200',
                   activeTool === tool.id
-                    ? 'bg-gray-300 text-black hover:bg-gray-300'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg scale-105'
                     : 'text-white hover:bg-gray-600 hover:text-white',
                   tool.draggable && 'cursor-grab active:cursor-grabbing'
                 )}

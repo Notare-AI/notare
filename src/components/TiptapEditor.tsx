@@ -61,11 +61,21 @@ const TiptapEditor = ({
       handleDOMEvents: {
         // Prevent React Flow from handling mouse events on the editor
         mousedown: (view, event) => {
-          event.stopPropagation();
+          if (isEditable) {
+            event.stopPropagation();
+          }
           return false;
         },
         click: (view, event) => {
-          event.stopPropagation();
+          if (isEditable) {
+            event.stopPropagation();
+          }
+          return false;
+        },
+        dblclick: (view, event) => {
+          if (isEditable) {
+            event.stopPropagation();
+          }
           return false;
         },
       },
