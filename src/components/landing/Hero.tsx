@@ -10,7 +10,7 @@ const Hero = () => {
           The Best Note Taking App for Visual Thinkers and AI-Powered Insights
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-          Struggling with scattered notes, endless PDF scrolling, and forgotten ideas? Notare is the ultimate AI note taking tool that organizes your thoughts on an infinite canvas, extracts key insights from documents, and ensures privacy—no data training ever.
+          Struggling with scattered notes, endless PDF scrolling, and forgotten ideas? Notare is the ultimate AI note taking tool that organizes your thoughts on an infinite canvas, extracts key insights from documents, reports and books while ensuring privacy—no data training ever.
         </p>
         <div className="flex justify-center gap-4 mb-12">
           <Button asChild size="lg" className="bg-primary text-primary-foreground">
