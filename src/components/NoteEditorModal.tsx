@@ -38,14 +38,21 @@ const NoteEditorModal = ({
   }, [isOpen, initialContent]);
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen && content !== initialContent) {
-      onSave(content);
+    if (!newOpen) {
+      const trimmedContent = content.trim();
+      const trimmedInitial = initialContent.trim();
+      if (trimmedContent !== trimmedInitial && trimmedContent !== '') {
+        onSave(trimmedContent);
+      }
     }
     onOpenChange(newOpen);
   };
 
   const handleSave = () => {
-    onSave(content);
+    const trimmedContent = content.trim();
+    if (trimmedContent !== initialContent.trim() && trimmedContent !== '') {
+      onSave(trimmedContent);
+    }
     onOpenChange(false);
   };
 
