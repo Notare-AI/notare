@@ -2,8 +2,8 @@ import { Check, LayoutDashboard, Brain, FileText, Download } from 'lucide-react'
 import { cn } from '@/lib/utils';
 import visualMaps from '@/images/visual-maps.png';
 import aiInsights from '@/images/ai-insights.png';
-import pdfNoteTaking from '@/images/pdf-note-taking.png';
-import dataOwnership from '@/images/data-ownership.png';
+import seamlessPdf from '@/images/seamless-pdf.png';
+import ownData from '@/images/own-data.png';
 
 const features = [
   {
@@ -40,7 +40,7 @@ const features = [
     ],
     icon: FileText,
     color: "text-green-500",
-    image: pdfNoteTaking,
+    image: seamlessPdf,
   },
   {
     title: "Own Your Data – Download and Export with Ease",
@@ -52,7 +52,7 @@ const features = [
     ],
     icon: Download,
     color: "text-orange-500",
-    image: dataOwnership,
+    image: ownData,
   },
 ];
 
