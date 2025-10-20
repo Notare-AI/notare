@@ -8,7 +8,7 @@ interface UseCanvasDragAndDropProps {
 }
 
 export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps) => {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, getNodes, getNode } = useReactFlow();
   const [contextType, setType] = useDnD();
   const [isDragOver, setIsDragOver] = useState(false);
   const dragLeaveTimer = useRef<number | null>(null);
@@ -55,11 +55,35 @@ export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps)
         y: event.clientY,
       });
 
+      // Detect if dropped inside a group
+      let parentId: string | undefined;
+      const allNodes = getNodes();
+      for (const node of allNodes) {
+        if (node.type === 'group') {
+          const groupPos = node.position;
+          const groupWidth = node.style?.width || node.width || 0;
+          const groupHeight = node.style?.height || node.height || 0;
+
+          if (
+            position.x >= groupPos.x &&
+            position.x <= groupPos.x + groupWidth &&
+            position.y >= groupPos.y &&
+            position.y <= groupPos.y + groupHeight
+          ) {
+            parentId = node.id;
+            // Adjust position to be relative to group
+            position.x -= groupPos.x;
+            position.y -= groupPos.y;
+            break;
+          }
+        }
+      }
+
       // Use the addNode function from useNodeCreation, passing the setNodes from FlowCanvas
-      addNode(type, '', position);
+      addNode(type, '', position, [], false, undefined, undefined, undefined, parentId);
       setType(null); // Reset DnD context type after drop
     },
-    [screenToFlowPosition, contextType, addNode, setType]
+    [screenToFlowPosition, contextType, addNode, setType, getNodes]
   );
 
   const onDragLeave = useCallback(() => {
