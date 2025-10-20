@@ -10,6 +10,12 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Undo,
+  Redo,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,45 +35,6 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
     return null;
   }
 
-  const buttons = [
-    {
-      name: 'bold',
-      icon: Bold,
-      action: () => editor.chain().focus().toggleBold().run(),
-      isActive: editor.isActive('bold'),
-    },
-    {
-      name: 'italic',
-      icon: Italic,
-      action: () => editor.chain().focus().toggleItalic().run(),
-      isActive: editor.isActive('italic'),
-    },
-    {
-      name: 'strike',
-      icon: Strikethrough,
-      action: () => editor.chain().focus().toggleStrike().run(),
-      isActive: editor.isActive('strike'),
-    },
-    {
-      name: 'bulletList',
-      icon: List,
-      action: () => editor.chain().focus().toggleBulletList().run(),
-      isActive: editor.isActive('bulletList'),
-    },
-    {
-      name: 'orderedList',
-      icon: ListOrdered,
-      action: () => editor.chain().focus().toggleOrderedList().run(),
-      isActive: editor.isActive('orderedList'),
-    },
-    {
-      name: 'blockquote',
-      icon: Quote,
-      action: () => editor.chain().focus().toggleBlockquote().run(),
-      isActive: editor.isActive('blockquote'),
-    },
-  ];
-
   const headingOptions = [
     { level: 1, icon: Heading1, label: 'Heading 1' },
     { level: 2, icon: Heading2, label: 'Heading 2' },
@@ -76,9 +43,32 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
 
   return (
     <div 
-      className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700"
+      className="flex items-center flex-wrap gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700"
       onMouseDown={(e) => e.preventDefault()}
     >
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().undo().run()}
+        disabled={!editor.can().undo()}
+        className="h-8 w-8"
+        title="Undo"
+      >
+        <Undo className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().redo().run()}
+        disabled={!editor.can().redo()}
+        className="h-8 w-8"
+        title="Redo"
+      >
+        <Redo className="h-4 w-4" />
+      </Button>
+
+      <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -88,6 +78,7 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
               'h-8 w-8',
               editor.isActive('heading') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
             )}
+            title="Headings"
           >
             <Heading className="h-4 w-4" />
           </Button>
@@ -115,23 +106,87 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {buttons.map((button) => (
-        <Button
-          key={button.name}
-          variant="ghost"
-          size="icon"
-          onClick={button.action}
-          disabled={!editor.isEditable}
-          className={cn(
-            'h-8 w-8',
-            button.isActive
-              ? 'bg-gray-200 dark:bg-gray-600'
-              : 'hover:bg-gray-200 dark:hover:bg-gray-600'
-          )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Text Align">
+            <AlignLeft className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <button.icon className="h-4 w-4" />
-        </Button>
-      ))}
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('left').run()}>
+            <AlignLeft className="mr-2 h-4 w-4" /> Left
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('center').run()}>
+            <AlignCenter className="mr-2 h-4 w-4" /> Center
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('right').run()}>
+            <AlignRight className="mr-2 h-4 w-4" /> Right
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('justify').run()}>
+            <AlignJustify className="mr-2 h-4 w-4" /> Justify
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={cn('h-8 w-8', editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Bold"
+      >
+        <Bold className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={cn('h-8 w-8', editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Italic"
+      >
+        <Italic className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        className={cn('h-8 w-8', editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Strikethrough"
+      >
+        <Strikethrough className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={cn('h-8 w-8', editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Bullet List"
+      >
+        <List className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={cn('h-8 w-8', editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Ordered List"
+      >
+        <ListOrdered className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        className={cn('h-8 w-8', editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
+        title="Blockquote"
+      >
+        <Quote className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

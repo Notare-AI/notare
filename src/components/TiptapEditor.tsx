@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
 import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
@@ -33,6 +34,9 @@ const TiptapEditor = ({
         heading: {
           levels: [1, 2, 3],
         },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
       }),
       Placeholder.configure({
         placeholder,
