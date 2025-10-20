@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Expand } from 'lucide-react';
@@ -36,13 +36,15 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
+  const justSavedRef = useRef(false);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
-    if (!isEditing) {
+    if (!isEditing && !justSavedRef.current) {
       setLabel(data.label || '');
     }
+    justSavedRef.current = false;
   }, [data.label, isEditing]);
 
   useEffect(() => {
@@ -53,6 +55,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
 
   useEffect(() => {
     if (!isEditing && label !== data.label) {
+      justSavedRef.current = true;
       setNodes((nodes) =>
         nodes.map((n) => {
           if (n.id === id) {
