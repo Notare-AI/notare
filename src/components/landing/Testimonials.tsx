@@ -4,14 +4,17 @@ const testimonials = [
   {
     quote: "Notare transformed how I study PDFs—AI summaries save me hours!",
     author: "Sarah, Student",
+    avatar: '@/images/testimonial-sarah.png', // Assumed name; update if different
   },
   {
     quote: "The visual maps make project planning a breeze. Best AI note taking tool I've used.",
     author: "Mike, Professional",
+    avatar: '@/images/testimonial-mike.png', // Assumed name; update if different
   },
   {
     quote: "Privacy-focused and powerful—perfect for research without data worries.",
     author: "Dr. Elena, Researcher",
+    avatar: '@/images/testimonial-elena.png', // Assumed name; update if different
   },
 ];
 
@@ -21,10 +24,20 @@ const Testimonials = () => {
       <h2 className="text-3xl font-bold text-center mb-12">What Users Say About the Best Note Taking App</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {testimonials.map((testimonial, index) => (
-          <div key={index} className="p-6 rounded-lg bg-background shadow-md">
-            <Quote className="h-8 w-8 text-primary mb-4" />
-            <p className="italic mb-4">"{testimonial.quote}"</p>
-            <p className="text-right text-sm text-muted-foreground">- {testimonial.author}</p>
+          <div key={index} className="p-6 rounded-lg bg-background shadow-md flex flex-col">
+            <div className="flex items-center mb-4">
+              <img 
+                src={testimonial.avatar} 
+                alt={`${testimonial.author} avatar`} 
+                className="h-12 w-12 rounded-full object-cover mr-4"
+                loading="lazy"
+              />
+              <div>
+                <p className="font-semibold">{testimonial.author}</p>
+              </div>
+            </div>
+            <Quote className="h-8 w-8 text-primary mb-4 self-start" />
+            <p className="italic mb-4 flex-grow">"{testimonial.quote}"</p>
           </div>
         ))}
       </div>
