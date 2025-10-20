@@ -169,6 +169,8 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
               ? 'cursor-grab'
               : activeTool === 'note'
               ? 'cursor-crosshair'
+              : activeTool === 'select'
+              ? 'cursor-pointer'
               : ''
           }
         >
