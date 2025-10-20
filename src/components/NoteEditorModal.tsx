@@ -43,7 +43,7 @@ const NoteEditorModal = ({
       setIsDirty(false); // Reset dirty flag on open
       setIsLoading(false);
     }
-  }, [isOpen]); // Note: Removed initialContent from deps to avoid resetting on prop change
+  }, [isOpen, initialContent]); // ADDED initialContent to dependencies here
 
   // NEW: Sync from canvas to modal if prop changes while open (but only if not dirty)
   useEffect(() => {
@@ -113,7 +113,7 @@ const NoteEditorModal = ({
           <div className="bg-background shadow-sm rounded-md w-full h-full p-6 md:p-10">
             <TiptapEditor
               value={htmlContent}
-              onChange={handleContentChange} // Updated to mark dirty
+              onChange={handleContentChange}
               className="w-full h-full flex flex-col"
               placeholder="Start writing..."
               isMarkdownInput={false}
