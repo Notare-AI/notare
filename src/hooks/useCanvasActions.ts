@@ -6,9 +6,10 @@ interface UseCanvasActionsProps {
   nodes: Node[];
   edges: Edge[];
   setEditingNodeId: (nodeId: string | null) => void;
+  setEditingNodeContent: (content: string) => void;
 }
 
-export const useCanvasActions = ({ nodes, edges, setEditingNodeId }: UseCanvasActionsProps) => {
+export const useCanvasActions = ({ nodes, edges, setEditingNodeId, setEditingNodeContent }: UseCanvasActionsProps) => {
   const downloadNodeBranch = useCallback((startNodeId: string) => {
     const startNode = nodes.find(n => n.id === startNodeId);
     if (!startNode) {
@@ -71,14 +72,15 @@ export const useCanvasActions = ({ nodes, edges, setEditingNodeId }: UseCanvasAc
     showSuccess("Branch downloaded successfully!");
   }, [nodes, edges]);
 
-  const openNodeInEditor = useCallback((nodeId: string) => {
+  const openNodeInEditor = useCallback((nodeId: string, content: string) => {
     const nodeToEdit = nodes.find(n => n.id === nodeId);
     if (nodeToEdit && typeof nodeToEdit.data.label === 'string') {
       setEditingNodeId(nodeId);
+      setEditingNodeContent(content);
     } else {
       showError("Could not find node content to edit.");
     }
-  }, [nodes, setEditingNodeId]);
+  }, [nodes, setEditingNodeId, setEditingNodeContent]);
 
   return { downloadNodeBranch, openNodeInEditor };
 };

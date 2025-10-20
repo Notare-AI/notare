@@ -66,6 +66,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [isMinimapOpen, setIsMinimapOpen] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [editingNodeContent, setEditingNodeContent] = useState<string>('');
 
   // --- Hooks for modularity ---
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef: useRef(false) });
@@ -73,7 +74,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const { addNode, addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded });
-  const { downloadNodeBranch, openNodeInEditor } = useCanvasActions({ nodes, edges, setEditingNodeId });
+  const { downloadNodeBranch, openNodeInEditor } = useCanvasActions({ nodes, edges, setEditingNodeId, setEditingNodeContent });
 
   // --- Effects ---
   useEffect(() => {
@@ -116,12 +117,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
       })
     );
     setEditingNodeId(null);
-  };
-
-  const getCurrentEditingNodeContent = () => {
-    if (!editingNodeId) return '';
-    const node = nodes.find(n => n.id === editingNodeId);
-    return node?.data.label || '';
   };
 
   if (isLoading) {
@@ -185,7 +180,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
       <NoteEditorModal 
         isOpen={!!editingNodeId} 
         onOpenChange={(isOpen) => !isOpen && setEditingNodeId(null)}
-        initialContent={getCurrentEditingNodeContent()}
+        initialContent={editingNodeContent}
         onSave={handleSaveFromEditor}
       />
     </div>
