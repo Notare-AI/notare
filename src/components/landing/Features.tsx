@@ -1,4 +1,4 @@
-import { Check, LayoutDashboard, Brain, FileText, Shield } from 'lucide-react';
+import { Check, LayoutDashboard, Brain, FileText, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const features = [
@@ -36,14 +36,14 @@ const features = [
     color: "text-green-500",
   },
   {
-    title: "Privacy-Focused Note Taking – Your Data Stays Yours",
-    description: "Worried about AI training on your notes? Notare guarantees no data training, with secure sync across all your devices.",
+    title: "Own Your Data – Download and Export with Ease",
+    description: "Take full control of your notes. Notare lets you download individual notes or entire branches as Markdown files, ensuring you always have access to your data offline.",
     points: [
-      "End-to-end encryption and privacy by design",
-      "Real-time sync on mobile, web, and desktop",
-      "Export notes as Markdown anytime"
+      "One-click download for single nodes as Markdown",
+      "Export entire note branches for complete backups",
+      "No vendor lock-in—your data is always portable"
     ],
-    icon: Shield,
+    icon: Download,
     color: "text-orange-500",
   },
 ];
