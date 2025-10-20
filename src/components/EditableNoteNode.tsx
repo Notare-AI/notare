@@ -9,8 +9,6 @@ import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 import TiptapEditor from './TiptapEditor';
-import { supabase } from '@/integrations/supabase/client';
-import { showError } from '@/utils/toast';
 
 interface Source {
   text: string;
@@ -28,13 +26,12 @@ type EditableNoteProps = {
   id: string;
   data: EditableNoteData;
   selected?: boolean;
-  canvasId: string; // NEW: Added canvasId prop for saving
 };
 
-function EditableNoteNode({ id, data, selected, canvasId }: EditableNoteProps) {
+function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
-  const { setNodes, getNodes, getEdges } = useReactFlow(); // UPDATED: Added getNodes, getEdges
+  const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
@@ -52,14 +49,14 @@ function EditableNoteNode({ id, data, selected, canvasId }: EditableNoteProps) {
 
   useEffect(() => {
     if (!selected && isEditing) {
-      handleBlur();
+      saveChanges();
       setIsEditing(false);
     }
   }, [selected, isEditing]);
 
-  const handleBlur = async () => { // UPDATED: Made async and added immediate save
-    setIsEditing(false);
+  const saveChanges = () => {
     if (label !== data.label) {
+      justSavedRef.current = true;
       setNodes((nodes) =>
         nodes.map((n) => {
           if (n.id === id) {
@@ -68,26 +65,19 @@ function EditableNoteNode({ id, data, selected, canvasId }: EditableNoteProps) {
           return n;
         })
       );
+    }
+  };
 
-      // NEW: Immediate save to Supabase
-      try {
-        const canvas_data = { nodes: getNodes(), edges: getEdges() }; // Get latest state
-        const { error } = await supabase
-          .from('canvases')
-          .update({ canvas_data })
-          .eq('id', canvasId);
-
-        if (error) throw error;
-      } catch (error: any) {
-        showError(error.message || 'Failed to save note changes.');
-        console.error('Save error:', error);
-      }
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (selected && !isEditing) {
+      e.stopPropagation();
+      setIsEditing(true);
     }
   };
 
   const handleOpenInEditor = () => {
     if (isEditing && label !== data.label) {
-      handleBlur();
+      saveChanges();
     }
     setIsEditing(false);
     openNodeInEditor(id, label);
