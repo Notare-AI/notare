@@ -35,9 +35,10 @@ const getNodeTypeFromRequest = (requestType: string): string => {
 interface UseNodeCreationProps {
   setNodes: (nodes: Node[] | ((nds: Node[]) => Node[])) => void;
   onNodeAdded: () => void;
+  canvasId: string; // NEW: Added canvasId to props
 }
 
-export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps) => {
+export const useNodeCreation = ({ setNodes, onNodeAdded, canvasId }: UseNodeCreationProps) => { // NEW: Added canvasId
   const { screenToFlowPosition, fitView } = useReactFlow();
 
   const addNode = useCallback((
@@ -59,12 +60,13 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
         sources: sources,
         isAiGenerated: isAiGenerated,
         color: parentNodeColor, // Apply parent color if available
+        canvasId, // NEW: Include canvasId in node data
       },
       style: { width: 250, ...parentNodeStyle }, // Apply parent style if available
       selected: true,
     };
 
-    setNodes((nds) => nds.map(n => ({...n, selected: false})).concat(newNode));
+    setNodes((nds) => nds.map(n => ({ ...n, selected: false })).concat(newNode));
     onNodeAdded();
 
     setTimeout(() => {
@@ -72,7 +74,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
     }, 100);
 
     return newNode; // Return the newly created node
-  }, [setNodes, onNodeAdded, fitView]);
+  }, [setNodes, onNodeAdded, fitView, canvasId]); // NEW: Added canvasId to deps
 
   const addNodeFromRequest = useCallback((newNodeRequest: NewNodeRequest) => {
     const { type, content, sources } = newNodeRequest;

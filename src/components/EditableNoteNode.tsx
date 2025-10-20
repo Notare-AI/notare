@@ -22,16 +22,16 @@ interface EditableNoteData {
   sources?: Source[];
   color?: string;
   isAiGenerated?: boolean;
+  canvasId: string; // NEW: canvasId now in data
 }
 
 type EditableNoteProps = {
   id: string;
   data: EditableNoteData;
   selected?: boolean;
-  canvasId: string; // NEW: Added canvasId prop for saving
 };
 
-function EditableNoteNode({ id, data, selected, canvasId }: EditableNoteProps) {
+function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label || '');
   const { setNodes, getNodes, getEdges } = useReactFlow(); // UPDATED: Added getNodes, getEdges
@@ -75,7 +75,7 @@ function EditableNoteNode({ id, data, selected, canvasId }: EditableNoteProps) {
         const { error } = await supabase
           .from('canvases')
           .update({ canvas_data })
-          .eq('id', canvasId);
+          .eq('id', data.canvasId); // NEW: Use data.canvasId
 
         if (error) throw error;
       } catch (error: any) {
