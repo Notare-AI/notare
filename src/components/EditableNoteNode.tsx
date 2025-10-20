@@ -76,11 +76,9 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   };
 
   const handleOpenInEditor = () => {
-    // Save current changes before opening modal
     if (isEditing && label !== data.label) {
       saveChanges();
     }
-    // Exit editing mode
     setIsEditing(false);
     openNodeInEditor(id, label);
   };
@@ -139,7 +137,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
       >
         <NodeResizer isVisible={selected} minWidth={200} minHeight={150} />
 
-        {/* Header */}
         <div className="flex items-center justify-between p-2 border-b border-border bg-card-header rounded-t-[7px] cursor-move">
           <span className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-foreground bg-muted border border-border rounded">
             <Pen size={14} />
@@ -175,13 +172,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           </div>
         </div>
 
-        {/* Body */}
         <div
           ref={contentRef}
           className={cn(
             'flex-grow overflow-y-auto',
             { 'cursor-move': !isEditing },
-            isEditing && 'cursor-text' // Explicitly set text cursor when editing
+            isEditing && 'cursor-text'
           )}
         >
           <TiptapEditor
@@ -191,6 +187,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             className="w-full h-full flex flex-col"
             isEditable={isEditing}
             autoFocus={isEditing}
+            isMarkdownInput={true}
           />
         </div>
       </div>

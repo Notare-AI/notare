@@ -9,6 +9,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import TiptapEditor from './TiptapEditor';
+import TurndownService from 'turndown';
+import Showdown from 'showdown';
+
+const turndownService = new TurndownService();
+const showdownConverter = new Showdown.Converter();
 
 interface NoteEditorModalProps {
   isOpen: boolean;
@@ -23,35 +28,34 @@ const NoteEditorModal = ({
   initialContent,
   onSave,
 }: NoteEditorModalProps) => {
-  const [content, setContent] = useState(initialContent);
+  const [htmlContent, setHtmlContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
-      // Small delay to ensure the editor is ready
-      setTimeout(() => {
-        setContent(initialContent);
-        setIsLoading(false);
-      }, 100);
+      const initialHtml = showdownConverter.makeHtml(initialContent);
+      setHtmlContent(initialHtml);
+      setIsLoading(false);
     }
   }, [isOpen, initialContent]);
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      const trimmedContent = content.trim();
+      const newMarkdown = turndownService.turndown(htmlContent).trim();
       const trimmedInitial = initialContent.trim();
-      if (trimmedContent !== trimmedInitial && trimmedContent !== '') {
-        onSave(trimmedContent);
+      if (newMarkdown !== trimmedInitial && newMarkdown !== '') {
+        onSave(newMarkdown);
       }
     }
     onOpenChange(newOpen);
   };
 
   const handleSave = () => {
-    const trimmedContent = content.trim();
-    if (trimmedContent !== initialContent.trim() && trimmedContent !== '') {
-      onSave(trimmedContent);
+    const newMarkdown = turndownService.turndown(htmlContent).trim();
+    const trimmedInitial = initialContent.trim();
+    if (newMarkdown !== trimmedInitial && newMarkdown !== '') {
+      onSave(newMarkdown);
     }
     onOpenChange(false);
   };
@@ -83,17 +87,16 @@ const NoteEditorModal = ({
         <div className="flex-grow p-4 md:p-8 overflow-y-auto">
           <div className="bg-background shadow-sm rounded-md w-full h-full p-6 md:p-10">
             <TiptapEditor
-              value={content}
-              onChange={setContent}
+              value={htmlContent}
+              onChange={setHtmlContent}
               className="w-full h-full flex flex-col"
               placeholder="Start writing..."
+              isMarkdownInput={false}
             />
           </div>
         </div>
         <DialogFooter className="p-6 border-t bg-background rounded-b-lg">
-          <Button
-            onClick={handleSave}
-          >
+          <Button onClick={handleSave}>
             Save Changes
           </Button>
         </DialogFooter>

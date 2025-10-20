@@ -11,17 +11,18 @@ import Showdown from 'showdown';
 import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
+const turndownService = new TurndownService();
+const showdownConverter = new Showdown.Converter();
+
 interface TiptapEditorProps {
   value: string;
-  onChange: (markdown: string) => void;
+  onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
   isEditable?: boolean;
   autoFocus?: boolean;
+  isMarkdownInput?: boolean;
 }
-
-const turndownService = new TurndownService();
-const showdownConverter = new Showdown.Converter();
 
 const TiptapEditor = ({
   value,
@@ -30,10 +31,10 @@ const TiptapEditor = ({
   className,
   isEditable = true,
   autoFocus = false,
+  isMarkdownInput = false,
 }: TiptapEditorProps) => {
   const editorRef = useRef<any>(null);
   const lastValueRef = useRef<string>('');
-  const isInternalUpdate = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -52,7 +53,7 @@ const TiptapEditor = ({
       Color,
       Highlight.configure({ multicolor: true }),
     ],
-    content: '', // Initial content is set via useEffect
+    content: '',
     editable: isEditable,
     editorProps: {
       attributes: {
@@ -60,7 +61,6 @@ const TiptapEditor = ({
           'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
       },
       handleDOMEvents: isEditable ? {
-        // Only apply these when editing to prevent interference with selection
         mousedown: (view, event) => {
           event.stopPropagation();
           return false;
@@ -69,36 +69,28 @@ const TiptapEditor = ({
           event.stopPropagation();
           return false;
         },
-      } : {}, // Empty when not editable, allowing events to propagate for selection
+      } : {},
     },
     onUpdate: ({ editor }) => {
-      isInternalUpdate.current = true;
       const html = editor.getHTML();
-      const markdown = turndownService.turndown(html);
-      onChange(markdown);
+      onChange(html);
     },
   });
 
   useEffect(() => {
     if (editor && value !== lastValueRef.current) {
       lastValueRef.current = value;
-      if (isInternalUpdate.current) {
-        isInternalUpdate.current = false;
-        return;
+      
+      let contentToSet = value;
+      if (isMarkdownInput) {
+        contentToSet = showdownConverter.makeHtml(value);
       }
-      try {
-        const html = showdownConverter.makeHtml(value);
-        // Only update if the content has actually changed to avoid loops
-        if (html !== editor.getHTML()) {
-          editor.commands.setContent(html, false, { preserveWhitespace: 'full' });
-        }
-      } catch (error) {
-        console.error('Error converting markdown to HTML:', error);
-        // Fallback: set content as plain text
-        editor.commands.setContent(value, false);
+      
+      if (contentToSet !== editor.getHTML()) {
+        editor.commands.setContent(contentToSet, false, { preserveWhitespace: 'full' });
       }
     }
-  }, [value, editor]);
+  }, [value, editor, isMarkdownInput]);
 
   useEffect(() => {
     if (editor) {
@@ -124,7 +116,7 @@ const TiptapEditor = ({
         className={cn(
           'flex-grow overflow-y-auto p-3',
           { 'nodrag': isEditable },
-          isEditable && 'cursor-text' // Explicitly set text cursor when editable
+          isEditable && 'cursor-text'
         )}
       />
     </div>
