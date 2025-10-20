@@ -237,7 +237,19 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => editor.chain().focus().toggleTaskList().run()}
+        onClick={() => {
+          if (editor.isActive('taskList')) {
+            editor.chain().focus().toggleTaskList().run();
+          } else {
+            editor.chain().focus().insertContent({
+              type: 'taskList',
+              content: [{
+                type: 'taskItem',
+                content: [{ type: 'paragraph' }]
+              }]
+            }).run();
+          }
+        }}
         className={cn('h-8 w-8', editor.isActive('taskList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600')}
         title="Task List"
       >
