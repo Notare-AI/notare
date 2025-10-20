@@ -40,15 +40,10 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
-    // When data from the parent (React Flow state) changes, update the local state.
-    // This is important for external updates, like from AI.
-    // We don't check for `isEditing` to ensure external updates are always reflected.
-    // The editor's state will be preserved correctly by Tiptap internally.
     setLabel(data.label || '');
   }, [data.label]);
 
   useEffect(() => {
-    // If the node is deselected, exit editing mode.
     if (!selected && isEditing) {
       setIsEditing(false);
     }
@@ -56,7 +51,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
 
   const handleBlur = () => {
     setIsEditing(false);
-    // Persist changes to the global state when the editor loses focus.
     if (label !== data.label) {
       setNodes((nodes) =>
         nodes.map((n) => {
@@ -160,7 +154,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         </div>
 
         {/* Body */}
-        <div ref={contentRef} className="flex-grow overflow-y-auto">
+        <div
+          ref={contentRef}
+          className={cn(
+            'flex-grow overflow-y-auto',
+            { 'cursor-grab': !isEditing }
+          )}
+        >
           <TiptapEditor
             value={label}
             onChange={setLabel}

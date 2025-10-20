@@ -70,24 +70,19 @@ const TiptapEditor = ({
   useEffect(() => {
     if (editor) {
       editor.setEditable(isEditable);
-      // Update editor props to conditionally apply 'nodrag'
-      editor.setOptions({
-        editorProps: {
-          attributes: {
-            class: cn(
-              'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
-              { 'nodrag': isEditable }
-            ),
-          },
-        },
-      });
     }
   }, [isEditable, editor]);
 
   return (
     <div className={className}>
       {isEditable && <TiptapToolbar editor={editor} />}
-      <EditorContent editor={editor} className="flex-grow overflow-y-auto p-3" />
+      <EditorContent
+        editor={editor}
+        className={cn(
+          'flex-grow overflow-y-auto p-3',
+          { 'nodrag': isEditable }
+        )}
+      />
     </div>
   );
 };
