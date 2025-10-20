@@ -6,9 +6,19 @@ import {
   List,
   ListOrdered,
   Quote,
+  Heading,
+  Heading1,
+  Heading2,
+  Heading3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface TiptapToolbarProps {
   editor: Editor | null;
@@ -58,8 +68,47 @@ const TiptapToolbar = ({ editor }: TiptapToolbarProps) => {
     },
   ];
 
+  const headingOptions = [
+    { level: 1, icon: Heading1, label: 'Heading 1' },
+    { level: 2, icon: Heading2, label: 'Heading 2' },
+    { level: 3, icon: Heading3, label: 'Heading 3' },
+  ];
+
   return (
     <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-t-md border-b border-gray-200 dark:border-gray-700">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'h-8 w-8',
+              editor.isActive('heading') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+            )}
+          >
+            <Heading className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() => editor.chain().focus().setParagraph().run()}
+            disabled={!editor.can().setParagraph()}
+          >
+            Paragraph
+          </DropdownMenuItem>
+          {headingOptions.map(option => (
+            <DropdownMenuItem
+              key={option.level}
+              onClick={() => editor.chain().focus().toggleHeading({ level: option.level as 1 | 2 | 3 }).run()}
+              disabled={!editor.can().toggleHeading({ level: option.level as 1 | 2 | 3 })}
+            >
+              <option.icon className="mr-2 h-4 w-4" />
+              {option.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       {buttons.map((button) => (
         <Button
           key={button.name}
