@@ -60,7 +60,7 @@ const Features = () => {
   return (
     <section id="features" className="container py-20 md:py-24 space-y-24">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-        Why Notare is the Best Note Taking App for Students, Professionals, and Researchers
+        Why Notare is the Best Note Taking App for Students, Readers, and Researchers
       </h2>
       
       {features.map((feature, index) => (
