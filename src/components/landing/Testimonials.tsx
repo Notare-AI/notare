@@ -2,9 +2,9 @@ import { Quote } from 'lucide-react';
 
 const testimonials = [
   {
-    quote: "Notare transformed how I study PDFs—AI summaries save me hours!",
+    quote: "Notare transformed how I study, PDF—AI summaries save me hours!",
     author: "Sarah, Student",
-    avatar: '@/images/testimonial-sarah.png', // Assumed name; update if different
+    
   },
   {
     quote: "The visual maps make project planning a breeze. Best AI note taking tool I've used.",
