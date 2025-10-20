@@ -3,7 +3,8 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import TextStyle from '@tiptap/extension-text-style';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import TiptapToolbar from './TiptapToolbar';
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
@@ -44,6 +45,7 @@ const TiptapEditor = ({
         placeholder,
       }),
       TextStyle,
+      Color,
       Highlight.configure({ multicolor: true }),
     ],
     content: '', // Initial content is set via useEffect
