@@ -4,13 +4,13 @@ import { cn } from '@/lib/utils';
 const testimonials = [
   {
     author: "Sarah Chen",
-    role: "UX Designer at TechCorp",
+    role: "UX Designer",
     content: "Notare has revolutionized how I organize my design ideas. The infinite canvas and AI insights have made my workflow so much more efficient. It's like having a super-powered digital whiteboard!",
     rating: 5,
   },
   {
-    author: "Dr. Michael Rodriguez",
-    role: "Professor of History",
+    author: "Michael Rodriguez",
+    role: "PHD student in History",
     content: "As an academic, I deal with complex topics daily. Notare's visual mapping and PDF integration have been game-changers for my research and lecture preparations. Highly recommended!",
     rating: 5,
   },
