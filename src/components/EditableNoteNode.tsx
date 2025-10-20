@@ -50,14 +50,9 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   }, [selected, isEditing]);
 
   const handleDoubleClick = (e: React.MouseEvent) => {
-    // Only allow editing if the node is selected and we're not clicking on interactive elements
     if (selected && !isEditing) {
-      const target = e.target as HTMLElement;
-      // Don't enter editing mode if clicking on buttons or interactive elements
-      if (!target.closest('button') && !target.closest('[role="button"]')) {
-        e.stopPropagation();
-        setIsEditing(true);
-      }
+      e.stopPropagation();
+      setIsEditing(true);
     }
   };
 
@@ -169,8 +164,8 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         <div
           ref={contentRef}
           className={cn(
-            'flex-grow overflow-y-auto relative',
-            isEditing ? 'cursor-text' : 'cursor-pointer'
+            'flex-grow overflow-y-auto',
+            { 'cursor-grab': !isEditing }
           )}
         >
           <TiptapEditor

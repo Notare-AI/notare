@@ -8,7 +8,6 @@ import {
   useEdgesState,
   addEdge,
   Edge,
-  SelectionMode,
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -21,7 +20,6 @@ import CustomAnimatedEdge from './CustomAnimatedEdge';
 import NoteEditorModal from './NoteEditorModal';
 import CanvasMinimap from './CanvasMinimap';
 import FlowControls from './FlowControls';
-import SelectionRectangle from './SelectionRectangle';
 
 // Import the new hooks
 import { useCanvasData } from '@/hooks/useCanvasData';
@@ -73,6 +71,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef: useRef(false) });
   const { isLoading, isInitializedRef } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory });
   const { addNode, addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
+  const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded });
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions({ nodes, edges, setEditingNodeId });
 
@@ -102,8 +101,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     [activeTool, addNodeOnPaneClick]
   );
 
-  const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
-
   const handleDrop = useCallback((event: React.DragEvent) => {
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
@@ -125,20 +122,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const currentEditingNodeContent = editingNodeId 
     ? (nodes.find(n => n.id === editingNodeId)?.data.label || '') 
     : '';
-
-  // Determine cursor based on active tool
-  const getCanvasCursor = () => {
-    switch (activeTool) {
-      case 'select':
-        return 'cursor-pointer';
-      case 'pan':
-        return 'cursor-grab';
-      case 'note':
-        return 'cursor-crosshair';
-      default:
-        return 'cursor-default';
-    }
-  };
 
   if (isLoading) {
     return (
@@ -170,12 +153,9 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           onDragLeave={onDragLeave}
           fitView
           zoomOnDoubleClick={false}
-          panOnDrag={activeTool === 'pan'}
+          panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
           selectionOnDrag={activeTool === 'select'}
           nodesDraggable={activeTool === 'select'}
-          selectNodesOnDrag={activeTool === 'select'}
-          selectionMode={activeTool === 'select' ? SelectionMode.Partial : SelectionMode.Single}
-          selectionKeyCode={['Shift']}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           deleteKeyCode={['Backspace', 'Delete']}
@@ -184,12 +164,14 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           snapToGrid={true}
           snapGrid={[15, 15]}
           multiSelectionKeyCode="Shift"
-          className={cn(
-            'transition-all duration-200',
-            getCanvasCursor()
-          )}
+          className={
+            activeTool === 'pan'
+              ? 'cursor-grab'
+              : activeTool === 'note'
+              ? 'cursor-crosshair'
+              : ''
+          }
         >
-          <SelectionRectangle isEnabled={activeTool === 'select'} />
           <FlowControls onSettingsClick={onSettingsClick} />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
           <CanvasMinimap isMinimapOpen={isMinimapOpen} setIsMinimapOpen={setIsMinimapOpen} />
