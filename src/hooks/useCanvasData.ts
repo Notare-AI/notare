@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { supabase } from '@/integrations/supabase/client';
 import { showError } from '@/utils/toast';
@@ -76,11 +76,18 @@ export const useCanvasData = ({
     }
 
     saveTimeoutRef.current = window.setTimeout(async () => {
-      const canvas_data = { nodes, edges };
-      await supabase
-        .from('canvases')
-        .update({ canvas_data })
-        .eq('id', canvasId);
+      try {
+        const canvas_data = { nodes, edges };
+        const { error } = await supabase
+          .from('canvases')
+          .update({ canvas_data })
+          .eq('id', canvasId);
+
+        if (error) throw error;
+      } catch (error: any) {
+        showError(error.message || 'Failed to auto-save canvas.');
+        console.error('Auto-save error:', error);
+      }
     }, 500);
 
     return () => {
