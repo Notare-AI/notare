@@ -158,6 +158,13 @@
     pointer-events: none;
     @apply text-gray-500 dark:text-gray-400;
   }
+
+  /* Reset heading margins within the editor to prevent layout issues */
+  .tiptap h1,
+  .tiptap h2,
+  .tiptap h3 {
+    @apply mt-4 mb-2;
+  }
 }
 
 /* Custom override for Supabase Auth UI to show Microsoft icon and text */
