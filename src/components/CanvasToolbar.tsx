@@ -18,7 +18,7 @@ interface CanvasToolbarProps {
 const tools = [
   { id: 'select' as const, icon: MousePointer2, label: 'Select', draggable: false, tooltip: 'Select and move items' },
   { id: 'pan' as const, icon: Hand, label: 'Pan', draggable: false, tooltip: 'Pan the canvas' },
-  { id: 'note' as const, icon: FilePlus2, label: 'New Note', draggable: true, tooltip: 'Drag to add a new note' },
+  { id: 'note' as const, icon: FilePlus2, label: 'New Note', draggable: true, tooltip: 'Click to add a new note' },
 ];
 
 const CanvasToolbar = ({ activeTool, onToolChange }: CanvasToolbarProps) => {
