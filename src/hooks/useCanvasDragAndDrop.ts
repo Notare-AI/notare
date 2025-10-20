@@ -26,7 +26,7 @@ export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps)
     if (type && !isDragOver) {
       setIsDragOver(true);
     }
-  }, [type, isDragOver]); // Added type and isDragOver to deps
+  }, [type, isDragOver]);
 
   const onDrop = useCallback(
     (event: React.DragEvent, setNodes: (nodes: Node[] | ((nds: Node[]) => Node[])) => void) => {
@@ -51,7 +51,7 @@ export const useCanvasDragAndDrop = ({ onNodeAdded }: UseCanvasDragAndDropProps)
       addNode(type, '', position);
       setType(null); // Reset DnD context type after drop
     },
-    [type, setType, addNode, screenToFlowPosition] // Added type to deps
+    [screenToFlowPosition, type, addNode, setType]
   );
 
   const onDragLeave = useCallback(() => {
