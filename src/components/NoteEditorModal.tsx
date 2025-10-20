@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -30,34 +30,59 @@ const NoteEditorModal = ({
 }: NoteEditorModalProps) => {
   const [htmlContent, setHtmlContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDirty, setIsDirty] = useState(false); // NEW: Track if user has made changes in modal
+  const lastSavedContent = useRef(initialContent); // NEW: Track the last saved content to detect external changes
 
+  // Initialize content when modal opens
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
       const initialHtml = showdownConverter.makeHtml(initialContent);
       setHtmlContent(initialHtml);
+      lastSavedContent.current = initialContent; // Reset last saved
+      setIsDirty(false); // Reset dirty flag on open
       setIsLoading(false);
     }
-  }, [isOpen, initialContent]); // Added initialContent dependency to refresh if it changes while open
+  }, [isOpen]); // Note: Removed initialContent from deps to avoid resetting on prop change
+
+  // NEW: Sync from canvas to modal if prop changes while open (but only if not dirty)
+  useEffect(() => {
+    if (isOpen && initialContent !== lastSavedContent.current && !isDirty) {
+      // Canvas updated externally while modal is open, and user hasn't edited yet
+      const newHtml = showdownConverter.makeHtml(initialContent);
+      setHtmlContent(newHtml);
+      lastSavedContent.current = initialContent; // Update last saved
+    }
+    // If dirty, we ignore the update to prevent overwriting user's unsaved changes
+  }, [initialContent, isOpen, isDirty]);
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       const newMarkdown = turndownService.turndown(htmlContent).trim();
-      const trimmedInitial = initialContent.trim();
+      const trimmedInitial = lastSavedContent.current.trim(); // Use last saved to compare
       if (newMarkdown !== trimmedInitial && newMarkdown !== '') {
         onSave(newMarkdown);
+        lastSavedContent.current = newMarkdown; // Update last saved after save
       }
+      setIsDirty(false); // Reset dirty on close
     }
     onOpenChange(newOpen);
   };
 
   const handleSave = () => {
     const newMarkdown = turndownService.turndown(htmlContent).trim();
-    const trimmedInitial = initialContent.trim(); // Use latest initialContent
+    const trimmedInitial = lastSavedContent.current.trim();
     if (newMarkdown !== trimmedInitial && newMarkdown !== '') {
       onSave(newMarkdown);
+      lastSavedContent.current = newMarkdown;
     }
     onOpenChange(false);
+    setIsDirty(false);
+  };
+
+  const handleContentChange = (newHtml: string) => {
+    setHtmlContent(newHtml);
+    setIsDirty(true); // Mark as dirty when user edits
   };
 
   if (isLoading) {
@@ -88,7 +113,7 @@ const NoteEditorModal = ({
           <div className="bg-background shadow-sm rounded-md w-full h-full p-6 md:p-10">
             <TiptapEditor
               value={htmlContent}
-              onChange={setHtmlContent}
+              onChange={handleContentChange} // Updated to mark dirty
               className="w-full h-full flex flex-col"
               placeholder="Start writing..."
               isMarkdownInput={false}
