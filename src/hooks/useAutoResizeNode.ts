@@ -36,7 +36,7 @@ export const useAutoResizeNode = (nodeId: string, content: string) => {
           })
         );
       }
-    }, 50);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, [content, nodeId, getNode, setNodes]);

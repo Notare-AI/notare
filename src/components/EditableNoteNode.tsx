@@ -40,8 +40,10 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
   useEffect(() => {
-    setLabel(data.label || '');
-  }, [data.label]);
+    if (!isEditing) {
+      setLabel(data.label || '');
+    }
+  }, [data.label, isEditing]);
 
   useEffect(() => {
     if (!selected && isEditing) {
