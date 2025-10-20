@@ -56,17 +56,19 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     }
   };
 
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (label !== data.label) {
-      setNodes((nodes) =>
-        nodes.map((n) => {
-          if (n.id === id) {
-            return { ...n, data: { ...n.data, label } };
-          }
-          return n;
-        })
-      );
+  const handleBlur = (e: React.FocusEvent) => {
+    if (contentRef.current && !contentRef.current.contains(e.relatedTarget)) {
+      setIsEditing(false);
+      if (label !== data.label) {
+        setNodes((nodes) =>
+          nodes.map((n) => {
+            if (n.id === id) {
+              return { ...n, data: { ...n.data, label } };
+            }
+            return n;
+          })
+        );
+      }
     }
   };
 
@@ -168,11 +170,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             { 'cursor-move': !isEditing },
             isEditing && 'cursor-text' // Explicitly set text cursor when editing
           )}
+          onBlur={handleBlur}
+          tabIndex={-1} // Make the div focusable to capture blur events
         >
           <TiptapEditor
             value={label}
             onChange={setLabel}
-            onBlur={handleBlur}
             placeholder={!label ? 'Double-click to edit...' : ''}
             className="w-full h-full flex flex-col"
             isEditable={isEditing}

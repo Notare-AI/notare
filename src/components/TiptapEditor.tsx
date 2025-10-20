@@ -14,7 +14,6 @@ import { cn } from '@/lib/utils';
 interface TiptapEditorProps {
   value: string;
   onChange: (markdown: string) => void;
-  onBlur?: () => void;
   placeholder?: string;
   className?: string;
   isEditable?: boolean;
@@ -27,7 +26,6 @@ const showdownConverter = new Showdown.Converter();
 const TiptapEditor = ({
   value,
   onChange,
-  onBlur,
   placeholder = 'Start writing...',
   className,
   isEditable = true,
@@ -76,11 +74,6 @@ const TiptapEditor = ({
       const html = editor.getHTML();
       const markdown = turndownService.turndown(html);
       onChange(markdown);
-    },
-    onBlur: () => {
-      if (onBlur) {
-        onBlur();
-      }
     },
   });
 
