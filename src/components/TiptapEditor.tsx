@@ -42,7 +42,7 @@ const TiptapEditor = ({
     editorProps: {
       attributes: {
         class:
-          'prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
+          'nodrag prose prose-sm dark:prose-invert max-w-none w-full h-full bg-transparent border-none resize-none outline-none p-0 m-0 block focus:outline-none',
       },
     },
     onUpdate: ({ editor }) => {
