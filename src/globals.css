@@ -246,18 +246,3 @@ button[aria-label="Continue with Azure"]::after {
   font-size: 14px; /* Restore font size for new text */
   vertical-align: middle;
 }
-
-/* Group Node Styles */
-@layer components {
-  .react-flow__node-group {
-    background: transparent !important;
-    border: 2px dashed hsl(var(--border)) !important;
-    border-radius: 8px !important;
-    min-width: 200px !important;
-    min-height: 150px !important;
-  }
-
-  .react-flow__node-group.selected {
-    border: 2px solid hsl(var(--primary)) !important;
-  }
-}
