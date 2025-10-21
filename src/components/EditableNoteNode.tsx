@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Expand } from 'lucide-react';
@@ -9,7 +9,6 @@ import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 import LexicalEditor from './lexical/LexicalEditor';
-import InlineLexicalEditor from './lexical/InlineLexicalEditor';
 import { convertTipTapToLexical, isTipTapJSON, isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 interface Source {
@@ -52,6 +51,13 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     );
   }, [id, isEditing, setNodes]);
 
+  // Exit edit mode when the node is deselected
+  useEffect(() => {
+    if (!selected && isEditing) {
+      setIsEditing(false);
+    }
+  }, [selected, isEditing]);
+
   // Allow starting edit with the "Enter" key on a selected node
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -85,12 +91,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     return content;
   };
 
-  const handleSave = (newContent: string) => {
+  const handleContentChange = useCallback((newContent: string) => {
+    // This updates the node state, which is then auto-saved by the useCanvasData hook.
     setNodes((nodes) =>
-      nodes.map((n) => (n.id === id ? { ...n, data: { ...n, label: newContent } } : n))
+      nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, label: newContent } } : n))
     );
-    setIsEditing(false);
-  };
+  }, [id, setNodes]);
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
@@ -148,21 +154,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
         </div>
 
         <div ref={contentRef} className="flex-grow overflow-y-auto p-3">
-          {isEditing ? (
-            <InlineLexicalEditor
-              initialState={getLexicalContent(data.label || '')}
-              onSave={handleSave}
-              onCancel={() => setIsEditing(false)}
-            />
-          ) : (
-            <div className="w-full h-full" onDoubleClick={() => setIsEditing(true)}>
-              <LexicalEditor
-                initialValue={getLexicalContent(data.label || '')}
-                isEditable={false}
-                showToolbar={false}
-              />
-            </div>
-          )}
+          <LexicalEditor
+            initialValue={getLexicalContent(data.label || '')}
+            onChange={handleContentChange}
+            isEditable={isEditing}
+            showToolbar={isEditing}
+          />
         </div>
       </div>
       <Handle type="source" position={Position.Right} id="right-source" />

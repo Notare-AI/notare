@@ -11,6 +11,7 @@ import { ListItemNode, ListNode } from '@lexical/list';
 import { CodeNode } from '@lexical/code';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { EditorState } from 'lexical';
+import { cn } from '@/lib/utils';
 
 import { theme } from './theme';
 import ToolbarPlugin from './ToolbarPlugin';
@@ -58,8 +59,8 @@ export default function LexicalEditor({
         {showToolbar && isEditable && <ToolbarPlugin />}
         <div className="relative flex-grow">
           <RichTextPlugin
-            contentEditable={<ContentEditable className="outline-none w-full h-full" />}
-            placeholder={<div className="absolute top-0 left-0 text-gray-400 pointer-events-none">Type something...</div>}
+            contentEditable={<ContentEditable className={cn("outline-none w-full h-full", !isEditable && "cursor-default")} />}
+            placeholder={<div className={cn("absolute top-0 left-0 text-gray-400 pointer-events-none", !isEditable && "hidden")}>Type something...</div>}
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />
