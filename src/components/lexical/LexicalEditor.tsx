@@ -10,7 +10,6 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { TRANSFORMERS } from '@lexical/markdown';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
@@ -55,6 +54,22 @@ const UpdateEditablePlugin = ({ editable }: { editable: boolean }) => {
   return null;
 };
 
+// This new plugin will focus the editor whenever it becomes editable.
+const AutoFocusOnEditPlugin = ({ editable }: { editable: boolean }) => {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    if (editable) {
+      // We use a timeout to ensure that the focus happens after the DOM has been updated
+      // and the editor is truly ready to receive focus.
+      setTimeout(() => {
+        editor.focus(undefined, { defaultSelection: 'rootEnd' });
+      }, 0);
+    }
+  }, [editor, editable]);
+
+  return null;
+};
+
 export default function LexicalEditor({
   initialValue,
   onChange,
@@ -82,7 +97,7 @@ export default function LexicalEditor({
           <ListPlugin />
           <LinkPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-          {isEditable && <AutoFocusPlugin />}
+          <AutoFocusOnEditPlugin editable={isEditable} />
           {onChange && <OnChangePlugin onChange={handleOnChange} ignoreSelectionChange />}
           <UpdateEditablePlugin editable={isEditable} />
         </div>
