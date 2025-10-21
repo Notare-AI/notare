@@ -10,6 +10,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { TRANSFORMERS } from '@lexical/markdown';
+import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
@@ -45,7 +46,7 @@ interface LexicalEditorProps {
   showToolbar?: boolean;
 }
 
-// This new component ensures the editor's editable state is always in sync.
+// This component ensures the editor's editable state is always in sync.
 const UpdateEditablePlugin = ({ editable }: { editable: boolean }) => {
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function LexicalEditor({
         {showToolbar && isEditable && <ToolbarPlugin />}
         <div className="relative flex-grow">
           <RichTextPlugin
-            contentEditable={<ContentEditable className={cn("outline-none w-full h-full p-1", !isEditable && "cursor-default")} />}
+            contentEditable={<ContentEditable className={cn("outline-none w-full h-full p-1", isEditable ? "cursor-text" : "cursor-default")} />}
             placeholder={<div className={cn("absolute top-1 left-1 text-gray-400 pointer-events-none", !isEditable && "hidden")}>Type something...</div>}
             ErrorBoundary={LexicalErrorBoundary}
           />
@@ -81,6 +82,7 @@ export default function LexicalEditor({
           <ListPlugin />
           <LinkPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          {isEditable && <AutoFocusPlugin />}
           {onChange && <OnChangePlugin onChange={handleOnChange} ignoreSelectionChange />}
           <UpdateEditablePlugin editable={isEditable} />
         </div>
