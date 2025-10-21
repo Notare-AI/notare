@@ -134,10 +134,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           color: 'hsl(var(--foreground))',
           background: nodeStyles.background,
         }}
-        className={cn(
-          "w-full h-full box-border flex flex-col rounded-lg",
-          isEditing && "cursor-text"
-        )}
+        className="w-full h-full box-border flex flex-col rounded-lg"
         onDoubleClick={() => setIsEditing(true)}
       >
         <NodeResizer isVisible={selected} minWidth={200} minHeight={150} />
