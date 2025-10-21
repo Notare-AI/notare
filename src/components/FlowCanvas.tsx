@@ -4,10 +4,8 @@ import {
   Background,
   BackgroundVariant,
   useNodesState,
-  Node,
   useEdgesState,
   addEdge,
-  Edge,
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -17,7 +15,6 @@ import ReferenceNode from './ReferenceNode';
 import ImageNode from './ImageNode';
 import CanvasToolbar, { Tool } from './CanvasToolbar';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
-import NoteEditorModal from './NoteEditorModal';
 import CanvasMinimap from './CanvasMinimap';
 import FlowControls from './FlowControls';
 
@@ -65,16 +62,14 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const [isMinimapOpen, setIsMinimapOpen] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-  const [editingNodeContent, setEditingNodeContent] = useState<string>('');
 
   // --- Hooks for modularity ---
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef: useRef(false) });
-  const { isLoading, isInitializedRef } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory });
-  const { addNode, addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
+  const { isLoading } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory });
+  const { addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded });
-  const { downloadNodeBranch, openNodeInEditor } = useCanvasActions({ nodes, edges, setEditingNodeId, setEditingNodeContent });
+  const { downloadNodeBranch } = useCanvasActions({ nodes, edges });
 
   // --- Effects ---
   useEffect(() => {
@@ -105,20 +100,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
-  const handleSaveFromEditor = (newContent: string) => {
-    if (!editingNodeId) return;
-
-    setNodes((nodes) =>
-      nodes.map((n) => {
-        if (n.id === editingNodeId) {
-          return { ...n, data: { ...n.data, label: newContent } };
-        }
-        return n;
-      })
-    );
-    setEditingNodeId(null);
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -129,7 +110,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
 
   return (
     <div className="h-full w-full relative" ref={reactFlowWrapper}>
-      <CanvasActionsProvider value={{ downloadNodeBranch, openNodeInEditor }}>
+      <CanvasActionsProvider value={{ downloadNodeBranch }}>
         {isDragOver && (
           <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
             <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
@@ -177,12 +158,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         </ReactFlow>
       </CanvasActionsProvider>
       <CanvasToolbar activeTool={activeTool} onToolChange={setActiveTool} />
-      <NoteEditorModal 
-        isOpen={!!editingNodeId} 
-        onOpenChange={(isOpen) => !isOpen && setEditingNodeId(null)}
-        initialContent={editingNodeContent}
-        onSave={handleSaveFromEditor}
-      />
     </div>
   );
 };

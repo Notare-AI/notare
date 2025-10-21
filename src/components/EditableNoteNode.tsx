@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
-import { Pen, Eye, Expand } from 'lucide-react';
+import { Pen, Eye } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
-  const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
+  const { downloadNodeBranch } = useCanvasActions();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -148,7 +148,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             {data.sources && data.sources.length > 0 && (
               <button onClick={handleViewSourcesClick} className={cn("p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground", isActive && "bg-blue-500/10 text-blue-600 dark:text-blue-300")} title="View sources in PDF"><Eye size={16} /></button>
             )}
-            <button onClick={() => openNodeInEditor(id, data.label)} className="p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground" title="Open in editor"><Expand size={16} /></button>
             <NodeAIEditor nodeId={id} currentContent={data.label} />
           </div>
         </div>

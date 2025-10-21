@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { NodeResizer, useReactFlow, Handle, Position } from '@xyflow/react';
-import { Quote, Pencil, Expand } from 'lucide-react';
+import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
+import { Quote, Pencil } from 'lucide-react';
 import NodeToolbarComponent from './NodeToolbar';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -27,7 +27,7 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { handleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
-  const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
+  const { downloadNodeBranch } = useCanvasActions();
 
   useEffect(() => {
     setLabel(data.label || '');
@@ -108,13 +108,6 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
             Reference
           </span>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => openNodeInEditor(id, data.label)}
-              className="p-1 text-gray-500 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
-              title="Open in editor"
-            >
-              <Expand size={16} />
-            </button>
             {!isEditing && (
               <button
                 onClick={handleEditClick}

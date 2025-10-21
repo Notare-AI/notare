@@ -1,15 +1,13 @@
 import { useCallback } from 'react';
-import { useReactFlow, Node, Edge } from '@xyflow/react';
+import { Node, Edge } from '@xyflow/react';
 import { showError, showSuccess } from '@/utils/toast';
 
 interface UseCanvasActionsProps {
   nodes: Node[];
   edges: Edge[];
-  setEditingNodeId: (nodeId: string | null) => void;
-  setEditingNodeContent: (content: string) => void;
 }
 
-export const useCanvasActions = ({ nodes, edges, setEditingNodeId, setEditingNodeContent }: UseCanvasActionsProps) => {
+export const useCanvasActions = ({ nodes, edges }: UseCanvasActionsProps) => {
   const downloadNodeBranch = useCallback((startNodeId: string) => {
     const startNode = nodes.find(n => n.id === startNodeId);
     if (!startNode) {
@@ -72,15 +70,5 @@ export const useCanvasActions = ({ nodes, edges, setEditingNodeId, setEditingNod
     showSuccess("Branch downloaded successfully!");
   }, [nodes, edges]);
 
-  const openNodeInEditor = useCallback((nodeId: string, content: string) => {
-    const nodeToEdit = nodes.find(n => n.id === nodeId);
-    if (nodeToEdit && (typeof nodeToEdit.data.label === 'string' || nodeToEdit.data.label === undefined)) {
-      setEditingNodeId(nodeId);
-      setEditingNodeContent(content || '');
-    } else {
-      showError("Could not find node content to edit.");
-    }
-  }, [nodes, setEditingNodeId, setEditingNodeContent]);
-
-  return { downloadNodeBranch, openNodeInEditor };
+  return { downloadNodeBranch };
 };
