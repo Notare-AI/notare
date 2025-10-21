@@ -6,7 +6,6 @@ import { useHighlight } from '@/contexts/HighlightContext';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
-import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 import LexicalEditor from './lexical/LexicalEditor';
 import { convertTipTapToLexical, isTipTapJSON, isLexicalJSON } from '@/lib/convertTipTapToLexical';
@@ -34,7 +33,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
-  const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch } = useCanvasActions();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
@@ -152,7 +150,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           </div>
         </div>
 
-        <div ref={contentRef} className="flex-grow overflow-y-auto p-3">
+        <div className="flex-grow overflow-y-auto p-3">
           <LexicalEditor
             initialValue={getLexicalContent(data.label || '')}
             onChange={handleContentChange}

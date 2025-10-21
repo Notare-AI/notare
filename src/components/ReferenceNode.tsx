@@ -6,7 +6,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
-import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 
 interface ReferenceNodeData {
@@ -26,7 +25,6 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
   const { setNodes } = useReactFlow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { handleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
-  const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch } = useCanvasActions();
 
   useEffect(() => {
@@ -121,7 +119,7 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
         </div>
 
         {/* Body */}
-        <div ref={contentRef} className="flex-grow p-3 overflow-y-auto" onDoubleClick={handleEditClick}>
+        <div className="flex-grow p-3 overflow-y-auto" onDoubleClick={handleEditClick}>
           {isEditing ? (
             <textarea
               ref={textareaRef}
