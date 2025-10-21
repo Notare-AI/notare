@@ -87,7 +87,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
 
   const handleSave = (newContent: string) => {
     setNodes((nodes) =>
-      nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, label: newContent } } : n))
+      nodes.map((n) => (n.id === id ? { ...n, data: { ...n, label: newContent } } : n))
     );
     setIsEditing(false);
   };
@@ -155,7 +155,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
               onCancel={() => setIsEditing(false)}
             />
           ) : (
-            <div className="cursor-text w-full h-full" onDoubleClick={() => setIsEditing(true)}>
+            <div className="w-full h-full" onDoubleClick={() => setIsEditing(true)}>
               <LexicalEditor
                 initialValue={getLexicalContent(data.label || '')}
                 isEditable={false}
