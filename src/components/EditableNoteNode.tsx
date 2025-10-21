@@ -6,6 +6,7 @@ import { useHighlight } from '@/contexts/HighlightContext';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
+import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 import LexicalEditor from './lexical/LexicalEditor';
 import { convertTipTapToLexical, isTipTapJSON, isLexicalJSON } from '@/lib/convertTipTapToLexical';
@@ -33,6 +34,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
+  const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch } = useCanvasActions();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
@@ -92,7 +94,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const handleContentChange = useCallback((newContent: string) => {
     // This updates the node state, which is then auto-saved by the useCanvasData hook.
     setNodes((nodes) =>
-      nodes.map((n) => (n.id === id ? { ...n, data: { ...n, label: newContent } } : n))
+      nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, label: newContent } } : n))
     );
   }, [id, setNodes]);
 
@@ -150,7 +152,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
           </div>
         </div>
 
-        <div className="flex-grow overflow-y-auto p-3">
+        <div ref={contentRef} className="flex-grow overflow-y-auto p-3">
           <LexicalEditor
             initialValue={getLexicalContent(data.label || '')}
             onChange={handleContentChange}

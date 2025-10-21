@@ -60,7 +60,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
         isAiGenerated: isAiGenerated,
         color: parentNodeColor, // Apply parent color if available
       },
-      style: { width: 300, minHeight: 400, ...parentNodeStyle }, // Apply parent style if available
+      style: { width: 300, height: 200, ...parentNodeStyle }, // Apply parent style if available
       selected: true,
     };
 
