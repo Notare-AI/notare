@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { useReactFlow, NodeResizer, Handle, Position } from '@xyflow/react';
+import { NodeResizer, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Expand } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
@@ -8,7 +7,8 @@ import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
-import TiptapEditor from './TiptapEditor';
+import LexicalEditor from './lexical/LexicalEditor';
+import { convertTipTapToLexical, isTipTapJSON, isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 interface Source {
   text: string;
@@ -29,72 +29,18 @@ type EditableNoteProps = {
 };
 
 function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [label, setLabel] = useState(data.label || '');
-  const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const contentRef = useAutoResizeNode(id, data.label);
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
-  const saveTimeoutRef = useRef<number | null>(null);
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
-  useEffect(() => {
-    if (!isEditing) {
-      setLabel(data.label || '');
-    }
-  }, [data.label, isEditing]);
-
-  useEffect(() => {
-    if (!selected && isEditing) {
-      saveChanges();
-      setIsEditing(false);
-    }
-  }, [selected, isEditing]);
-
-  const saveChanges = () => {
-    if (label !== data.label) {
-      setNodes((nodes) =>
-        nodes.map((n) => {
-          if (n.id === id) {
-            return { ...n, data: { ...n.data, label } };
-          }
-          return n;
-        })
-      );
-    }
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = null;
-    }
-  };
-
-  const debouncedSave = () => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveTimeoutRef.current = window.setTimeout(saveChanges, 1000); // Save every 1 second during editing
-  };
-
   const handleDoubleClick = (e: React.MouseEvent) => {
-    if (selected && !isEditing) {
+    if (selected) {
       e.stopPropagation();
-      setIsEditing(true);
+      openNodeInEditor(id, data.label);
     }
-  };
-
-  const handleOpenInEditor = () => {
-    if (isEditing && label !== data.label) {
-      saveChanges();
-    }
-    setIsEditing(false);
-    openNodeInEditor(id, label);
-  };
-
-  const handleContentChange = (newContent: string) => {
-    setLabel(newContent);
-    debouncedSave(); // Trigger debounced save on change
   };
 
   const textsToHighlight = data.sources?.map(s => s.text) || [];
@@ -124,6 +70,41 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
       setHighlightedText(null);
     }
     originalHandleDelete();
+  };
+
+  const getLexicalContent = () => {
+    let content = data.label || '';
+    if (isTipTapJSON(content)) {
+      return convertTipTapToLexical(JSON.parse(content));
+    }
+    if (!isLexicalJSON(content)) {
+      return JSON.stringify({
+        root: {
+          children: [{
+            children: [{
+              detail: 0,
+              format: 0,
+              mode: "normal",
+              style: "",
+              text: content,
+              type: "text",
+              version: 1
+            }],
+            direction: null,
+            format: "",
+            indent: 0,
+            type: "paragraph",
+            version: 1
+          }],
+          direction: null,
+          format: "",
+          indent: 0,
+          type: "root",
+          version: 1
+        }
+      });
+    }
+    return content;
   };
 
   return (
@@ -175,7 +156,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleOpenInEditor();
+                openNodeInEditor(id, data.label);
               }}
               className="p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground"
               title="Open in editor"
@@ -188,20 +169,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
 
         <div
           ref={contentRef}
-          className={cn(
-            'flex-grow overflow-y-auto',
-            { 'cursor-move': !isEditing },
-            isEditing && 'cursor-text'
-          )}
+          className="flex-grow overflow-y-auto p-3 cursor-pointer"
         >
-          <TiptapEditor
-            value={label}
-            onChange={handleContentChange}
-            placeholder={!label ? 'Double-click to edit...' : ''}
-            className="w-full h-full flex flex-col"
-            isEditable={isEditing}
-            autoFocus={isEditing}
-            isMarkdownInput={true}
+          <LexicalEditor
+            initialValue={getLexicalContent()}
+            isEditable={false}
+            showToolbar={false}
           />
         </div>
       </div>
