@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye } from 'lucide-react';
@@ -169,4 +169,4 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   );
 }
 
-export default EditableNoteNode;
+export default memo(EditableNoteNode);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import {
   ReactFlow,
   Background,
@@ -62,9 +62,10 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const [isMinimapOpen, setIsMinimapOpen] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const isInitializedRef = useRef(false);
 
   // --- Hooks for modularity ---
-  const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef: useRef(false) });
+  const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef });
   const { isLoading } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory });
   const { addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
@@ -100,6 +101,8 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
+  const canvasActions = useMemo(() => ({ downloadNodeBranch }), [downloadNodeBranch]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -110,7 +113,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
 
   return (
     <div className="h-full w-full relative" ref={reactFlowWrapper}>
-      <CanvasActionsProvider value={{ downloadNodeBranch }}>
+      <CanvasActionsProvider value={canvasActions}>
         {isDragOver && (
           <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
             <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
