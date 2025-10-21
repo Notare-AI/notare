@@ -315,7 +315,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   };
 
   const handleKeyPoints = async () => {
-    if (pdfPagesContent.length === 0) return;
+    if (pdfPagesContent.length === 0) return.
     setActiveGenerator('keyPoints');
     try {
       const formattedText = getFormattedPdfTextForAI();
@@ -542,7 +542,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex-grow overflow-auto flex justify-center">
+              <div className="flex-grow overflow-auto">
                 <Document
                   file={activePdf.pdf_url}
                   onLoadSuccess={onDocumentLoadSuccess}
