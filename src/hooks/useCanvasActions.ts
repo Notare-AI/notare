@@ -74,9 +74,9 @@ export const useCanvasActions = ({ nodes, edges, setEditingNodeId, setEditingNod
 
   const openNodeInEditor = useCallback((nodeId: string, content: string) => {
     const nodeToEdit = nodes.find(n => n.id === nodeId);
-    if (nodeToEdit && typeof nodeToEdit.data.label === 'string') {
+    if (nodeToEdit && (typeof nodeToEdit.data.label === 'string' || nodeToEdit.data.label === undefined)) {
       setEditingNodeId(nodeId);
-      setEditingNodeContent(content);
+      setEditingNodeContent(content || '');
     } else {
       showError("Could not find node content to edit.");
     }

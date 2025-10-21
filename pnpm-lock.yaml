@@ -23,6 +23,9 @@ importers:
       '@lexical/list':
         specifier: ^0.37.0
         version: 0.37.0
+      '@lexical/markdown':
+        specifier: ^0.37.0
+        version: 0.37.0
       '@lexical/react':
         specifier: ^0.37.0
         version: 0.37.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(yjs@13.6.27)
