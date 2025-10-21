@@ -85,11 +85,11 @@ export default function LexicalEditor({
 
   return (
     <LexicalComposer initialConfig={{ ...editorConfig, editorState: initialValue, editable: isEditable }}>
-      <div className="lexical-container bg-transparent w-full flex flex-col">
+      <div className="lexical-container bg-transparent w-full h-full flex flex-col">
         {showToolbar && isEditable && <ToolbarPlugin />}
-        <div className="relative">
+        <div className="relative flex-grow">
           <RichTextPlugin
-            contentEditable={<ContentEditable className={cn("outline-none w-full p-1", isEditable ? "cursor-text" : "cursor-default")} />}
+            contentEditable={<ContentEditable className={cn("outline-none w-full h-full p-1", isEditable ? "cursor-text" : "cursor-default")} />}
             placeholder={<div className={cn("absolute top-1 left-1 text-gray-400 pointer-events-none", !isEditable && "hidden")}>Type something...</div>}
             ErrorBoundary={LexicalErrorBoundary}
           />
