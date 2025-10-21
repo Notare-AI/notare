@@ -124,6 +124,25 @@ export const useAI = () => {
             sources: [], // Ollama doesn't provide sources in this format
           };
         }
+        // Additional fallback for chat message format
+        if (parsed.content && typeof parsed.content === 'string') {
+          console.warn("AI response in chat message format. Using fallback for local development.");
+          if (objectKey === 'tldr') {
+            return {
+              summary: parsed.content,
+              sources: [],
+            };
+          }
+          if (objectKey === 'keyPoints') {
+            return {
+              points: parsed.content.split('\n').filter((line: string) => line.trim().startsWith('- ')).map((line: string) => line.trim().slice(2)),
+              sources: [],
+            };
+          }
+          if (objectKey === 'note') {
+            return parsed.content;
+          }
+        }
       }
       // --- End Fallback ---
 
