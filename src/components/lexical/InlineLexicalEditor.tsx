@@ -13,7 +13,7 @@ import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { TRANSFORMERS } from '@lexical/markdown';
 import { EditorState } from 'lexical';
 import { theme } from './theme';
-import { useEffect, useState } from 'react';
+import { useRef } from 'react';
 
 const editorConfig = {
   namespace: 'InlineEditor',
@@ -31,13 +31,13 @@ interface InlineLexicalEditorProps {
 }
 
 export default function InlineLexicalEditor({ initialState, onSave, onCancel }: InlineLexicalEditorProps) {
-  const [editorState, setEditorState] = useState(initialState);
+  const editorStateRef = useRef(initialState);
 
   const handleSave = () => {
-    onSave(editorState);
+    onSave(editorStateRef.current);
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSave();
@@ -47,20 +47,13 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
     }
   };
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [editorState]);
-
   return (
     <LexicalComposer initialConfig={{ ...editorConfig, editorState: initialState }}>
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full" onKeyDown={handleKeyDown}>
         <RichTextPlugin
           contentEditable={
             <ContentEditable
-              className="outline-none w-full h-full p-0"
+              className="outline-none w-full h-full p-0 cursor-text"
               onBlur={handleSave}
             />
           }
@@ -70,7 +63,7 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
         <HistoryPlugin />
         <AutoFocusPlugin />
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-        <OnChangePlugin onChange={(state) => setEditorState(JSON.stringify(state.toJSON()))} />
+        <OnChangePlugin onChange={(state) => (editorStateRef.current = JSON.stringify(state.toJSON()))} />
       </div>
     </LexicalComposer>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { Pen, Eye, Expand } from 'lucide-react';
@@ -39,6 +39,33 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { downloadNodeBranch, openNodeInEditor } = useCanvasActions();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
+
+  // Disable node dragging when editing starts, and re-enable it when it ends.
+  useEffect(() => {
+    setNodes((nodes) =>
+      nodes.map((n) => {
+        if (n.id === id) {
+          n.draggable = !isEditing;
+        }
+        return n;
+      })
+    );
+  }, [id, isEditing, setNodes]);
+
+  // Allow starting edit with the "Enter" key on a selected node
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (selected && event.key === 'Enter' && !isEditing) {
+        const target = event.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          event.preventDefault();
+          setIsEditing(true);
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selected, isEditing]);
 
   const getLexicalContent = (content: string) => {
     if (isTipTapJSON(content)) {
@@ -88,7 +115,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
       <Handle type="source" position={Position.Left} id="left-source" />
       <Handle type="target" position={Position.Left} id="left-target" />
       <NodeToolbarComponent
-        isVisible={selected}
+        isVisible={selected && !isEditing}
         onDelete={handleDelete}
         onColorChange={handleColorChange}
         onZoomToNode={handleZoomToNode}
@@ -97,7 +124,7 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
       />
       <div
         style={{
-          border: selected ? '2px solid #9CA3AF' : `1px solid ${nodeStyles.borderColor}`,
+          border: selected ? `2px solid ${isEditing ? '#3B82F6' : '#9CA3AF'}` : `1px solid ${nodeStyles.borderColor}`,
           color: 'hsl(var(--foreground))',
           background: nodeStyles.background,
         }}
