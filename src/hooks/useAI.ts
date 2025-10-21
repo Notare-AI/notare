@@ -96,6 +96,7 @@ export const useAI = () => {
 
       const isValidSource = (s: any): s is Source => typeof s === 'object' && s !== null && typeof s.text === 'string' && typeof s.page === 'number';
 
+      // Standard format check
       if (objectKey === 'tldr' && typeof parsed.summary === 'string' && Array.isArray(parsed.sources) && parsed.sources.every(isValidSource)) {
         return parsed;
       }
@@ -105,6 +106,27 @@ export const useAI = () => {
       if (objectKey === 'note' && typeof parsed.note === 'string') {
         return parsed.note;
       }
+
+      // --- Fallback for local Ollama model ---
+      const isLocal = window.location.hostname === 'localhost';
+      if (isLocal) {
+        if (objectKey === 'tldr' && parsed.data?.abstract) {
+          console.warn("AI response format mismatch. Using fallback for local development.");
+          return {
+            summary: parsed.data.abstract,
+            sources: [], // Ollama doesn't provide sources in this format
+          };
+        }
+        if (objectKey === 'keyPoints' && parsed.data?.keywords && Array.isArray(parsed.data.keywords)) {
+          console.warn("AI response format mismatch. Using fallback for local development.");
+          return {
+            points: parsed.data.keywords,
+            sources: [], // Ollama doesn't provide sources in this format
+          };
+        }
+      }
+      // --- End Fallback ---
+
       throw new Error('Parsed JSON does not match the expected format.');
     } catch (parseError: any) {
       console.error('AI JSON parsing error:', parseError, 'Raw response:', responseText);
