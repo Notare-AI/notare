@@ -110,6 +110,7 @@ export const useAI = () => {
       // --- Fallback for local Ollama model ---
       const isLocal = window.location.hostname === 'localhost';
       if (isLocal) {
+        // Fallback 1: "data" object format
         if (objectKey === 'tldr' && parsed.data?.abstract) {
           console.warn("AI response format mismatch. Using fallback for local development.");
           return {
@@ -124,7 +125,7 @@ export const useAI = () => {
             sources: [], // Ollama doesn't provide sources in this format
           };
         }
-        // Additional fallback for chat message format
+        // Fallback 2: Chat message format (e.g., {"role": "system", "content": "..."})
         if (parsed.content && typeof parsed.content === 'string') {
           console.warn("AI response in chat message format. Using fallback for local development.");
           if (objectKey === 'tldr') {
@@ -134,8 +135,13 @@ export const useAI = () => {
             };
           }
           if (objectKey === 'keyPoints') {
+            // Extract points by splitting on common patterns (e.g., "1. ", "- ", "* ")
+            const points = parsed.content
+              .split(/\n/)
+              .filter(line => line.trim().match(/^\s*(\d+\.|\-|\*)\s+/))
+              .map(line => line.trim().replace(/^\s*(\d+\.|\-|\*)\s+/, ''));
             return {
-              points: parsed.content.split('\n').filter((line: string) => line.trim().startsWith('- ')).map((line: string) => line.trim().slice(2)),
+              points: points.length > 0 ? points : [parsed.content], // Fallback to whole content if no points found
               sources: [],
             };
           }
