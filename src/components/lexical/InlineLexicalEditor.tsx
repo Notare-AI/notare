@@ -13,7 +13,7 @@ import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { TRANSFORMERS } from '@lexical/markdown';
 import { EditorState } from 'lexical';
 import { theme } from './theme';
-import { useRef } from 'react';
+import { useState } from 'react';
 
 const editorConfig = {
   namespace: 'InlineEditor',
@@ -31,14 +31,13 @@ interface InlineLexicalEditorProps {
 }
 
 export default function InlineLexicalEditor({ initialState, onSave, onCancel }: InlineLexicalEditorProps) {
-  const editorStateRef = useRef(initialState);
+  const [editorState, setEditorState] = useState(initialState);
 
   const handleSave = () => {
-    onSave(editorStateRef.current);
+    onSave(editorState);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    // Save on Cmd/Ctrl + Enter
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault();
       handleSave();
@@ -46,7 +45,6 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
       event.preventDefault();
       onCancel();
     }
-    // Let the Enter key create new lines by default (no special handling needed)
   };
 
   return (
@@ -56,7 +54,7 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
           contentEditable={
             <ContentEditable
               className="outline-none w-full h-full p-0 cursor-text"
-              onBlur={handleSave} // This is the primary "automatic" save mechanism
+              onBlur={handleSave}
             />
           }
           placeholder={<div className="absolute top-0 left-0 text-gray-400 pointer-events-none">Type here...</div>}
@@ -65,7 +63,7 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
         <HistoryPlugin />
         <AutoFocusPlugin />
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-        <OnChangePlugin onChange={(state) => (editorStateRef.current = JSON.stringify(state.toJSON()))} />
+        <OnChangePlugin onChange={(state) => setEditorState(JSON.stringify(state.toJSON()))} />
       </div>
     </LexicalComposer>
   );
