@@ -2,7 +2,7 @@ import { NodeResizer, Handle, Position } from '@xyflow/react';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import NodeToolbarComponent from './NodeToolbar';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 
 interface ImageNodeData {
   src: string;
@@ -83,4 +83,4 @@ function ImageNode({ id, data, selected }: ImageNodeProps) {
   );
 }
 
-export default ImageNode;
+export default memo(ImageNode);

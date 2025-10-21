@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
+import { memo } from 'react';
 
 interface Source {
   text: string;
@@ -121,4 +122,4 @@ function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
   );
 }
 
-export default KeyPointsNode;
+export default memo(KeyPointsNode);

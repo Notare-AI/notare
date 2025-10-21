@@ -1,6 +1,7 @@
 import { useReactFlow, Handle, Position } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
+import { memo } from 'react';
 
 interface CustomNodeData {
   label?: string;
@@ -48,4 +49,4 @@ function CustomNode({ id, data, selected }: CustomNodeProps) {
   );
 }
 
-export default CustomNode;
+export default memo(CustomNode);

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useAutoResizeNode } from '@/hooks/useAutoResizeNode';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
+import { memo } from 'react';
 
 interface Source {
   text: string;
@@ -120,4 +121,4 @@ function TldrNode({ id, data, selected }: TldrNodeProps) {
   );
 }
 
-export default TldrNode;
+export default memo(TldrNode);

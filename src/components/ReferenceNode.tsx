@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import { Quote, Pencil } from 'lucide-react';
 import NodeToolbarComponent from './NodeToolbar';
@@ -156,4 +156,4 @@ function ReferenceNode({ id, data, selected }: ReferenceNodeProps) {
   );
 }
 
-export default ReferenceNode;
+export default memo(ReferenceNode);

@@ -6,6 +6,7 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
+  Viewport,
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -63,6 +64,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [isMinimapOpen, setIsMinimapOpen] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
+  const animationFrameId = useRef(0);
 
   // --- Hooks for modularity ---
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef });
@@ -87,6 +89,48 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     },
     [setEdges]
   );
+
+  const onMove = useCallback((_, viewport: Viewport) => {
+    const wrapperBounds = reactFlowWrapper.current?.getBoundingClientRect();
+    if (!wrapperBounds) {
+      return;
+    }
+
+    cancelAnimationFrame(animationFrameId.current);
+
+    animationFrameId.current = requestAnimationFrame(() => {
+      setNodes((nds) => {
+        const viewWidth = wrapperBounds.width;
+        const viewHeight = wrapperBounds.height;
+
+        const visibleArea = {
+          x1: -viewport.x / viewport.zoom,
+          y1: -viewport.y / viewport.zoom,
+          x2: (-viewport.x + viewWidth) / viewport.zoom,
+          y2: (-viewport.y + viewHeight) / viewport.zoom,
+        };
+
+        const buffer = 200;
+
+        return nds.map((node) => {
+          const nodeWidth = node.width || 300;
+          const nodeHeight = node.height || 200;
+
+          const nodeIsVisible =
+            node.position.x + nodeWidth > visibleArea.x1 - buffer &&
+            node.position.x < visibleArea.x2 + buffer &&
+            node.position.y + nodeHeight > visibleArea.y1 - buffer &&
+            node.position.y < visibleArea.y2 + buffer;
+
+          if (!!node.hidden === !nodeIsVisible) {
+            return node;
+          }
+
+          return { ...node, hidden: !nodeIsVisible };
+        });
+      });
+    });
+  }, [setNodes]);
 
   const handlePaneClick = useCallback(
     (event: React.MouseEvent) => {
@@ -131,6 +175,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           onDrop={handleDrop}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
+          onMove={onMove}
           fitView
           zoomOnDoubleClick={false}
           panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
