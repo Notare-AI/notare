@@ -36,6 +36,7 @@ type ReferenceType = 'Book' | 'Journal Article' | 'Website';
 interface Source {
   text: string;
   page: number;
+  fileName?: string;
 }
 
 const referenceTemplates: Record<ReferenceType, string> = {
@@ -302,12 +303,13 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   };
 
   const handleTldr = async () => {
-    if (pdfPagesContent.length === 0) return;
+    if (pdfPagesContent.length === 0 || !activePdf) return;
     setActiveGenerator('tldr');
     try {
       const formattedText = getFormattedPdfTextForAI();
       const { summary, sources } = await generateTLDRWithSources(formattedText);
-      onAddNode({ type: 'TLDR', content: summary, sources });
+      const reference = `\n\n---\n*Source: ${activePdf.file_name}*`;
+      onAddNode({ type: 'TLDR', content: summary + reference, sources });
     } catch (e: any) {
       showError(e.message || 'Failed to generate TLDR.');
       setActiveGenerator(null);
@@ -315,13 +317,14 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   };
 
   const handleKeyPoints = async () => {
-    if (pdfPagesContent.length === 0) return;
+    if (pdfPagesContent.length === 0 || !activePdf) return;
     setActiveGenerator('keyPoints');
     try {
       const formattedText = getFormattedPdfTextForAI();
       const { points, sources } = await extractKeyPoints(formattedText);
       const content = points.map(p => `- ${p}`).join('\n');
-      onAddNode({ type: 'Key Points', content, sources });
+      const reference = `\n\n---\n*Source: ${activePdf.file_name}*`;
+      onAddNode({ type: 'Key Points', content: content + reference, sources });
     } catch (e: any) {
       showError(e.message || 'Failed to extract key points.');
       setActiveGenerator(null);
@@ -336,12 +339,15 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   };
 
   const handleCreateNoteFromSelection = () => {
-    if (!selection) return;
+    if (!selection || !activePdf) return;
+
+    const reference = `\n\n---\n*Source: ${activePdf.file_name}, p. ${pageNumber}*`;
+    const contentWithReference = `${selection.text}${reference}`;
 
     onAddNode({
       type: 'Note',
-      content: selection.text,
-      sources: [{ text: selection.text, page: pageNumber }],
+      content: contentWithReference,
+      sources: [{ text: selection.text, page: pageNumber, fileName: activePdf.file_name }],
     });
     showSuccess('Note created from selection!');
     
