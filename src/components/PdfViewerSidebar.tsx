@@ -315,7 +315,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   };
 
   const handleKeyPoints = async () => {
-    if (pdfPagesContent.length === 0) return.
+    if (pdfPagesContent.length === 0) return;
     setActiveGenerator('keyPoints');
     try {
       const formattedText = getFormattedPdfTextForAI();
@@ -477,7 +477,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
           </div>
         </div>
 
-        <div ref={viewerRef} onMouseUp={handleMouseUp} className="flex-grow p-4 overflow-y-auto relative">
+        <div ref={viewerRef} onMouseUp={handleMouseUp} className="flex-grow p-4 overflow-auto relative">
           {pdfs.length === 0 ? (
             <PdfUploader onFilesUploaded={handleFilesUpload} />
           ) : activePdf ? (
