@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -6,6 +7,10 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
+import { TRANSFORMERS } from '@lexical/markdown';
+
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { CodeNode } from '@lexical/code';
@@ -40,6 +45,15 @@ interface LexicalEditorProps {
   showToolbar?: boolean;
 }
 
+// This new component ensures the editor's editable state is always in sync.
+const UpdateEditablePlugin = ({ editable }: { editable: boolean }) => {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    editor.setEditable(editable);
+  }, [editor, editable]);
+  return null;
+};
+
 export default function LexicalEditor({
   initialValue,
   onChange,
@@ -59,14 +73,16 @@ export default function LexicalEditor({
         {showToolbar && isEditable && <ToolbarPlugin />}
         <div className="relative flex-grow">
           <RichTextPlugin
-            contentEditable={<ContentEditable className={cn("outline-none w-full h-full", !isEditable && "cursor-default")} />}
-            placeholder={<div className={cn("absolute top-0 left-0 text-gray-400 pointer-events-none", !isEditable && "hidden")}>Type something...</div>}
+            contentEditable={<ContentEditable className={cn("outline-none w-full h-full p-1", !isEditable && "cursor-default")} />}
+            placeholder={<div className={cn("absolute top-1 left-1 text-gray-400 pointer-events-none", !isEditable && "hidden")}>Type something...</div>}
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />
           <ListPlugin />
           <LinkPlugin />
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           {onChange && <OnChangePlugin onChange={handleOnChange} ignoreSelectionChange />}
+          <UpdateEditablePlugin editable={isEditable} />
         </div>
       </div>
     </LexicalComposer>
