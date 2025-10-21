@@ -10,6 +10,7 @@ interface UseCanvasDataProps {
   setNodes: (nodes: Node[] | ((nds: Node[]) => Node[])) => void;
   setEdges: (edges: Edge[] | ((eds: Edge[]) => Edge[])) => void;
   setInitialHistory: (nodes: Node[], edges: Edge[]) => void;
+  isInitializedRef: React.MutableRefObject<boolean>;
 }
 
 export const useCanvasData = ({
@@ -19,9 +20,9 @@ export const useCanvasData = ({
   setNodes,
   setEdges,
   setInitialHistory,
+  isInitializedRef,
 }: UseCanvasDataProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const isInitializedRef = useRef(false);
   const saveTimeoutRef = useRef<number | null>(null);
 
   // Fetch canvas data on canvasId change
@@ -63,7 +64,7 @@ export const useCanvasData = ({
     };
 
     fetchCanvasData();
-  }, [canvasId, setNodes, setEdges, setInitialHistory]);
+  }, [canvasId, setNodes, setEdges, setInitialHistory, isInitializedRef]);
 
   // Debounced saving of canvas data
   useEffect(() => {
@@ -88,7 +89,7 @@ export const useCanvasData = ({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [nodes, edges, canvasId]);
+  }, [nodes, edges, canvasId, isInitializedRef]);
 
-  return { isLoading, isInitializedRef };
+  return { isLoading };
 };

@@ -64,10 +64,11 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [isMinimapOpen, setIsMinimapOpen] = useState(true);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef(0);
+  const isInitializedRef = useRef(false);
 
   // --- Hooks for modularity ---
-  const { isLoading, isInitializedRef } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory });
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef });
+  const { isLoading } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory, isInitializedRef });
   const { addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded });
