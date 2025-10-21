@@ -38,13 +38,15 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Save on Cmd/Ctrl + Enter
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault();
       handleSave();
     } else if (event.key === 'Escape') {
       event.preventDefault();
       onCancel();
     }
+    // Let the Enter key create new lines by default (no special handling needed)
   };
 
   return (
@@ -54,7 +56,7 @@ export default function InlineLexicalEditor({ initialState, onSave, onCancel }: 
           contentEditable={
             <ContentEditable
               className="outline-none w-full h-full p-0 cursor-text"
-              onBlur={handleSave}
+              onBlur={handleSave} // This is the primary "automatic" save mechanism
             />
           }
           placeholder={<div className="absolute top-0 left-0 text-gray-400 pointer-events-none">Type here...</div>}
