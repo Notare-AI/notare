@@ -182,6 +182,8 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           selectionOnDrag={activeTool === 'select'}
           selectionMode="partial"
           nodesDraggable={activeTool === 'select'}
+          elementsSelectable={activeTool === 'select'}
+          nodesConnectable={activeTool === 'select'}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           deleteKeyCode={['Backspace', 'Delete']}
@@ -195,8 +197,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
               ? 'cursor-grab'
               : activeTool === 'note'
               ? 'cursor-crosshair'
-              : activeTool === 'select'
-              ? 'cursor-pointer'
               : ''
           }
         >
