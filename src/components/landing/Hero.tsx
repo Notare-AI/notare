@@ -7,7 +7,7 @@ const Hero = () => {
     <section className="relative bg-background text-foreground py-20 md:py-32">
       <div className="container mx-auto max-w-6xl px-4 text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          The Best Note Taking App for Visual Thinkers and AI-Powered Insights
+          Go from a 50-page PDF to a 5-minute visual summary.
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
           Struggling with scattered notes, endless PDF scrolling, and forgotten ideas? Notare is the ultimate AI note taking tool that organizes your thoughts on an infinite canvas, extracts key insights from documents, reports and books while ensuring privacy—no data training ever.
