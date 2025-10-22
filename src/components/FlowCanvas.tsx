@@ -26,6 +26,7 @@ import { useNodeCreation } from '@/hooks/useNodeCreation';
 import { useCanvasDragAndDrop } from '@/hooks/useCanvasDragAndDrop';
 import { useCanvasKeyboardShortcuts } from '@/hooks/useCanvasKeyboardShortcuts';
 import { useCanvasActions } from '@/hooks/useCanvasActions';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import { CanvasActionsProvider } from '@/contexts/CanvasActionsContext';
 
 
@@ -73,6 +74,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded });
   const { downloadNodeBranch } = useCanvasActions({ nodes, edges });
+  const { uploadAndAddImageNode } = useImageUpload({ canvasId, setNodes, reactFlowWrapper });
 
   // --- Effects ---
   useEffect(() => {
@@ -205,7 +207,11 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           <CanvasMinimap isMinimapOpen={isMinimapOpen} setIsMinimapOpen={setIsMinimapOpen} />
         </ReactFlow>
       </CanvasActionsProvider>
-      <CanvasToolbar activeTool={activeTool} onToolChange={setActiveTool} />
+      <CanvasToolbar
+        activeTool={activeTool}
+        onToolChange={setActiveTool}
+        onImageUpload={uploadAndAddImageNode}
+      />
     </div>
   );
 };
