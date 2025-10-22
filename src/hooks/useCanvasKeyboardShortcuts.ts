@@ -146,7 +146,7 @@ export const useCanvasKeyboardShortcuts = ({
         const image = new Image();
         image.onload = () => {
           const aspectRatio = image.width / image.height;
-          const defaultWidth = 300;
+          const defaultWidth = 400;
           const defaultHeight = defaultWidth / aspectRatio;
 
           const newNode: Node = {
@@ -162,7 +162,7 @@ export const useCanvasKeyboardShortcuts = ({
           const newNode: Node = {
             id: getId(), type: 'image', position,
             data: { src: publicUrl, alt: imageFile?.name },
-            style: { width: 300, height: 200 },
+            style: { width: 400, height: 300 },
           };
           setNodes((nds) => nds.concat(newNode));
           dismissToast(toastId);
