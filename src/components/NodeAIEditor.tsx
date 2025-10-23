@@ -3,43 +3,43 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAI } from '@/hooks/useAI';
-import { Send, MessageSquare, Loader2, X, Bot } from 'lucide-react';
+import { Send, MessageSquare, Loader2, X, Bot, PlusSquare } from 'lucide-react';
 import { showError } from '@/utils/toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-interface NodeAIEditorProps {
-  nodeId: string;
-  currentContent: string;
-}
+import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-const NodeAIEditor = ({ currentContent }: NodeAIEditorProps) => {
+interface NodeAIEditorProps {
+  nodeId: string;
+  currentContent: string;
+  chatHistory?: Message[];
+  onHistoryChange: (history: Message[]) => void;
+}
+
+const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: NodeAIEditorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const { generateNodeChatResponse, isGenerating } = useAI();
+  const { addNodeFromMessage } = useCanvasActions();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      // Reset chat when opening
-      setMessages([
-        { role: 'assistant', content: "Hello! How can I help you with this note?" }
-      ]);
+      setMessages(chatHistory || [{ role: 'assistant', content: "Hello! How can I help you with this note?" }]);
       setPrompt('');
     }
-  }, [isOpen]);
+  }, [isOpen, chatHistory]);
 
   useEffect(() => {
-    // Auto-scroll to bottom on new message
     if (scrollAreaRef.current) {
       const scrollElement = scrollAreaRef.current.querySelector('div');
       if (scrollElement) {
@@ -59,7 +59,9 @@ const NodeAIEditor = ({ currentContent }: NodeAIEditorProps) => {
     try {
       const responseText = await generateNodeChatResponse(currentContent, newMessages);
       const assistantMessage: Message = { role: 'assistant', content: responseText };
-      setMessages(prev => [...prev, assistantMessage]);
+      const finalMessages = [...newMessages, assistantMessage];
+      setMessages(finalMessages);
+      onHistoryChange(finalMessages);
     } catch (error) {
       showError('Failed to get AI response.');
       const errorMessage: Message = { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' };
@@ -100,10 +102,21 @@ const NodeAIEditor = ({ currentContent }: NodeAIEditorProps) => {
                   </Avatar>
                 )}
                 <div className={cn(
-                  "max-w-[80%] rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert max-w-none",
+                  "group relative max-w-[80%] rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert max-w-none",
                   message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-[#363636]'
                 )}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                  {message.role === 'assistant' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-white hover:bg-white/10"
+                      onClick={() => addNodeFromMessage(message.content, nodeId)}
+                      title="Add to canvas"
+                    >
+                      <PlusSquare size={14} />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

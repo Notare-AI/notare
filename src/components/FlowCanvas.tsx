@@ -7,6 +7,7 @@ import {
   useEdgesState,
   addEdge,
   Viewport,
+  useReactFlow,
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -66,11 +67,12 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef(0);
   const isInitializedRef = useRef(false);
+  const { getNode, screenToFlowPosition } = useReactFlow();
 
   // --- Hooks for modularity ---
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef });
   const { isLoading } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory, isInitializedRef });
-  const { addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
+  const { addNode, addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
   useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded, setActiveTool });
   const { downloadNodeBranch } = useCanvasActions({ nodes, edges });
@@ -91,6 +93,23 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     },
     [setEdges]
   );
+
+  const addNodeFromMessage = useCallback((content: string, parentNodeId: string) => {
+    const parentNode = getNode(parentNodeId);
+    if (!parentNode) {
+      console.error("Parent node not found for adding message to canvas");
+      const position = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      addNode('Note', content, position);
+      return;
+    }
+
+    const position = {
+      x: parentNode.position.x + (parentNode.width || 200) + 50,
+      y: parentNode.position.y,
+    };
+
+    addNode('Note', content, position, [], false, parentNodeId, parentNode.data.color);
+  }, [getNode, addNode, screenToFlowPosition]);
 
   const onMove = useCallback((_, viewport: Viewport) => {
     const wrapperBounds = reactFlowWrapper.current?.getBoundingClientRect();
@@ -147,7 +166,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
-  const canvasActions = useMemo(() => ({ downloadNodeBranch }), [downloadNodeBranch]);
+  const canvasActions = useMemo(() => ({ downloadNodeBranch, addNodeFromMessage }), [downloadNodeBranch, addNodeFromMessage]);
 
   if (isLoading) {
     return (

@@ -1,4 +1,4 @@
-import { NodeResizer, Handle, Position } from '@xyflow/react';
+import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import { ListChecks, Eye } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import NodeToolbarComponent from './NodeToolbar';
@@ -6,17 +6,23 @@ import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
 import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 
 interface Source {
   text: string;
   page: number;
 }
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface KeyPointsNodeData {
   label: string;
   sources: Source[];
   color?: string;
+  chatHistory?: Message[];
 }
 
 type KeyPointsNodeProps = {
@@ -26,6 +32,7 @@ type KeyPointsNodeProps = {
 };
 
 function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
+  const { setNodes } = useReactFlow();
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const { downloadNodeBranch } = useCanvasActions();
@@ -59,6 +66,12 @@ function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
     }
     originalHandleDelete();
   };
+
+  const handleChatHistoryChange = useCallback((newHistory: Message[]) => {
+    setNodes((nodes) =>
+      nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, chatHistory: newHistory } } : n))
+    );
+  }, [id, setNodes]);
 
   return (
     <>
@@ -103,7 +116,12 @@ function KeyPointsNode({ id, data, selected }: KeyPointsNodeProps) {
                 <Eye size={16} />
               </button>
             )}
-            <NodeAIEditor nodeId={id} currentContent={data.label} />
+            <NodeAIEditor
+              nodeId={id}
+              currentContent={data.label}
+              chatHistory={data.chatHistory}
+              onHistoryChange={handleChatHistoryChange}
+            />
           </div>
         </div>
 

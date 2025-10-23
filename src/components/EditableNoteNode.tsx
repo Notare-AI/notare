@@ -15,11 +15,17 @@ interface Source {
   page: number;
 }
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface EditableNoteData {
   label: string;
   sources?: Source[];
   color?: string;
   isAiGenerated?: boolean;
+  chatHistory?: Message[];
 }
 
 type EditableNoteProps = {
@@ -96,6 +102,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
     );
   }, [id, setNodes]);
 
+  const handleChatHistoryChange = useCallback((newHistory: Message[]) => {
+    setNodes((nodes) =>
+      nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, chatHistory: newHistory } } : n))
+    );
+  }, [id, setNodes]);
+
   const textsToHighlight = data.sources?.map(s => s.text) || [];
   const isCurrentlyHighlighted = JSON.stringify(highlightedText) === JSON.stringify(textsToHighlight);
   const isActive = isPdfSidebarOpen && isCurrentlyHighlighted;
@@ -146,7 +158,12 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             {data.sources && data.sources.length > 0 && (
               <button onClick={handleViewSourcesClick} className={cn("p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground", isActive && "bg-blue-500/10 text-blue-600 dark:text-blue-300")} title="View sources in PDF"><Eye size={16} /></button>
             )}
-            <NodeAIEditor nodeId={id} currentContent={data.label} />
+            <NodeAIEditor
+              nodeId={id}
+              currentContent={data.label}
+              chatHistory={data.chatHistory}
+              onHistoryChange={handleChatHistoryChange}
+            />
           </div>
         </div>
 
