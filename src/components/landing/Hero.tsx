@@ -14,7 +14,7 @@ const Hero = () => {
         </p>
         <div className="flex justify-center gap-4 mb-12">
           <Button asChild size="lg" className="bg-primary text-primary-foreground">
-            <Link to="/dashboard">Start Free Trial <ArrowRight className="ml-2 h-5 w-5" /></Link>
+            <Link to="/dashboard">Start Mapping for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link to="/pricing">View Pricing</Link>
