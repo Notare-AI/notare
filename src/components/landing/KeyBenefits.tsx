@@ -2,6 +2,7 @@ import visualMaps from '@/images/visual-maps.png';
 import aiInsights from '@/images/ai-insights.png';
 import pdfNoteTaking from '@/images/pdf-note-taking.png';
 import ownData from '@/images/own-data.png';
+import { cn } from '@/lib/utils';
 
 const benefits = [
   {
@@ -29,16 +30,25 @@ const benefits = [
 const KeyBenefits = () => {
   return (
     <section id="benefits" className="container py-20 md:py-24">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="flex flex-col gap-20 md:gap-32">
         {benefits.map((benefit, index) => (
-          <div key={index}>
-            <img 
-              src={benefit.image} 
-              alt={benefit.title} 
-              className="rounded-lg shadow-lg mb-6 aspect-video object-cover border"
-            />
-            <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-            <p className="text-muted-foreground">{benefit.description}</p>
+          <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+            {/* Text content */}
+            <div className={cn(
+              "text-center md:text-left",
+              index % 2 !== 0 && "md:order-last" // For odd items (2nd, 4th), move text to the right
+            )}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{benefit.title}</h2>
+              <p className="text-lg text-muted-foreground">{benefit.description}</p>
+            </div>
+            {/* Image */}
+            <div>
+              <img 
+                src={benefit.image} 
+                alt={benefit.title} 
+                className="rounded-lg shadow-xl aspect-video object-cover border"
+              />
+            </div>
           </div>
         ))}
       </div>
