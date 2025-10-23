@@ -17,7 +17,7 @@ const corsHeaders = {
 }
 
 const PREMIUM_CREDITS = 500;
-const FREE_CREDITS = 10;
+const FREE_CREDITS = 50;
 
 const updateSubscription = async (supabaseAdmin: any, customerId: string, plan: string, credits: number) => {
   const nextReset = new Date();

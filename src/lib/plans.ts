@@ -16,7 +16,7 @@ export const plans: Plan[] = [
       'Synced notes across devices',
       'Privacy - no data training!',
       '500mb of storage',
-      '10 AI credits',
+      '50 AI credits',
       'Unlimited notes',
       '3 Canvases',
       '1 PDF upload per canvas',
