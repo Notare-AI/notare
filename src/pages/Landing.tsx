@@ -1,20 +1,22 @@
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
-import Features from '@/components/landing/Features';
-import Testimonials from '@/components/landing/Testimonials';
-import FAQ from '@/components/landing/FAQ';
+import KeyBenefits from '@/components/landing/KeyBenefits';
+import HowItWorks from '@/components/landing/HowItWorks';
+import Audience from '@/components/landing/Audience';
+import PricingPreview from '@/components/landing/PricingPreview';
 import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
 
 const Landing = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow">
         <Hero />
-        <Features />
-        <Testimonials />
-        <FAQ />
+        <KeyBenefits />
+        <HowItWorks />
+        <Audience />
+        <PricingPreview />
         <CTASection />
       </main>
       <Footer />
