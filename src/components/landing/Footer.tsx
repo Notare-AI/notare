@@ -1,4 +1,5 @@
-import { PenSquare } from 'lucide-react';
+import { PenSquare, Twitter, Mail } from 'lucide-react';
+import DiscordIcon from '@/components/icons/DiscordIcon';
 
 const Footer = () => {
   return (
@@ -9,6 +10,17 @@ const Footer = () => {
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Notare. All rights reserved.
           </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <a href="https://discord.gg/j7VHUmr8" target="_blank" rel="noopener noreferrer" aria-label="Discord" className="text-muted-foreground hover:text-foreground transition-colors">
+            <DiscordIcon className="h-5 w-5" />
+          </a>
+          <a href="https://x.com/ANomadicDev" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Twitter className="h-5 w-5" />
+          </a>
+          <a href="mailto:NotareAI@outlook.com" aria-label="Email" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Mail className="h-5 w-5" />
+          </a>
         </div>
       </div>
     </footer>
