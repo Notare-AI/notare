@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { Node, Edge, useReactFlow } from '@xyflow/react';
 import { useNodeCreation } from './useNodeCreation';
 import { useImageUpload } from './useImageUpload';
+import { Tool } from '@/components/CanvasToolbar';
 
 interface UseCanvasKeyboardShortcutsProps {
   nodes: Node[];
@@ -12,6 +13,7 @@ interface UseCanvasKeyboardShortcutsProps {
   canvasId: string;
   reactFlowWrapper: React.RefObject<HTMLDivElement>;
   onNodeAdded: () => void;
+  setActiveTool: (tool: Tool) => void;
 }
 
 export const useCanvasKeyboardShortcuts = ({
@@ -23,6 +25,7 @@ export const useCanvasKeyboardShortcuts = ({
   canvasId,
   reactFlowWrapper,
   onNodeAdded,
+  setActiveTool,
 }: UseCanvasKeyboardShortcutsProps) => {
   const clipboardRef = useRef<Node[]>([]);
   const { getNodes } = useReactFlow();
@@ -51,6 +54,19 @@ export const useCanvasKeyboardShortcuts = ({
         event.preventDefault();
         handleRedo();
         return;
+      }
+
+      // Tool switching hotkeys
+      switch (event.key.toLowerCase()) {
+        case 'v':
+          setActiveTool('select');
+          break;
+        case 'h':
+          setActiveTool('pan');
+          break;
+        case 'n':
+          setActiveTool('note');
+          break;
       }
 
       const isCopy = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'c';
@@ -96,7 +112,7 @@ export const useCanvasKeyboardShortcuts = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [getNodes, setNodes, setEdges, handleUndo, handleRedo, getId]);
+  }, [getNodes, setNodes, setEdges, handleUndo, handleRedo, getId, setActiveTool]);
 
   useEffect(() => {
     const handlePaste = async (event: ClipboardEvent) => {
