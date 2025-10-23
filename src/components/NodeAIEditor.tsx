@@ -1,68 +1,69 @@
-import { useState } from 'react';
-import { useReactFlow, addEdge } from '@xyflow/react';
+import { useState, useRef, useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAI } from '@/hooks/useAI';
-import { Send, MessageSquare, Loader2, X } from 'lucide-react';
+import { Send, MessageSquare, Loader2, X, Bot } from 'lucide-react';
 import { showError } from '@/utils/toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface NodeAIEditorProps {
   nodeId: string;
   currentContent: string;
 }
 
-const NodeAIEditor = ({ nodeId, currentContent }: NodeAIEditorProps) => {
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+const NodeAIEditor = ({ currentContent }: NodeAIEditorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const { getNode, setNodes, setEdges } = useReactFlow();
-  const { generateUpdatedNodeContent, isGenerating } = useAI();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const { generateNodeChatResponse, isGenerating } = useAI();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+  useEffect(() => {
+    if (isOpen) {
+      // Reset chat when opening
+      setMessages([
+        { role: 'assistant', content: "Hello! How can I help you with this note?" }
+      ]);
+      setPrompt('');
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    // Auto-scroll to bottom on new message
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current.querySelector('div');
+      if (scrollElement) {
+        scrollElement.scrollTo({ top: scrollElement.scrollHeight, behavior: 'smooth' });
+      }
+    }
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!prompt.trim() || isGenerating) return;
+
+    const userMessage: Message = { role: 'user', content: prompt };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    setPrompt('');
 
     try {
-      const newContent = await generateUpdatedNodeContent(currentContent, prompt);
-      
-      const parentNode = getNode(nodeId);
-      if (!parentNode) {
-        showError('Could not find the source node.');
-        return;
-      }
-
-      const newNodePosition = {
-        x: parentNode.position.x + (parentNode.width || 200) + 50,
-        y: parentNode.position.y,
-      };
-
-      const newNodeId = `node_${+new Date()}`;
-      const newNode = {
-        id: newNodeId,
-        type: 'editableNote',
-        position: newNodePosition,
-        data: { 
-          label: newContent,
-          color: parentNode.data.color, // Preserve color from parent
-          isAiGenerated: true,
-        },
-        style: { ...parentNode.style }, // Preserve style from parent
-      };
-
-      const newEdge = {
-        id: `e-${nodeId}-${newNodeId}`,
-        source: nodeId,
-        target: newNodeId,
-        type: 'customAnimated',
-        animated: true,
-      };
-
-      setNodes((nodes) => nodes.concat(newNode));
-      setEdges((edges) => addEdge(newEdge, edges));
-
-      setIsOpen(false);
-      setPrompt('');
+      const responseText = await generateNodeChatResponse(currentContent, newMessages);
+      const assistantMessage: Message = { role: 'assistant', content: responseText };
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      showError('Failed to update node with AI.');
+      showError('Failed to get AI response.');
+      const errorMessage: Message = { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' };
+      setMessages(prev => [...prev, errorMessage]);
     }
   };
 
@@ -71,34 +72,65 @@ const NodeAIEditor = ({ nodeId, currentContent }: NodeAIEditorProps) => {
       <PopoverTrigger asChild>
         <button
           className="p-1 text-gray-400 rounded hover:bg-gray-700 hover:text-white"
-          title="Generate from this node"
+          title="Chat about this note"
         >
           <MessageSquare size={16} />
         </button>
       </PopoverTrigger>
-      <PopoverContent 
-        side="right" 
-        align="start" 
-        className="w-80 bg-[#2A2A2A] border-gray-700 text-white p-0"
+      <PopoverContent
+        side="right"
+        align="start"
+        className="w-96 bg-[#2A2A2A] border-gray-700 text-white p-0 flex flex-col h-[500px]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="flex items-center justify-between p-3 border-b border-gray-700">
-          <p className="text-sm font-medium">How may I help you?</p>
+        <div className="flex items-center justify-between p-3 border-b border-gray-700 flex-shrink-0">
+          <p className="text-sm font-medium">Chat with Note</p>
           <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-white" onClick={() => setIsOpen(false)}>
             <X size={14} />
           </Button>
         </div>
-        <div className="p-3">
+        
+        <ScrollArea className="flex-grow p-3" ref={scrollAreaRef}>
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <div key={index} className={cn("flex items-start gap-3", message.role === 'user' ? 'justify-end' : '')}>
+                {message.role === 'assistant' && (
+                  <Avatar className="h-8 w-8 bg-gray-600">
+                    <AvatarFallback><Bot size={18} /></AvatarFallback>
+                  </Avatar>
+                )}
+                <div className={cn(
+                  "max-w-[80%] rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert max-w-none",
+                  message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-[#363636]'
+                )}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+            {isGenerating && (
+              <div className="flex items-start gap-3">
+                <Avatar className="h-8 w-8 bg-gray-600">
+                  <AvatarFallback><Bot size={18} /></AvatarFallback>
+                </Avatar>
+                <div className="bg-[#363636] rounded-lg px-3 py-2 flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="p-3 border-t border-gray-700 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Input
-              placeholder="Type your message..."
+              placeholder="Ask about your note..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleGenerate()}
+              onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleSendMessage()}
               disabled={isGenerating}
               className="bg-[#363636] border-gray-500 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-gray-400 h-9"
             />
-            <Button onClick={handleGenerate} disabled={isGenerating || !prompt.trim()} size="icon" className="h-9 w-9 bg-gray-600 hover:bg-gray-500">
+            <Button onClick={handleSendMessage} disabled={isGenerating || !prompt.trim()} size="icon" className="h-9 w-9 bg-gray-600 hover:bg-gray-500">
               {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send size={16} />}
             </Button>
           </div>

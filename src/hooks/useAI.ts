@@ -236,27 +236,18 @@ export const useAI = () => {
     return _generateContent(payload);
   }, [_generateContent]);
 
-  const generateUpdatedNodeContent = useCallback(async (
-    currentNodeContent: string,
-    prompt: string
+  const generateNodeChatResponse = useCallback(async (
+    noteContent: string,
+    history: { role: 'user' | 'assistant', content: string }[]
   ): Promise<string> => {
-    const fullPrompt = `You are an AI assistant helping a user build a knowledge map. The user has a note with the following content and has provided a prompt for you to update it.
-Your task is to intelligently integrate the user's request into the existing content. You can rewrite, append, or prepend as you see fit to create a coherent and improved note.
-Return only the complete, updated text for the note, without any extra explanations or markdown formatting.
-
----
-Original Note Content:
-${currentNodeContent || "(This note is currently empty)"}
----
-User's Prompt:
-"${prompt}"
----
-
-Updated Note Content:`;
-    
+    const systemPrompt = {
+      role: 'system',
+      content: `You are an AI assistant inside a note-taking app. The user is asking you questions about the following note. Your answers should be helpful, concise, and directly related to the user's query and the note's content. Note Content: """\n${noteContent}\n"""`
+    };
+    const messages = [systemPrompt, ...history];
     const payload = {
       model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: fullPrompt }],
+      messages,
     };
     return _generateContent(payload);
   }, [_generateContent]);
@@ -266,7 +257,7 @@ Updated Note Content:`;
     extractKeyPoints,
     generateNoteFromSelection,
     generateChatResponse,
-    generateUpdatedNodeContent,
+    generateNodeChatResponse,
     isGenerating,
     error,
   };
