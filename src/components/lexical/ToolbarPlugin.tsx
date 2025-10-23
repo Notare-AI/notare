@@ -15,6 +15,7 @@ import { $getNearestNodeOfType, mergeRegister } from '@lexical/utils';
 import {
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
+  INSERT_CHECK_LIST_COMMAND,
   REMOVE_LIST_COMMAND,
   $isListNode,
   ListNode,
@@ -26,7 +27,7 @@ import {
   HeadingTagType,
 } from '@lexical/rich-text';
 import {
-  Bold, Italic, Underline, Strikethrough, Code, Link, List, ListOrdered, Quote, Heading1, Heading2, Heading3, Undo, Redo
+  Bold, Italic, Underline, Strikethrough, Code, Link, List, ListOrdered, Quote, Heading1, Heading2, Heading3, Undo, Redo, CheckSquare
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -143,6 +144,7 @@ export default function ToolbarPlugin() {
       <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)} className="h-8 w-8"><List size={16} /></Button>
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)} className="h-8 w-8"><ListOrdered size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)} className="h-8 w-8"><CheckSquare size={16} /></Button>
     </div>
   );
 }
