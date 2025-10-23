@@ -10,7 +10,7 @@ const Hero = () => {
           Turn Complex Knowledge into Visual Clarity—Instantly
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-          Struggling with scattered notes, endless PDF scrolling, and forgotten ideas? Notare is the ultimate AI note taking tool that organizes your thoughts on an infinite canvas, extracts key insights from documents, reports and books while ensuring privacy—no data training ever.
+          Notare is the AI-powered visual workspace for students, researchers, and professionals. Upload PDFs, extract key insights with AI, and build interconnected knowledge maps—all on an infinite canvas.
         </p>
         <div className="flex justify-center gap-4 mb-12">
           <Button asChild size="lg" className="bg-primary text-primary-foreground">
