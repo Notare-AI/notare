@@ -14,8 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 28% 21%;
 
-    /* Application Primary Color (Blue/Indigo) */
-    --primary: 221.2 83.2% 53.3%; /* #3b82f6 */
+    --primary: 18 96% 52%; /* #FA500F */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 160 82% 32%; /* #10B981 */
@@ -32,9 +31,7 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    
-    /* Application Ring Color (Blue/Indigo) */
-    --ring: 221.2 83.2% 53.3%; /* #3b82f6 */
+    --ring: 18 96% 52%; /* #FA500F */
 
     --radius: 0.5rem;
   }
@@ -50,8 +47,7 @@
     --popover: 0 0% 9%; /* #171717 */
     --popover-foreground: 210 40% 98%;
 
-    /* Application Primary Color (Blue/Indigo) */
-    --primary: 217.2 91.2% 59.8%; /* #3b82f6 */
+    --primary: 18 96% 52%; /* #FA500F */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 160 82% 42%;
@@ -68,9 +64,7 @@
 
     --border: 0 0% 20%; /* #333333 */
     --input: 0 0% 20%; /* #333333 */
-    
-    /* Application Ring Color (Blue/Indigo) */
-    --ring: 217.2 91.2% 59.8%; /* #3b82f6 */
+    --ring: 18 96% 52%; /* #FA500F */
   }
 }
 
@@ -199,6 +193,12 @@
     outline: none;
     box-shadow: 0 0 0 2px hsl(var(--ring));
   }
+}
+
+/* Fix for AI chat code blocks not wrapping */
+.prose pre {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Custom override for Supabase Auth UI to show Microsoft icon and text */
