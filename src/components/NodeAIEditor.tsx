@@ -102,7 +102,7 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
                   </Avatar>
                 )}
                 <div className={cn(
-                  "group relative max-w-[80%] rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert max-w-none break-all",
+                  "group relative max-w-[80%] rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert max-w-none break-words",
                   message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-[#363636]'
                 )}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
