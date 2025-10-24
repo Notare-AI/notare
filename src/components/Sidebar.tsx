@@ -6,12 +6,9 @@ import {
   MoreVertical,
   PanelLeftClose,
   Sparkles,
-  Share2,
-  Users,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import AddCanvasModal from "./AddCanvasModal";
-import ShareCanvasModal from "./ShareCanvasModal";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
 import { User } from "@supabase/supabase-js";
@@ -21,7 +18,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -40,7 +36,6 @@ import { useUserProfile } from "@/contexts/UserProfileContext";
 interface Canvas {
   id: string;
   title: string;
-  owner_id: string;
 }
 
 interface SidebarProps {
@@ -64,7 +59,6 @@ const Sidebar = ({
   const [canvasToDelete, setCanvasToDelete] = useState<Canvas | null>(null);
   const [editingCanvasId, setEditingCanvasId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
-  const [sharingCanvas, setSharingCanvas] = useState<Canvas | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { profile } = useUserProfile();
 
@@ -76,32 +70,35 @@ const Sidebar = ({
     checkUser();
   }, []);
 
-  const fetchCanvases = useCallback(async () => {
+  const fetchCanvases = async () => {
     if (!user) return;
-    const { data, error } = await supabase.rpc('get_user_canvases');
+    const { data, error } = await supabase
+      .from("canvases")
+      .select("id, title")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: false });
 
     if (error) {
       showError("Could not fetch your canvases.");
       console.error(error);
     } else {
-      const fetchedCanvases = data as Canvas[];
-      setCanvases(fetchedCanvases);
-      if (!selectedCanvasId && fetchedCanvases.length > 0) {
-        onSelectCanvas(fetchedCanvases[0]);
+      setCanvases(data);
+      if (!selectedCanvasId && data && data.length > 0) {
+        onSelectCanvas(data[0]);
       } else if (
         selectedCanvasId &&
-        !fetchedCanvases.some((c) => c.id === selectedCanvasId)
+        !data.some((c) => c.id === selectedCanvasId)
       ) {
-        onSelectCanvas(fetchedCanvases.length > 0 ? fetchedCanvases[0] : null);
+        onSelectCanvas(data.length > 0 ? data[0] : null);
       }
     }
-  }, [user, selectedCanvasId, onSelectCanvas]);
+  };
 
   useEffect(() => {
     if (user) {
       fetchCanvases();
     }
-  }, [user, fetchCanvases]);
+  }, [user]);
 
   useEffect(() => {
     if (editingCanvasId && inputRef.current) {
@@ -117,7 +114,7 @@ const Sidebar = ({
     const { data, error } = await supabase
       .from("canvases")
       .insert([{ title, owner_id: user.id }])
-      .select("id, title, owner_id")
+      .select("id, title")
       .single();
 
     if (error) {
@@ -269,53 +266,37 @@ const Sidebar = ({
                       <span className="truncate flex-grow pr-2">
                         {canvas.title}
                       </span>
-                      <div className="flex items-center">
-                        {canvas.owner_id !== user?.id && (
-                          <Users size={14} className="text-muted-foreground shrink-0 mr-1" title="Shared with you" />
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                              className="h-8 w-8 shrink-0 -mr-2 text-muted-foreground group-hover:text-foreground"
-                            >
-                              <MoreVertical size={16} />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="bg-popover text-popover-foreground border-border"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="h-8 w-8 shrink-0 -mr-2 text-muted-foreground group-hover:text-foreground"
                           >
-                            {canvas.owner_id === user?.id && (
-                              <>
-                                <DropdownMenuItem onClick={() => setSharingCanvas(canvas)}>
-                                  <Share2 className="mr-2 h-4 w-4" />
-                                  <span>Share</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRename(canvas)}>
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => setCanvasToDelete(canvas)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  Remove
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {canvas.owner_id !== user?.id && (
-                              <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                Leave Canvas
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                            <MoreVertical size={16} />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="bg-popover text-popover-foreground border-border"
+                        >
+                          <DropdownMenuItem
+                            onClick={() => handleRename(canvas)}
+                            className="hover:!bg-muted focus:!bg-muted"
+                          >
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setCanvasToDelete(canvas)}
+                            className="hover:!bg-muted focus:!bg-muted text-destructive focus:!text-destructive-foreground"
+                          >
+                            Remove
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   )}
                 </li>
@@ -367,12 +348,6 @@ const Sidebar = ({
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
         onAddCanvas={handleAddCanvas}
-      />
-      <ShareCanvasModal
-        isOpen={!!sharingCanvas}
-        onOpenChange={() => setSharingCanvas(null)}
-        canvas={sharingCanvas}
-        currentUser={user}
       />
       <AlertDialog
         open={!!canvasToDelete}
