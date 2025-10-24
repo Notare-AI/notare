@@ -21,4 +21,11 @@ export const posts: Post[] = [
     date: '2024-07-25', // Placeholder for new post
     author: 'The Notare Team',
   },
+  {
+    slug: 'organize-research-notes-ai',
+    title: 'How to Organize Research Notes with AI: A Step-by-Step Guide for Students and Academics',
+    description: 'Struggling to organize research notes? Learn how to use AI tools like Notare to summarize PDFs, extract key insights, and build visual knowledge maps—saving hours of manual work. Try it for free!',
+    date: '2025-10-25',
+    author: 'Niall Parkinson',
+  },
 ];
