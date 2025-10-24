@@ -22,12 +22,11 @@ import {
 } from '@lexical/list';
 import {
   $createHeadingNode,
-  $createQuoteNode,
   $isHeadingNode,
   HeadingTagType,
 } from '@lexical/rich-text';
 import {
-  Bold, Italic, Underline, Strikethrough, Code, Link, List, ListOrdered, Quote, Heading1, Heading2, Heading3, Undo, Redo, CheckSquare
+  Bold, Italic, Underline, Strikethrough, Code, Link, List, ListOrdered, Heading1, Heading2, Heading3, Undo, Redo, CheckSquare
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -45,21 +44,46 @@ export default function ToolbarPlugin() {
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isCode, setIsCode] = useState(false);
   const [isLink, setIsLink] = useState(false);
+  const [blockType, setBlockType] = useState('paragraph');
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
+      // Text formats
       setIsBold(selection.hasFormat('bold'));
       setIsItalic(selection.hasFormat('italic'));
       setIsUnderline(selection.hasFormat('underline'));
       setIsStrikethrough(selection.hasFormat('strikethrough'));
       setIsCode(selection.hasFormat('code'));
 
+      // Link
       const node = selection.anchor.getNode();
       const parent = node.getParent();
       setIsLink($isLinkNode(parent) || $isLinkNode(node));
+
+      // Block type
+      const anchorNode = selection.anchor.getNode();
+      const element =
+        anchorNode.getKey() === 'root'
+          ? anchorNode
+          : anchorNode.getTopLevelElementOrThrow();
+      const elementKey = element.getKey();
+      const elementDOM = editor.getElementByKey(elementKey);
+
+      if (elementDOM !== null) {
+        if ($isListNode(element)) {
+          const parentList = $getNearestNodeOfType(anchorNode, ListNode);
+          const type = parentList ? parentList.getListType() : element.getListType();
+          setBlockType(type);
+        } else {
+          const type = $isHeadingNode(element)
+            ? element.getTag()
+            : element.getType();
+          setBlockType(type);
+        }
+      }
     }
-  }, []);
+  }, [editor]);
 
   useEffect(() => {
     return mergeRegister(
@@ -104,26 +128,45 @@ export default function ToolbarPlugin() {
   }, [editor, isLink]);
 
   const formatHeading = (tag: HeadingTagType) => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        const node = selection.anchor.getNode();
-        const parent = node.getParent();
-        if ($isHeadingNode(parent) && parent.getTag() === tag) {
-          // If it's already the same heading, convert back to paragraph
-          const paragraph = $createParagraphNode();
-          parent.replace(paragraph);
-          paragraph.select();
-        } else {
-          const heading = $createHeadingNode(tag);
-          if (parent.getTextContent()) {
-            heading.append(...parent.getChildren());
-          }
-          parent.replace(heading);
-          heading.select();
+    if (blockType !== tag) {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $createHeadingNode(tag).select();
         }
-      }
-    });
+      });
+    } else {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $createParagraphNode().select();
+        }
+      });
+    }
+  };
+
+  const formatBulletList = () => {
+    if (blockType !== 'bullet') {
+      editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const formatNumberedList = () => {
+    if (blockType !== 'number') {
+      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const formatCheckList = () => {
+    if (blockType !== 'check') {
+      editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
   };
 
   return (
@@ -131,9 +174,9 @@ export default function ToolbarPlugin() {
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)} disabled={!canUndo} className="h-8 w-8"><Undo size={16} /></Button>
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)} disabled={!canRedo} className="h-8 w-8"><Redo size={16} /></Button>
       <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-      <Button variant="ghost" size="icon" onClick={() => formatHeading('h1')} className="h-8 w-8"><Heading1 size={16} /></Button>
-      <Button variant="ghost" size="icon" onClick={() => formatHeading('h2')} className="h-8 w-8"><Heading2 size={16} /></Button>
-      <Button variant="ghost" size="icon" onClick={() => formatHeading('h3')} className="h-8 w-8"><Heading3 size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={() => formatHeading('h1')} className={cn('h-8 w-8', blockType === 'h1' && 'bg-gray-200 dark:bg-gray-700')}><Heading1 size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={() => formatHeading('h2')} className={cn('h-8 w-8', blockType === 'h2' && 'bg-gray-200 dark:bg-gray-700')}><Heading2 size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={() => formatHeading('h3')} className={cn('h-8 w-8', blockType === 'h3' && 'bg-gray-200 dark:bg-gray-700')}><Heading3 size={16} /></Button>
       <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')} className={cn('h-8 w-8', isBold && 'bg-gray-200 dark:bg-gray-700')}><Bold size={16} /></Button>
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')} className={cn('h-8 w-8', isItalic && 'bg-gray-200 dark:bg-gray-700')}><Italic size={16} /></Button>
@@ -142,9 +185,9 @@ export default function ToolbarPlugin() {
       <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')} className={cn('h-8 w-8', isCode && 'bg-gray-200 dark:bg-gray-700')}><Code size={16} /></Button>
       <Button variant="ghost" size="icon" onClick={insertLink} className={cn('h-8 w-8', isLink && 'bg-gray-200 dark:bg-gray-700')}><Link size={16} /></Button>
       <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-      <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)} className="h-8 w-8"><List size={16} /></Button>
-      <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)} className="h-8 w-8"><ListOrdered size={16} /></Button>
-      <Button variant="ghost" size="icon" onClick={() => editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)} className="h-8 w-8"><CheckSquare size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={formatBulletList} className={cn('h-8 w-8', blockType === 'bullet' && 'bg-gray-200 dark:bg-gray-700')}><List size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={formatNumberedList} className={cn('h-8 w-8', blockType === 'number' && 'bg-gray-200 dark:bg-gray-700')}><ListOrdered size={16} /></Button>
+      <Button variant="ghost" size="icon" onClick={formatCheckList} className={cn('h-8 w-8', blockType === 'check' && 'bg-gray-200 dark:bg-gray-700')}><CheckSquare size={16} /></Button>
     </div>
   );
 }
