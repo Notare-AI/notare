@@ -18,7 +18,7 @@ const CanvasMinimap = ({ isMinimapOpen, setIsMinimapOpen }: CanvasMinimapProps) 
           }}
           nodeColor={(node) => {
             if (node.style?.backgroundColor) return node.style.backgroundColor;
-            return 'hsl(var(--accent))';
+            return 'hsl(var(--primary))'; // Changed from accent to primary
           }}
           nodeStrokeColor={'hsl(var(--border))'}
           maskColor={'hsla(var(--background), 0.8)'}

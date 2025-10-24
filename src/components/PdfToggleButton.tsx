@@ -15,7 +15,7 @@ const PdfToggleButton = ({ onClick, isActive }: PdfToggleButtonProps) => {
       onClick={onClick}
       className={cn(
         'bg-white text-black hover:bg-gray-200 border-gray-300 shadow-sm',
-        isActive && 'bg-blue-100 border-blue-400'
+        isActive && 'bg-primary/10 border-primary text-primary hover:bg-primary/20'
       )}
       title={isActive ? "Close PDF Viewer" : "Open PDF Viewer"}
     >

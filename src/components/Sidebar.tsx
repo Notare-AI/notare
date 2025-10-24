@@ -312,7 +312,7 @@ const Sidebar = ({
             {profile?.subscription_plan === 'free' && (
               <Button
                 onClick={onUpgradeClick}
-                className="w-full mb-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:opacity-90 transition-opacity"
+                className="w-full mb-4" // Removed hardcoded gradient classes
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 Upgrade to Pro
