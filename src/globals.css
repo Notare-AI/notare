@@ -90,7 +90,7 @@
   border-bottom: 1px solid hsl(var(--border));
 }
 .react-flow__controls-button:hover {
-  background: hsl(var(--accent));
+  background: hsl(var(--muted)); /* Changed from accent to muted for greyscale hover */
 }
 .react-flow__controls-button svg {
   fill: hsl(var(--foreground));
