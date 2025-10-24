@@ -95,15 +95,15 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
         <ScrollArea className="flex-grow p-3" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.map((message, index) => (
-              <div key={index} className={cn("flex items-start gap-3", message.role === 'user' ? 'justify-end' : '')}>
+              <div key={index} className={cn("flex items-start gap-3 w-full", message.role === 'user' ? 'justify-end' : '')}>
                 {message.role === 'assistant' && (
-                  <Avatar className="h-8 w-8 bg-gray-600">
+                  <Avatar className="h-8 w-8 bg-gray-600 flex-shrink-0">
                     <AvatarFallback><Bot size={18} /></AvatarFallback>
                   </Avatar>
                 )}
                 <div className={cn(
-                  "group relative rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert break-words", // Common styles
-                  message.role === 'user' ? 'bg-blue-600 text-white max-w-[80%]' : 'bg-[#363636] max-w-[calc(100%-44px)]' // Role-specific styles for width
+                  "group relative rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert break-words flex-grow flex-shrink max-w-full overflow-hidden",
+                  message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-[#363636]'
                 )}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                   {message.role === 'assistant' && (
@@ -121,11 +121,11 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
               </div>
             ))}
             {isGenerating && (
-              <div className="flex items-start gap-3">
-                <Avatar className="h-8 w-8 bg-gray-600">
+              <div className="flex items-start gap-3 w-full">
+                <Avatar className="h-8 w-8 bg-gray-600 flex-shrink-0">
                   <AvatarFallback><Bot size={18} /></AvatarFallback>
                 </Avatar>
-                <div className="bg-[#363636] rounded-lg px-3 py-2 flex items-center">
+                <div className="bg-[#363636] rounded-lg px-3 py-2 flex items-center flex-grow flex-shrink max-w-full overflow-hidden">
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
               </div>
