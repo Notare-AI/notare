@@ -11,7 +11,8 @@ import { HighlightProvider } from "./contexts/HighlightContext";
 import { UserProfileProvider } from "./contexts/UserProfileContext";
 import CheckoutPage from "./pages/Checkout";
 import Landing from "./pages/Landing";
-import BlogComingSoon from "./pages/BlogComingSoon";
+import BlogPage from "./pages/Blog";
+import AStepByStepGuideToUsingNotare from "./pages/blog/A-Step-by-Step-Guide-to-Using-Notare";
 import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
 import { Analytics } from "@vercel/analytics/react";
@@ -41,8 +42,8 @@ const App = () => (
                 }
               />
               <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
-              <Route path="/blog" element={<LandingLayout><BlogComingSoon /></LandingLayout>} />
-              <Route path="/blog/:slug" element={<LandingLayout><BlogComingSoon /></LandingLayout>} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/a-step-by-step-guide-to-using-notare" element={<AStepByStepGuideToUsingNotare />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
