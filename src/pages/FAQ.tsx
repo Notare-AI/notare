@@ -11,9 +11,6 @@ Notare is an AI-powered visual knowledge platform that helps users summarize PDF
 ## How accurate is Notare’s AI?
 Notare uses GPT-4 and fine-tuned models to ensure high accuracy. Users can edit summaries for precision.
 
-## Can I collaborate with others on Notare?
-Yes! Notare’s Professional and Team plans include collaboration features for shared canvases.
-
 ## Is my data secure?
 Yes. Notare uses Supabase for secure authentication and data storage. You can export your data anytime.
 `;
