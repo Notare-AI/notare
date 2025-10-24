@@ -82,7 +82,7 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
       <PopoverContent
         side="right"
         align="start"
-        className="w-[28rem] bg-[#2A2A2A] border-gray-700 text-white p-0 flex flex-col h-[500px]" // Increased width to w-[28rem]
+        className="w-[28rem] bg-[#2A2A2A] border-gray-700 text-white p-0 flex flex-col h-[500px]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex items-center justify-between p-3 border-b border-gray-700 flex-shrink-0">
@@ -103,7 +103,7 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
                 )}
                 <div className={cn(
                   "group relative rounded-lg px-3 py-2 text-sm prose prose-sm prose-invert break-words", // Common styles
-                  message.role === 'user' ? 'bg-blue-600 text-white max-w-[80%]' : 'bg-[#363636] flex-1' // Role-specific styles for width
+                  message.role === 'user' ? 'bg-blue-600 text-white max-w-[80%]' : 'bg-[#363636] max-w-[calc(100%-44px)]' // Role-specific styles for width
                 )}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                   {message.role === 'assistant' && (
