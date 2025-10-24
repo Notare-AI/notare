@@ -14,7 +14,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 28% 21%;
 
-    --primary: 18 96% 52%; /* #FA500F */
+    /* Application Primary Color (Blue/Indigo) */
+    --primary: 221.2 83.2% 53.3%; /* #3b82f6 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 160 82% 32%; /* #10B981 */
@@ -31,7 +32,9 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 18 96% 52%; /* #FA500F */
+    
+    /* Application Ring Color (Blue/Indigo) */
+    --ring: 221.2 83.2% 53.3%; /* #3b82f6 */
 
     --radius: 0.5rem;
   }
@@ -47,7 +50,8 @@
     --popover: 0 0% 9%; /* #171717 */
     --popover-foreground: 210 40% 98%;
 
-    --primary: 18 96% 52%; /* #FA500F */
+    /* Application Primary Color (Blue/Indigo) */
+    --primary: 217.2 91.2% 59.8%; /* #3b82f6 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 160 82% 42%;
@@ -64,7 +68,9 @@
 
     --border: 0 0% 20%; /* #333333 */
     --input: 0 0% 20%; /* #333333 */
-    --ring: 18 96% 52%; /* #FA500F */
+    
+    /* Application Ring Color (Blue/Indigo) */
+    --ring: 217.2 91.2% 59.8%; /* #3b82f6 */
   }
 }
 
