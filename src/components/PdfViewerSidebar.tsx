@@ -490,7 +490,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
             <div className="flex flex-col h-full">
               {selection && !isGenerating && (
                 <div style={{ position: 'absolute', top: selection.top, left: selection.left, transform: 'translateX(-50%)', zIndex: 10 }}>
-                  <Button onClick={handleCreateNoteFromSelection} size="sm" className="shadow-lg bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button onClick={handleCreateNoteFromSelection} size="sm" className="shadow-lg">
                     <MessageSquare size={16} className="mr-2" />
                     Create Note
                   </Button>

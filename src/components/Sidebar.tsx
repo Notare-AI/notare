@@ -259,8 +259,8 @@ const Sidebar = ({
                       }}
                       className={`group flex items-center justify-between rounded-md px-3 h-9 text-sm cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
                         selectedCanvasId === canvas.id
-                          ? "bg-accent"
-                          : "hover:bg-accent"
+                          ? "bg-muted text-foreground"
+                          : "hover:bg-muted/50"
                       }`}
                     >
                       <span className="truncate flex-grow pr-2">
@@ -285,13 +285,13 @@ const Sidebar = ({
                         >
                           <DropdownMenuItem
                             onClick={() => handleRename(canvas)}
-                            className="hover:!bg-accent focus:!bg-accent"
+                            className="hover:!bg-muted focus:!bg-muted"
                           >
                             Rename
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => setCanvasToDelete(canvas)}
-                            className="hover:!bg-accent focus:!bg-accent text-destructive focus:!text-destructive-foreground"
+                            className="hover:!bg-muted focus:!bg-muted text-destructive focus:!text-destructive-foreground"
                           >
                             Remove
                           </DropdownMenuItem>
@@ -312,7 +312,7 @@ const Sidebar = ({
             {profile?.subscription_plan === 'free' && (
               <Button
                 onClick={onUpgradeClick}
-                className="w-full mb-4" // Removed hardcoded gradient classes
+                className="w-full mb-4"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 Upgrade to Pro

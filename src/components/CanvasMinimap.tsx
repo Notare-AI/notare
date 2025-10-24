@@ -31,7 +31,7 @@ const CanvasMinimap = ({ isMinimapOpen, setIsMinimapOpen }: CanvasMinimapProps) 
         <button
           onClick={() => setIsMinimapOpen(!isMinimapOpen)}
           title={isMinimapOpen ? 'Hide Minimap' : 'Show Minimap'}
-          className="bg-card text-foreground w-8 h-8 flex items-center justify-center rounded-sm border border-border shadow-md hover:bg-accent"
+          className="bg-card text-foreground w-8 h-8 flex items-center justify-center rounded-sm border border-border shadow-md hover:bg-muted"
         >
           {isMinimapOpen ? <Minimize2 size={16} /> : <Map size={16} />}
         </button>
