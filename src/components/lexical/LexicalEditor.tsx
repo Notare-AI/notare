@@ -10,6 +10,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { TRANSFORMERS } from '@lexical/markdown';
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
@@ -95,6 +96,7 @@ export default function LexicalEditor({
           />
           <HistoryPlugin />
           <ListPlugin />
+          <CheckListPlugin />
           <LinkPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <AutoFocusOnEditPlugin editable={isEditable} />

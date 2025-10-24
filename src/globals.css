@@ -201,6 +201,35 @@
   }
 }
 
+/* Lexical Checkbox Styles */
+@layer components {
+  .lexical-container li.listitem-checklist {
+    @apply list-none flex items-start my-1 p-0;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"] {
+    @apply appearance-none w-4 h-4 border border-border rounded-sm bg-background mt-1 mr-2 cursor-pointer flex-shrink-0;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"]:focus {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"]:checked {
+    @apply bg-primary border-primary;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"]:checked::after {
+    content: '✓';
+    @apply block w-full h-full text-center text-xs text-primary-foreground leading-4;
+  }
+
+  .lexical-container li.listitem-checklist-checked > div {
+    @apply line-through text-muted-foreground;
+  }
+}
+
+
 /* Custom override for Supabase Auth UI to show Microsoft icon and text */
 button[aria-label="Continue with Azure"] {
   font-size: 0; /* Hide original text content */
