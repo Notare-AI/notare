@@ -28,7 +28,7 @@ export const plans: Plan[] = [
     price: '£8',
     description: 'For individuals who need more power and flexibility.',
     features: [
-      '100 AI Credits/Month',
+      '250 AI Credits/Month',
       'Unlimited Canvases',
       '20 PDF Uploads',
       'Synced notes across devices',

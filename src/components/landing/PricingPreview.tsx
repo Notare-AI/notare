@@ -16,7 +16,7 @@ const plans = [
     name: 'Personal',
     price: '£8/month',
     features: [
-      '100 AI Credits/Month',
+      '250 AI Credits/Month',
       'Unlimited Canvases',
       '20 PDF Uploads'
     ],
