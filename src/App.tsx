@@ -13,10 +13,13 @@ import CheckoutPage from "./pages/Checkout";
 import Landing from "./pages/Landing";
 import BlogPage from "./pages/Blog";
 import AStepByStepGuideToUsingNotare from "./pages/blog/A-Step-by-Step-Guide-to-Using-Notare";
+import HowToSummarizeResearchPapersWithAI from "./pages/blog/How-to-Summarize-Research-Papers-with-AI-in-2025";
 import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
 import { Analytics } from "@vercel/analytics/react";
 import AuthConfirmPage from "./pages/AuthConfirm";
+import WhatIsNotare from "./pages/WhatIsNotare";
+import FAQPage from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -42,8 +45,11 @@ const App = () => (
                 }
               />
               <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
+              <Route path="/what-is-notare" element={<WhatIsNotare />} />
+              <Route path="/faq" element={<FAQPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/a-step-by-step-guide-to-using-notare" element={<AStepByStepGuideToUsingNotare />} />
+              <Route path="/blog/how-to-summarize-research-papers-with-ai-in-2025" element={<HowToSummarizeResearchPapersWithAI />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

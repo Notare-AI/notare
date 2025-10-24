@@ -16,6 +16,9 @@ const Header = () => {
             <Link to="/">Home</Link>
           </Button>
           <Button variant="ghost" asChild>
+            <Link to="/what-is-notare">What is Notare?</Link>
+          </Button>
+          <Button variant="ghost" asChild>
             <Link to="/pricing">Pricing</Link>
           </Button>
           <Button variant="ghost" asChild>

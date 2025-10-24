@@ -1,5 +1,6 @@
 import { PenSquare, Twitter, Mail } from 'lucide-react';
 import DiscordIcon from '@/components/icons/DiscordIcon';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -12,6 +13,9 @@ const Footer = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <Link to="/faq" className="text-muted-foreground hover:text-foreground transition-colors">
+            FAQ
+          </Link>
           <a href="https://discord.gg/j7VHUmr8" target="_blank" rel="noopener noreferrer" aria-label="Discord" className="text-muted-foreground hover:text-foreground transition-colors">
             <DiscordIcon className="h-5 w-5" />
           </a>

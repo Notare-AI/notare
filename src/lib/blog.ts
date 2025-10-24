@@ -14,4 +14,11 @@ export const posts: Post[] = [
     date: '2023-10-26', // Using a placeholder date
     author: 'The Notare Team',
   },
+  {
+    slug: 'how-to-summarize-research-papers-with-ai-in-2025',
+    title: 'How to Summarize Research Papers with AI in 2025',
+    description: 'Discover how AI tools like Notare can drastically reduce the time spent summarizing research papers, improving comprehension and retention.',
+    date: '2024-07-25', // Placeholder for new post
+    author: 'The Notare Team',
+  },
 ];
