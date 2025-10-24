@@ -28,4 +28,11 @@ export const posts: Post[] = [
     date: '2025-10-25',
     author: 'Niall Parkinson',
   },
+  {
+    slug: 'best-ai-tools-phd-students',
+    title: '10 Best AI Tools for PhD Students in 2025 (Save 20+ Hours/Week)',
+    description: 'Discover the top AI tools for PhD students in 2025—including Notare for visual note-taking and PDF summarization. Try the best tools for free!',
+    date: '2025-10-26',
+    author: 'Niall Parkinson',
+  },
 ];
