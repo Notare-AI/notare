@@ -1,32 +1,11 @@
-import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { PenSquare, MailCheck } from 'lucide-react';
+import { PenSquare } from 'lucide-react';
 
 const Login = () => {
-  const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
-
-  const handleSignUp = async () => {
-    setShowConfirmationMessage(true);
-  };
-
-  if (showConfirmationMessage) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="w-full max-w-sm p-8 space-y-6 text-center bg-card border border-border rounded-lg shadow-sm">
-          <MailCheck className="mx-auto h-12 w-12 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
-          <p className="text-muted-foreground">
-            We've sent a verification link to your email address. Please click the link to confirm your account.
-          </p>
-          <p className="text-sm text-muted-foreground/80">
-            You may need to check your spam folder.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Removed custom state and logic for 'showConfirmationMessage'
+  // Relying on Supabase Auth UI to handle email confirmation messages and social redirects.
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
@@ -69,16 +48,16 @@ const Login = () => {
           }}
           theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
           providers={['google', 'azure']}
-          onSignUp={handleSignUp}
+          // Removed onSignUp handler to prevent interrupting the flow
           redirectTo={`${window.location.origin}/dashboard`}
           socialLayout="horizontal"
           localization={{
             variables: {
               sign_in: {
-                button_label: 'Sign Up',
+                button_label: 'Sign In', // Changed back to standard 'Sign In'
               },
               sign_up: {
-                link_text: 'Already have an account? Log in',
+                link_text: 'Don\'t have an account? Sign Up', // Changed back to standard link text
               },
             },
           }}
