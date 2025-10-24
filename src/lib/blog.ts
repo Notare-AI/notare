@@ -42,4 +42,11 @@ export const posts: Post[] = [
     date: '2025-10-27',
     author: 'Niall Parkinson',
   },
+  {
+    slug: 'notare-vs-logseq',
+    title: 'Notare vs. Logseq: Which is Better for Research and Knowledge Management in 2025?',
+    description: 'Comparing Notare and Logseq for research and knowledge management? Discover which tool offers better AI integration, visual mapping, and collaboration for academics and professionals. Try Notare for free today!',
+    date: '2025-10-28',
+    author: 'Niall Parkinson',
+  },
 ];

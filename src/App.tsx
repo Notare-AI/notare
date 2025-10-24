@@ -16,7 +16,8 @@ import AStepByStepGuideToUsingNotare from "./pages/blog/A-Step-by-Step-Guide-to-
 import HowToSummarizeResearchPapersWithAI from "./pages/blog/How-to-Summarize-Research-Papers-with-AI-in-2025";
 import OrganizeResearchNotesAI from "./pages/blog/OrganizeResearchNotesAI";
 import BestAIToolsPhDStudents from "./pages/blog/BestAIToolsPhDStudents";
-import NotareVsObsidian from "./pages/blog/NotareVsObsidian"; // New import
+import NotareVsObsidian from "./pages/blog/NotareVsObsidian";
+import NotareVsLogseq from "./pages/blog/NotareVsLogseq"; // New import
 import LandingLayout from "./components/landing/LandingLayout";
 import PricingPage from "./pages/Pricing";
 import { Analytics } from "@vercel/analytics/react";
@@ -55,7 +56,8 @@ const App = () => (
               <Route path="/blog/how-to-summarize-research-papers-with-ai-in-2025" element={<HowToSummarizeResearchPapersWithAI />} />
               <Route path="/blog/organize-research-notes-ai" element={<OrganizeResearchNotesAI />} />
               <Route path="/blog/best-ai-tools-phd-students" element={<BestAIToolsPhDStudents />} />
-              <Route path="/blog/notare-vs-obsidian" element={<NotareVsObsidian />} /> {/* New route */}
+              <Route path="/blog/notare-vs-obsidian" element={<NotareVsObsidian />} />
+              <Route path="/blog/notare-vs-logseq" element={<NotareVsLogseq />} /> {/* New route */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
