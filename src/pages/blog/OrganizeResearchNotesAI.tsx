@@ -131,7 +131,7 @@ const OrganizeResearchNotesAI = () => {
             "datePublished": "2025-10-25",
             "author": {
               "@type": "Person",
-              "name": "Niall Parkinson"
+              "name": "Notare"
             },
             "publisher": {
               "@type": "Organization",
