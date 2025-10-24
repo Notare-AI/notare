@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { showError, showSuccess } from '@/utils/toast';
+import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
+import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 interface UseCanvasActionsProps {
   nodes: Node[];
@@ -45,17 +47,25 @@ export const useCanvasActions = ({ nodes, edges }: UseCanvasActionsProps) => {
         return;
     }
 
-    let markdownContent = `# ${startTextNode.data.label || 'Untitled Note'}\n\n`;
+    const getContentAsMarkdown = (node: Node): string => {
+        const content = node.data.label || '';
+        return isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
+    };
+
+    const startNodeMarkdown = getContentAsMarkdown(startTextNode);
+    const startNodeTitle = startNodeMarkdown.split('\n')[0] || 'Untitled Note';
+    let markdownContent = `# ${startNodeTitle}\n\n${startNodeMarkdown}\n\n`;
     
     const otherNodes = textNodes.filter(n => n.id !== startNodeId);
 
     otherNodes.forEach(node => {
-      const title = node.data.label?.split('\n')[0] || 'Untitled';
+      const nodeMarkdown = getContentAsMarkdown(node);
+      const title = nodeMarkdown.split('\n')[0] || 'Untitled';
       const type = node.type?.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()) || 'Note';
-      markdownContent += `---\n\n## ${type}: ${title}\n\n${node.data.label || ''}\n\n`;
+      markdownContent += `---\n\n## ${type}: ${title}\n\n${nodeMarkdown}\n\n`;
     });
 
-    const filename = `${(startNode.data.label || 'canvas_branch').substring(0, 30).replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+    const filename = `${(startNodeTitle).substring(0, 30).replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
     const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

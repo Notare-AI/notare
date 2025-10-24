@@ -1,6 +1,8 @@
 import { useReactFlow } from '@xyflow/react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { colorMap } from '@/lib/colors';
+import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
+import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 const generateFilename = (content: string) => {
   if (!content) {
@@ -58,8 +60,9 @@ export const useNodeLogic = (nodeId: string, color?: string) => {
   }, [nodeId, getNodes, fitView]);
 
   const handleDownloadAsMarkdown = useCallback((content: string) => {
-    const filename = generateFilename(content);
-    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8;' });
+    const markdownContent = isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
+    const filename = generateFilename(markdownContent);
+    const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
