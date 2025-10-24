@@ -29,6 +29,7 @@ import { useCanvasKeyboardShortcuts } from '@/hooks/useCanvasKeyboardShortcuts';
 import { useCanvasActions } from '@/hooks/useCanvasActions';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { CanvasActionsProvider } from '@/contexts/CanvasActionsContext';
+import { markdownToLexicalJson } from '@/lib/markdownToLexical';
 
 
 import '@xyflow/react/dist/style.css';
@@ -99,7 +100,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     if (!parentNode) {
       console.error("Parent node not found for adding message to canvas");
       const position = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-      addNode('Note', content, position);
+      addNode('Note', markdownToLexicalJson(content), position);
       return;
     }
 
@@ -108,7 +109,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
       y: parentNode.position.y,
     };
 
-    addNode('Note', content, position, [], false, parentNodeId, parentNode.data.color);
+    addNode('Note', markdownToLexicalJson(content), position, [], false, parentNodeId, parentNode.data.color);
   }, [getNode, addNode, screenToFlowPosition]);
 
   const onMove = useCallback((_, viewport: Viewport) => {
