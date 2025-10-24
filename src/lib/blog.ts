@@ -35,4 +35,11 @@ export const posts: Post[] = [
     date: '2025-10-26',
     author: 'Niall Parkinson',
   },
+  {
+    slug: 'notare-vs-obsidian',
+    title: 'Notare vs. Obsidian: Which is Better for Visual Note-Taking in 2025?',
+    description: 'Struggling to choose between Notare and Obsidian for visual note-taking? Compare features, AI capabilities, and use cases to decide which tool fits your workflow. Try Notare for free today!',
+    date: '2025-10-27',
+    author: 'Niall Parkinson',
+  },
 ];
