@@ -94,6 +94,11 @@ export const useAI = () => {
       
       const parsed = JSON.parse(jsonMatch[0]);
 
+      // Specific check for the unexpected 'articles' format
+      if (parsed.articles && Array.isArray(parsed.articles)) {
+        throw new Error('AI returned a list of articles instead of the requested summary/key points. Please ensure the input text is not just a bibliography.');
+      }
+
       const isValidSource = (s: any): s is Source => typeof s === 'object' && s !== null && typeof s.text === 'string' && typeof s.page === 'number';
 
       // Standard format check
@@ -161,11 +166,12 @@ export const useAI = () => {
 
   const generateTLDRWithSources = useCallback(async (text: string): Promise<{ summary: string; sources: Source[] }> => {
     const prompt = `Analyze the following text, which is formatted with page markers (e.g., "--- PAGE 1 ---"). Provide a concise summary (TLDR) of 100 words or less. Also, extract the original sentences from the text that directly support your summary, noting their original page number.
+    Your response MUST be a single, valid JSON object with ONLY the specified keys and no other information, such as lists of articles, bibliographies, or external metadata.
     Return your response as a single, valid JSON object with two keys:
     1. "summary": A string containing the summary.
     2. "sources": An array of objects, where each object has two keys: "text" (the exact quote) and "page" (the integer page number it came from).
     
-    Provide only the JSON object and nothing else.
+    Provide ONLY the JSON object and nothing else.
     
     Text:
     """
@@ -183,11 +189,12 @@ export const useAI = () => {
 
   const extractKeyPoints = useCallback(async (text: string): Promise<{ points: string[]; sources: Source[] }> => {
     const prompt = `Extract the 5 most important key points from the following text, which is formatted with page markers (e.g., "--- PAGE 1 ---"). Also, extract the original sentences from the text that directly support these key points, noting their original page number.
+    Your response MUST be a single, valid JSON object with ONLY the specified keys and no other information, such as lists of articles, bibliographies, or external metadata.
     Return your response as a single, valid JSON object with two keys:
     1. "points": An array of strings, where each string is a key point.
     2. "sources": An array of objects, where each object has two keys: "text" (the exact quote) and "page" (the integer page number it came from).
     
-    Provide only the JSON object and nothing else.
+    Provide ONLY the JSON object and nothing else.
     
     Text:
     """
