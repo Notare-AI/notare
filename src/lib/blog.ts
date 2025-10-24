@@ -49,4 +49,11 @@ export const posts: Post[] = [
     date: '2025-10-28',
     author: 'Niall Parkinson',
   },
+  {
+    slug: 'best-free-ai-note-taker',
+    title: 'What’s the Best Free AI Note-Taker in 2025? (We Tested 10 Tools)',
+    description: 'Looking for the best free AI note-taker? We tested 10 tools (including Notare, Obsidian, and Logseq) to find the top options for students, researchers, and professionals. Discover which tool saves you the most time!',
+    date: '2025-10-29',
+    author: 'Niall Parkinson',
+  },
 ];
