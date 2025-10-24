@@ -25,7 +25,7 @@ We’ll compare **features, use cases, AI capabilities, and pricing** to determi
 | **AI Capabilities**   | ✅ Summarize PDFs, AI chat      | ❌ (Plugins required)           |
 | **Canvas Type**       | Infinite visual canvas          | Graph view (plugins required)  |
 | **PDF Integration**   | ✅ Upload and summarize PDFs    | ❌ Manual uploads only          |
-| **Collaboration**     | ✅ Shared canvases              | ❌ Local-first (no built-in)     |
+|Local-first (no built-in)     |
 | **Data Ownership**    | ✅ Export as Markdown           | ✅ Local files                  |
 | **Pricing**           | Free tier + paid plans          | Free (plugins may cost)         |
 | **Best For**          | Researchers, visual learners   | Writers, developers, tinkerers |
