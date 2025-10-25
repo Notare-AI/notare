@@ -15,12 +15,29 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders, status: 200 })
   }
 
-  try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+  let creditRefunded = false;
+  let userIdForRefund: string | null = null;
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
 
+  const refundCredit = async () => {
+    if (userIdForRefund && !creditRefunded) {
+      const { error: incrementError } = await supabaseAdmin.rpc('increment_ai_credits', {
+        user_id_param: userIdForRefund,
+        increment_amount: 1,
+      });
+      if (incrementError) {
+        console.error('CRITICAL: Failed to refund credit after OpenAI failure:', incrementError);
+      } else {
+        creditRefunded = true;
+        console.log(`Credit refunded for user ${userIdForRefund}`);
+      }
+    }
+  };
+
+  try {
     const supabaseUserClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -34,6 +51,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+    userIdForRefund = user.id;
 
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY not set in environment variables.');
@@ -43,7 +61,7 @@ serve(async (req) => {
       })
     }
 
-    // 1. Attempt to decrement credits. This RPC handles resets and checks atomically.
+    // 1. Attempt to decrement credits.
     const { data: decrementSuccess, error: decrementError } = await supabaseAdmin.rpc('decrement_ai_credits', {
       user_id_param: user.id,
       decrement_amount: 1,
@@ -72,22 +90,25 @@ serve(async (req) => {
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
-
+    // 3. Check for errors BEFORE parsing JSON
     if (!res.ok) {
-      // 3. If OpenAI fails, refund the credit.
-      const { error: incrementError } = await supabaseAdmin.rpc('increment_ai_credits', {
-        user_id_param: user.id,
-        increment_amount: 1,
-      });
-      if (incrementError) {
-        console.error('CRITICAL: Failed to refund credit after OpenAI failure:', incrementError);
+      await refundCredit();
+      
+      const errorBody = await res.text();
+      let errorMessage = `An error occurred with the AI service (Status: ${res.status}).`;
+      try {
+        const errorJson = JSON.parse(errorBody);
+        errorMessage = errorJson.error?.message || errorMessage;
+      } catch {
+        errorMessage = errorBody.substring(0, 200) || errorMessage;
       }
-      const errorMessage = data.error?.message || 'An error occurred with the AI service.';
+      
+      console.error('OpenAI API Error:', errorMessage);
       throw new Error(errorMessage);
     }
 
-    // 4. Return successful response
+    // 4. If successful, parse the response and return it
+    const data = await res.json();
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
@@ -95,6 +116,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Edge function uncaught error:', error);
+    await refundCredit();
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
