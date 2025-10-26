@@ -95,17 +95,17 @@ const Index = () => {
           <ResizablePanel defaultSize={isPdfSidebarOpen ? 70 : 100}>
             <main className="flex-grow flex flex-col relative h-full">
               {isSidebarCollapsed && (
-                <div className="flex items-center p-2 border-b border-gray-700 text-white flex-shrink-0 h-[57px]">
+                <div className="flex items-center p-2 border-b border-border flex-shrink-0 h-[57px]">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsSidebarCollapsed(false)}
-                    className="mr-2 hover:bg-gray-700"
+                    className="mr-2 hover:bg-muted"
                   >
                     <PanelLeftOpen size={20} />
                   </Button>
                   {selectedCanvas && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-foreground">
                       <FileText size={16} />
                       <span className="font-medium">{selectedCanvas.title}</span>
                     </div>
