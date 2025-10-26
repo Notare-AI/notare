@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -34,38 +34,36 @@ const App = () => (
       <HighlightProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <UserProfileProvider>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth/confirm" element={<AuthConfirmPage />} />
-              <Route path="/checkout" element={<AuthLayout><CheckoutPage /></AuthLayout>} />
-              <Route
-                path="/dashboard"
-                element={
-                  <AuthLayout>
-                    <Dashboard />
-                  </AuthLayout>
-                }
-              />
-              <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
-              <Route path="/what-is-notare" element={<WhatIsNotare />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/blog/a-step-by-step-guide-to-using-notare" element={<AStepByStepGuideToUsingNotare />} />
-              <Route path="/blog/how-to-summarize-research-papers-with-ai-in-2025" element={<HowToSummarizeResearchPapersWithAI />} />
-              <Route path="/blog/organize-research-notes-ai" element={<OrganizeResearchNotesAI />} />
-              <Route path="/blog/best-ai-tools-phd-students" element={<BestAIToolsPhDStudents />} />
-              <Route path="/blog/notare-vs-obsidian" element={<NotareVsObsidian />} />
-              <Route path="/blog/notare-vs-logseq" element={<NotareVsLogseq />} />
-              <Route path="/blog/best-free-ai-note-taker" element={<BestFreeAINoteTaker />} /> {/* New route */}
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Analytics />
-          </UserProfileProvider>
-        </BrowserRouter>
+        <UserProfileProvider>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/confirm" element={<AuthConfirmPage />} />
+            <Route path="/checkout" element={<AuthLayout><CheckoutPage /></AuthLayout>} />
+            <Route
+              path="/dashboard"
+              element={
+                <AuthLayout>
+                  <Dashboard />
+                </AuthLayout>
+              }
+            />
+            <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
+            <Route path="/what-is-notare" element={<WhatIsNotare />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/a-step-by-step-guide-to-using-notare" element={<AStepByStepGuideToUsingNotare />} />
+            <Route path="/blog/how-to-summarize-research-papers-with-ai-in-2025" element={<HowToSummarizeResearchPapersWithAI />} />
+            <Route path="/blog/organize-research-notes-ai" element={<OrganizeResearchNotesAI />} />
+            <Route path="/blog/best-ai-tools-phd-students" element={<BestAIToolsPhDStudents />} />
+            <Route path="/blog/notare-vs-obsidian" element={<NotareVsObsidian />} />
+            <Route path="/blog/notare-vs-logseq" element={<NotareVsLogseq />} />
+            <Route path="/blog/best-free-ai-note-taker" element={<BestFreeAINoteTaker />} /> {/* New route */}
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Analytics />
+        </UserProfileProvider>
       </HighlightProvider>
     </TooltipProvider>
   </QueryClientProvider>
