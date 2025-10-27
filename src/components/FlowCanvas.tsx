@@ -220,7 +220,20 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
 
     } catch (err: any) {
       dismissToast(toastId);
-      showError(err.message || 'Failed to add YouTube video.');
+      let errorMessage = 'Failed to add YouTube video. Please check the URL and try again.';
+      if (err.context && typeof err.context.json === 'function') {
+        try {
+          const errorBody = await err.context.json();
+          if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch (parseError) {
+          // Ignore if parsing fails, stick with the default message
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      showError(errorMessage);
     } finally {
       setIsAddingVideo(false);
     }
