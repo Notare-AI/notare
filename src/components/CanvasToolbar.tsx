@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { MousePointer, Hand, StickyNote, Image as ImageIcon } from 'lucide-react';
+import { MousePointer, Hand, StickyNote, Image as ImageIcon, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -9,9 +9,10 @@ interface CanvasToolbarProps {
   activeTool: Tool;
   onToolChange: (tool: Tool) => void;
   onImageUpload: (file: File) => void;
+  onYouTubeAdd: () => void;
 }
 
-const CanvasToolbar = ({ activeTool, onToolChange, onImageUpload }: CanvasToolbarProps) => {
+const CanvasToolbar = ({ activeTool, onToolChange, onImageUpload, onYouTubeAdd }: CanvasToolbarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageButtonClick = () => {
@@ -68,6 +69,20 @@ const CanvasToolbar = ({ activeTool, onToolChange, onImageUpload }: CanvasToolba
             </TooltipTrigger>
             <TooltipContent>
               <p>Add Image</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onYouTubeAdd}
+              >
+                <Youtube className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add YouTube Video</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
