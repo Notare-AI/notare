@@ -15,12 +15,10 @@ import TldrNode from './TldrNode';
 import KeyPointsNode from './KeyPointsNode';
 import ReferenceNode from './ReferenceNode';
 import ImageNode from './ImageNode';
-import YouTubeVideoNode from './YouTubeVideoNode';
 import CanvasToolbar, { Tool } from './CanvasToolbar';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
 import CanvasMinimap from './CanvasMinimap';
 import FlowControls from './FlowControls';
-import AddYouTubeVideoModal from './AddYouTubeVideoModal';
 import { supabase } from '@/integrations/supabase/client';
 import { showLoading, dismissToast, showSuccess, showError } from '@/utils/toast';
 
@@ -45,7 +43,6 @@ const nodeTypes = {
   keyPoints: KeyPointsNode,
   reference: ReferenceNode,
   image: ImageNode,
-  youtubeVideo: YouTubeVideoNode,
 };
 
 const edgeTypes = {
@@ -70,8 +67,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const [isMinimapOpen, setIsMinimapOpen] = useState(true);
-  const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
-  const [isAddingVideo, setIsAddingVideo] = useState(false);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef(0);
   const isInitializedRef = useRef(false);
@@ -174,71 +169,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
-  const extractVideoId = (url: string): string | null => {
-    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
-  const handleAddYouTubeVideo = async (url: string) => {
-    const videoId = extractVideoId(url);
-    if (!videoId) {
-      showError("Invalid YouTube URL provided.");
-      return;
-    }
-
-    setIsAddingVideo(true);
-    const toastId = showLoading('Fetching video transcript...');
-
-    try {
-      const { data, error } = await supabase.functions.invoke('get-youtube-transcript', {
-        body: { videoUrl: url },
-      });
-
-      if (error) throw error;
-
-      const position = screenToFlowPosition({
-        x: window.innerWidth * 0.4,
-        y: window.innerHeight / 3,
-      });
-
-      const newNode = {
-        id: `yt_${videoId}_${Date.now()}`,
-        type: 'youtubeVideo',
-        position,
-        data: {
-          videoId,
-          transcript: data.transcript,
-        },
-        style: { width: 560, height: 315 + 40 }, // 16:9 aspect ratio + header height
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-      dismissToast(toastId);
-      showSuccess('YouTube video added successfully!');
-      setIsYouTubeModalOpen(false);
-
-    } catch (err: any) {
-      dismissToast(toastId);
-      let errorMessage = 'Failed to add YouTube video. Please check the URL and try again.';
-      if (err.context && typeof err.context.json === 'function') {
-        try {
-          const errorBody = await err.context.json();
-          if (errorBody.error) {
-            errorMessage = errorBody.error;
-          }
-        } catch (parseError) {
-          // Ignore if parsing fails, stick with the default message
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      showError(errorMessage);
-    } finally {
-      setIsAddingVideo(false);
-    }
-  };
-
   const canvasActions = useMemo(() => ({ downloadNodeBranch, addNodeFromMessage }), [downloadNodeBranch, addNodeFromMessage]);
 
   if (isLoading) {
@@ -303,13 +233,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         activeTool={activeTool}
         onToolChange={setActiveTool}
         onImageUpload={uploadAndAddImageNode}
-        onYouTubeAdd={() => setIsYouTubeModalOpen(true)}
-      />
-      <AddYouTubeVideoModal
-        isOpen={isYouTubeModalOpen}
-        onOpenChange={setIsYouTubeModalOpen}
-        onAddVideo={handleAddYouTubeVideo}
-        isAdding={isAddingVideo}
       />
     </div>
   );
