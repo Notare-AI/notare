@@ -48,13 +48,14 @@ const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
     setRecentlyClicked(nodeId);
     setTimeout(() => setRecentlyClicked(null), 1000);
 
-    // Select the target node and ensure it's not hidden by viewport culling
+    // Ensure the target node is not hidden by viewport culling, but do not change the selection.
     setNodes((nds) =>
-      nds.map((n) => ({
-        ...n,
-        selected: n.id === nodeId,
-        hidden: n.id === nodeId ? false : n.hidden,
-      }))
+      nds.map((n) => {
+        if (n.id === nodeId) {
+          return { ...n, hidden: false };
+        }
+        return n;
+      })
     );
 
     // Use a timeout to ensure the node is rendered before fitting the view
