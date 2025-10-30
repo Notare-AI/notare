@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useReactFlow, Node } from '@xyflow/react';
 import { Link } from 'lucide-react';
+import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
+import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
 
 interface BacklinksPanelProps {
   selectedNodeId: string | null;
 }
+
+const getReadableTitle = (label: string | undefined): string => {
+  if (!label) {
+    return 'Untitled Note';
+  }
+  if (isLexicalJSON(label)) {
+    const markdown = lexicalToMarkdown(label);
+    const firstLine = markdown.split('\n')[0].replace(/^[#\s*>-]+/, '').trim();
+    return firstLine || 'Untitled Note';
+  }
+  return label.split('\n')[0] || 'Untitled Note';
+};
 
 const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
   const [backlinks, setBacklinks] = useState<Node[]>([]);
@@ -49,7 +63,7 @@ const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
                     onClick={() => handleBacklinkClick(node.id)}
                     className="w-full text-left text-sm p-2 rounded-md hover:bg-muted/50 transition-colors"
                   >
-                    {node.data.label?.split('\n')[0] || 'Untitled Note'}
+                    {getReadableTitle(node.data.label)}
                   </button>
                 </li>
               ))}
