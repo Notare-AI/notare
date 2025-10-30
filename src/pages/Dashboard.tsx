@@ -16,6 +16,8 @@ import SettingsModal from "@/components/SettingsModal";
 import { showSuccess, showLoading, dismissToast, showError } from "@/utils/toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { supabase } from "@/integrations/supabase/client";
+import WhatsNewModal from "@/components/WhatsNewModal";
+import { LATEST_UPDATE_VERSION } from "@/lib/updates";
 
 interface Canvas {
   id: string;
@@ -39,6 +41,14 @@ const Index = () => {
   const [activeSettingsTab, setActiveSettingsTab] = useState('account');
   const [searchParams, setSearchParams] = useSearchParams();
   const { refetchProfile } = useUserProfile();
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
+
+  useEffect(() => {
+    const seenVersion = localStorage.getItem('notare-update-version');
+    if (seenVersion !== LATEST_UPDATE_VERSION) {
+      setIsWhatsNewOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     const verifySession = async (sessionId: string) => {
@@ -79,6 +89,11 @@ const Index = () => {
   const openSettings = (tab: 'account' | 'billing' | 'theme' = 'account') => {
     setActiveSettingsTab(tab);
     setIsSettingsOpen(true);
+  };
+
+  const handleCloseWhatsNew = () => {
+    localStorage.setItem('notare-update-version', LATEST_UPDATE_VERSION);
+    setIsWhatsNewOpen(false);
   };
 
   return (
@@ -153,6 +168,11 @@ const Index = () => {
         isOpen={isSettingsOpen} 
         onOpenChange={setIsSettingsOpen} 
         activeTab={activeSettingsTab}
+      />
+      <WhatsNewModal
+        isOpen={isWhatsNewOpen}
+        onOpenChange={setIsWhatsNewOpen}
+        onClose={handleCloseWhatsNew}
       />
     </>
   );
