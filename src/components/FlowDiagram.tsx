@@ -1,6 +1,13 @@
+import { useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import FlowCanvas from './FlowCanvas';
 import { DnDProvider } from './DnDContext';
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+import BacklinksPanel from './BacklinksPanel';
 
 interface NewNodeRequest {
   type: string;
@@ -15,15 +22,26 @@ interface FlowDiagramProps {
 }
 
 const FlowDiagram = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: FlowDiagramProps) => {
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
   return (
     <ReactFlowProvider>
       <DnDProvider>
-        <FlowCanvas
-          canvasId={canvasId}
-          newNodeRequest={newNodeRequest}
-          onNodeAdded={onNodeAdded}
-          onSettingsClick={onSettingsClick}
-        />
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel defaultSize={75}>
+            <FlowCanvas
+              canvasId={canvasId}
+              newNodeRequest={newNodeRequest}
+              onNodeAdded={onNodeAdded}
+              onSettingsClick={onSettingsClick}
+              onSelectionChange={(selectedIds) => setSelectedNodeId(selectedIds[0] || null)}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={25} minSize={10}>
+            <BacklinksPanel selectedNodeId={selectedNodeId} />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </DnDProvider>
     </ReactFlowProvider>
   );

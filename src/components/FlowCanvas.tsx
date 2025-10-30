@@ -8,6 +8,7 @@ import {
   addEdge,
   Viewport,
   useReactFlow,
+  Node,
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -19,8 +20,6 @@ import CanvasToolbar, { Tool } from './CanvasToolbar';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
 import CanvasMinimap from './CanvasMinimap';
 import FlowControls from './FlowControls';
-import { supabase } from '@/integrations/supabase/client';
-import { showLoading, dismissToast, showSuccess, showError } from '@/utils/toast';
 
 // Import the new hooks
 import { useCanvasData } from '@/hooks/useCanvasData';
@@ -60,9 +59,10 @@ interface FlowCanvasProps {
   newNodeRequest: NewNodeRequest | null;
   onNodeAdded: () => void;
   onSettingsClick: () => void;
+  onSelectionChange: (selectedIds: string[]) => void;
 }
 
-const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: FlowCanvasProps) => {
+const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, onSelectionChange }: FlowCanvasProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
@@ -169,6 +169,10 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
+  const handleSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {
+    onSelectionChange(nodes.map(n => n.id));
+  }, [onSelectionChange]);
+
   const canvasActions = useMemo(() => ({ downloadNodeBranch, addNodeFromMessage }), [downloadNodeBranch, addNodeFromMessage]);
 
   if (isLoading) {
@@ -200,6 +204,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onMove={onMove}
+          onSelectionChange={handleSelectionChange}
           fitView
           zoomOnDoubleClick={false}
           panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
