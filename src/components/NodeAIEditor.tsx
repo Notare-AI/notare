@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
-import { useReactFlow } from '@xyflow/react';
+import { useReactFlow, Node } from '@xyflow/react';
 import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
 import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
@@ -53,34 +53,47 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
   }, [messages]);
 
   const getConnectedNotesContext = () => {
-    const nodes = getNodes();
-    const edges = getEdges();
-
-    const connectedNodeIds = edges
-      .filter(edge => edge.source === nodeId || edge.target === nodeId)
-      .map(edge => (edge.source === nodeId ? edge.target : edge.source));
+    const allNodes = getNodes();
+    const allEdges = getEdges();
     
-    const uniqueConnectedNodeIds = [...new Set(connectedNodeIds)];
+    const branchNodes: Node[] = [];
+    const queue: string[] = [nodeId];
+    const visited = new Set<string>([nodeId]);
 
-    if (uniqueConnectedNodeIds.length === 0) {
-      return '';
+    // Traverse the graph (BFS) to find all connected nodes
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const currentNode = allNodes.find(n => n.id === currentId);
+      if (currentNode) {
+        branchNodes.push(currentNode);
+      }
+
+      allEdges.forEach(edge => {
+        let neighborId: string | null = null;
+        if (edge.source === currentId) neighborId = edge.target;
+        if (edge.target === currentId) neighborId = edge.source;
+
+        if (neighborId && !visited.has(neighborId)) {
+          visited.add(neighborId);
+          queue.push(neighborId);
+        }
+      });
     }
 
-    const contextParts = uniqueConnectedNodeIds.map(id => {
-      const node = nodes.find(n => n.id === id);
-      if (!node || !node.data?.label) {
-        return null;
-      }
-      const content = node.data.label;
-      const textContent = isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
-      
-      let nodeTitle = `Note (${node.type})`;
-      if (textContent.length > 0) {
-        nodeTitle = textContent.split('\n')[0].replace(/#/g, '').trim();
-      }
+    // Filter out the current node and format the context
+    const contextParts = branchNodes
+      .filter(node => node.id !== nodeId && node.data?.label)
+      .map(node => {
+        const content = node.data.label;
+        const textContent = isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
+        
+        let nodeTitle = `Note (${node.type})`;
+        if (textContent.length > 0) {
+          nodeTitle = textContent.split('\n')[0].replace(/#/g, '').trim();
+        }
 
-      return `--- Connected Note: "${nodeTitle}" ---\n${textContent}`;
-    }).filter(Boolean);
+        return `--- Connected Note: "${nodeTitle}" ---\n${textContent}`;
+      });
 
     return contextParts.join('\n\n');
   };
