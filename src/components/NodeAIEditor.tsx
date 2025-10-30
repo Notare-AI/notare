@@ -11,6 +11,9 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
+import { useReactFlow } from '@xyflow/react';
+import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
+import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -31,6 +34,7 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
   const { generateNodeChatResponse, isGenerating } = useAI();
   const { addNodeFromMessage } = useCanvasActions();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { getNodes, getEdges } = useReactFlow();
 
   useEffect(() => {
     if (isOpen) {
@@ -48,6 +52,39 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
     }
   }, [messages]);
 
+  const getConnectedNotesContext = () => {
+    const nodes = getNodes();
+    const edges = getEdges();
+
+    const connectedNodeIds = edges
+      .filter(edge => edge.source === nodeId || edge.target === nodeId)
+      .map(edge => (edge.source === nodeId ? edge.target : edge.source));
+    
+    const uniqueConnectedNodeIds = [...new Set(connectedNodeIds)];
+
+    if (uniqueConnectedNodeIds.length === 0) {
+      return '';
+    }
+
+    const contextParts = uniqueConnectedNodeIds.map(id => {
+      const node = nodes.find(n => n.id === id);
+      if (!node || !node.data?.label) {
+        return null;
+      }
+      const content = node.data.label;
+      const textContent = isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
+      
+      let nodeTitle = `Note (${node.type})`;
+      if (textContent.length > 0) {
+        nodeTitle = textContent.split('\n')[0].replace(/#/g, '').trim();
+      }
+
+      return `--- Connected Note: "${nodeTitle}" ---\n${textContent}`;
+    }).filter(Boolean);
+
+    return contextParts.join('\n\n');
+  };
+
   const handleSendMessage = async () => {
     if (!prompt.trim() || isGenerating) return;
 
@@ -57,7 +94,8 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
     setPrompt('');
 
     try {
-      const responseText = await generateNodeChatResponse(currentContent, newMessages);
+      const connectedNotesContext = getConnectedNotesContext();
+      const responseText = await generateNodeChatResponse(currentContent, newMessages, connectedNotesContext);
       const assistantMessage: Message = { role: 'assistant', content: responseText };
       const finalMessages = [...newMessages, assistantMessage];
       setMessages(finalMessages);
