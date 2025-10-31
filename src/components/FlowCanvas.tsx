@@ -277,6 +277,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, on
       />
       {editingNote && (
         <NoteEditorModal
+          key={editingNote.id}
           isOpen={!!editingNote}
           onOpenChange={(isOpen) => !isOpen && handleCloseFocusEditor()}
           initialContent={editingNote.content}
