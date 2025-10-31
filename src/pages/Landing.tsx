@@ -1,9 +1,10 @@
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
-import KeyBenefits from '@/components/landing/KeyBenefits';
-import HowItWorks from '@/components/landing/HowItWorks';
-import Audience from '@/components/landing/Audience';
-import PricingPreview from '@/components/landing/PricingPreview';
+import ProblemSection from '@/components/landing/ProblemSection';
+import SolutionSection from '@/components/landing/SolutionSection';
+import OutcomeSection from '@/components/landing/OutcomeSection';
+import PricingSection from '@/components/landing/PricingSection';
+import DemoSection from '@/components/landing/DemoSection';
 import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
 
@@ -13,10 +14,11 @@ const Landing = () => {
       <Header />
       <main className="flex-grow">
         <Hero />
-        <KeyBenefits />
-        <HowItWorks />
-        <Audience />
-        <PricingPreview />
+        <ProblemSection />
+        <SolutionSection />
+        <OutcomeSection />
+        <PricingSection />
+        <DemoSection />
         <CTASection />
       </main>
       <Footer />
