@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { MousePointer, Hand, StickyNote, Image as ImageIcon } from 'lucide-react';
+import { MousePointer, Hand, StickyNote, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -9,9 +9,11 @@ interface CanvasToolbarProps {
   activeTool: Tool;
   onToolChange: (tool: Tool) => void;
   onImageUpload: (file: File) => void;
+  isBacklinksPanelOpen: boolean;
+  onToggleBacklinksPanel: () => void;
 }
 
-const CanvasToolbar = ({ activeTool, onToolChange, onImageUpload }: CanvasToolbarProps) => {
+const CanvasToolbar = ({ activeTool, onToolChange, onImageUpload, isBacklinksPanelOpen, onToggleBacklinksPanel }: CanvasToolbarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageButtonClick = () => {
@@ -56,6 +58,20 @@ const CanvasToolbar = ({ activeTool, onToolChange, onImageUpload }: CanvasToolba
             </Tooltip>
           ))}
           <div className="w-[1px] h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isBacklinksPanelOpen ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={onToggleBacklinksPanel}
+              >
+                <LinkIcon className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isBacklinksPanelOpen ? 'Hide' : 'Show'} Linked References</p>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
