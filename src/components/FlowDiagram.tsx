@@ -23,25 +23,34 @@ interface FlowDiagramProps {
 
 const FlowDiagram = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: FlowDiagramProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isBacklinksPanelOpen, setIsBacklinksPanelOpen] = useState(true);
+
+  const flowCanvasProps = {
+    canvasId,
+    newNodeRequest,
+    onNodeAdded,
+    onSettingsClick,
+    onSelectionChange: (selectedIds: string[]) => setSelectedNodeId(selectedIds[0] || null),
+    isBacklinksPanelOpen,
+    onToggleBacklinksPanel: () => setIsBacklinksPanelOpen(prev => !prev),
+  };
 
   return (
     <ReactFlowProvider>
       <DnDProvider>
-        <ResizablePanelGroup direction="vertical">
-          <ResizablePanel defaultSize={75}>
-            <FlowCanvas
-              canvasId={canvasId}
-              newNodeRequest={newNodeRequest}
-              onNodeAdded={onNodeAdded}
-              onSettingsClick={onSettingsClick}
-              onSelectionChange={(selectedIds) => setSelectedNodeId(selectedIds[0] || null)}
-            />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={25} minSize={10}>
-            <BacklinksPanel selectedNodeId={selectedNodeId} />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        {isBacklinksPanelOpen ? (
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel defaultSize={75}>
+              <FlowCanvas {...flowCanvasProps} />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={25} minSize={10}>
+              <BacklinksPanel selectedNodeId={selectedNodeId} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        ) : (
+          <FlowCanvas {...flowCanvasProps} />
+        )}
       </DnDProvider>
     </ReactFlowProvider>
   );

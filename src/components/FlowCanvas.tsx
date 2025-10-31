@@ -20,6 +20,7 @@ import CanvasToolbar, { Tool } from './CanvasToolbar';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
 import CanvasMinimap from './CanvasMinimap';
 import FlowControls from './FlowControls';
+import BacklinksToggleButton from './BacklinksToggleButton';
 
 // Import the new hooks
 import { useCanvasData } from '@/hooks/useCanvasData';
@@ -60,9 +61,11 @@ interface FlowCanvasProps {
   onNodeAdded: () => void;
   onSettingsClick: () => void;
   onSelectionChange: (selectedIds: string[]) => void;
+  isBacklinksPanelOpen: boolean;
+  onToggleBacklinksPanel: () => void;
 }
 
-const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, onSelectionChange }: FlowCanvasProps) => {
+const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, onSelectionChange, isBacklinksPanelOpen, onToggleBacklinksPanel }: FlowCanvasProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
@@ -232,6 +235,14 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, on
           <FlowControls onSettingsClick={onSettingsClick} />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
           <CanvasMinimap isMinimapOpen={isMinimapOpen} setIsMinimapOpen={setIsMinimapOpen} />
+           <div 
+            className="absolute right-[4.5rem] bottom-4 z-10"
+          >
+            <BacklinksToggleButton
+              onClick={onToggleBacklinksPanel}
+              isActive={isBacklinksPanelOpen}
+            />
+          </div>
         </ReactFlow>
       </CanvasActionsProvider>
       <CanvasToolbar
