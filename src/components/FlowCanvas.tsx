@@ -20,6 +20,8 @@ import CanvasToolbar, { Tool } from './CanvasToolbar';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
 import FlowControls from './FlowControls';
 import BacklinksToggleButton from './BacklinksToggleButton';
+import NoteEditorModal from './NoteEditorModal';
+import { FocusEditorProvider } from '@/contexts/FocusEditorContext';
 
 // Import the new hooks
 import { useCanvasData } from '@/hooks/useCanvasData';
@@ -72,6 +74,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, on
   const animationFrameId = useRef(0);
   const isInitializedRef = useRef(false);
   const { getNode, screenToFlowPosition } = useReactFlow();
+  const [editingNote, setEditingNote] = useState<{ id: string; content: string } | null>(null);
 
   // --- Hooks for modularity ---
   const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef });
@@ -174,7 +177,30 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, on
     onSelectionChange(nodes.map(n => n.id));
   }, [onSelectionChange]);
 
+  const openFocusEditor = useCallback((nodeId: string, content: string) => {
+    setEditingNote({ id: nodeId, content });
+  }, []);
+
+  const handleSaveFocusEditor = useCallback((newContent: string) => {
+    if (!editingNote) return;
+
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === editingNote.id) {
+          return { ...node, data: { ...node.data, label: newContent } };
+        }
+        return node;
+      })
+    );
+    setEditingNote(null);
+  }, [editingNote, setNodes]);
+
+  const handleCloseFocusEditor = () => {
+    setEditingNote(null);
+  };
+
   const canvasActions = useMemo(() => ({ downloadNodeBranch, addNodeFromMessage }), [downloadNodeBranch, addNodeFromMessage]);
+  const focusEditorContextValue = useMemo(() => ({ openFocusEditor }), [openFocusEditor]);
 
   if (isLoading) {
     return (
@@ -186,67 +212,77 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, on
 
   return (
     <div className="h-full w-full relative" ref={reactFlowWrapper}>
-      <CanvasActionsProvider value={canvasActions}>
-        {isDragOver && (
-          <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
-            <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
-              Drop to create note
+      <FocusEditorProvider value={focusEditorContextValue}>
+        <CanvasActionsProvider value={canvasActions}>
+          {isDragOver && (
+            <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center pointer-events-none">
+              <div className="bg-blue-500/90 text-white px-4 py-2 rounded-lg font-medium">
+                Drop to create note
+              </div>
             </div>
-          </div>
-        )}
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onPaneClick={handlePaneClick}
-          onDrop={handleDrop}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onMove={onMove}
-          onSelectionChange={handleSelectionChange}
-          fitView
-          zoomOnDoubleClick={false}
-          panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
-          selectionOnDrag={activeTool === 'select'}
-          selectionMode="partial"
-          nodesDraggable={activeTool === 'select'}
-          elementsSelectable={activeTool === 'select'}
-          nodesConnectable={activeTool === 'select'}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          deleteKeyCode={['Backspace', 'Delete']}
-          proOptions={{ hideAttribution: true }}
-          minZoom={0.1}
-          snapToGrid={true}
-          snapGrid={[15, 15]}
-          multiSelectionKeyCode="Shift"
-          className={
-            activeTool === 'pan'
-              ? 'cursor-grab'
-              : activeTool === 'note'
-              ? 'cursor-crosshair'
-              : ''
-          }
-        >
-          <FlowControls onSettingsClick={onSettingsClick} />
-          <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
-           <div 
-            className="absolute right-4 bottom-4 z-10"
+          )}
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onPaneClick={handlePaneClick}
+            onDrop={handleDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onMove={onMove}
+            onSelectionChange={handleSelectionChange}
+            fitView
+            zoomOnDoubleClick={false}
+            panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
+            selectionOnDrag={activeTool === 'select'}
+            selectionMode="partial"
+            nodesDraggable={activeTool === 'select'}
+            elementsSelectable={activeTool === 'select'}
+            nodesConnectable={activeTool === 'select'}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            deleteKeyCode={['Backspace', 'Delete']}
+            proOptions={{ hideAttribution: true }}
+            minZoom={0.1}
+            snapToGrid={true}
+            snapGrid={[15, 15]}
+            multiSelectionKeyCode="Shift"
+            className={
+              activeTool === 'pan'
+                ? 'cursor-grab'
+                : activeTool === 'note'
+                ? 'cursor-crosshair'
+                : ''
+            }
           >
-            <BacklinksToggleButton
-              onClick={onToggleBacklinksPanel}
-              isActive={isBacklinksPanelOpen}
-            />
-          </div>
-        </ReactFlow>
-      </CanvasActionsProvider>
+            <FlowControls onSettingsClick={onSettingsClick} />
+            <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
+            <div 
+              className="absolute right-4 bottom-4 z-10"
+            >
+              <BacklinksToggleButton
+                onClick={onToggleBacklinksPanel}
+                isActive={isBacklinksPanelOpen}
+              />
+            </div>
+          </ReactFlow>
+        </CanvasActionsProvider>
+      </FocusEditorProvider>
       <CanvasToolbar
         activeTool={activeTool}
         onToolChange={setActiveTool}
         onImageUpload={uploadAndAddImageNode}
       />
+      {editingNote && (
+        <NoteEditorModal
+          isOpen={!!editingNote}
+          onOpenChange={(isOpen) => !isOpen && handleCloseFocusEditor()}
+          initialContent={editingNote.content}
+          onSave={handleSaveFocusEditor}
+        />
+      )}
     </div>
   );
 };
