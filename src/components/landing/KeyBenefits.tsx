@@ -12,7 +12,7 @@ const benefits = [
   },
   {
     image: aiInsights,
-    title: "AI-Powered Insights",
+    title: "Reading isn’t the hard part. Synthesizing is.",
     description: "One-click summaries, smart highlights, and an AI assistant in every note. Spend less time reading, more time understanding."
   },
   {
