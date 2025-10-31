@@ -7,7 +7,8 @@ const SITE_URL = Deno.env.get('SITE_URL') || 'https://pvlbymcgaeaknjlzzbji.supab
 
 // Whitelist of valid price IDs for security
 const VALID_PRICE_IDS = [
-  Deno.env.get('STRIPE_PRICE_ID_RESEARCH_PRO')
+  Deno.env.get('STRIPE_PRICE_ID_PERSONAL'),
+  Deno.env.get('STRIPE_PRICE_ID_PROFESSIONAL')
 ].filter(Boolean); // Filter out any undefined values
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {

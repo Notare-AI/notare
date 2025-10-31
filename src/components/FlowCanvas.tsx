@@ -8,6 +8,7 @@ import {
   addEdge,
   Viewport,
   useReactFlow,
+  Node,
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -18,6 +19,7 @@ import ImageNode from './ImageNode';
 import CanvasToolbar, { Tool } from './CanvasToolbar';
 import CustomAnimatedEdge from './CustomAnimatedEdge';
 import FlowControls from './FlowControls';
+import BacklinksToggleButton from './BacklinksToggleButton';
 
 // Import the new hooks
 import { useCanvasData } from '@/hooks/useCanvasData';
@@ -57,9 +59,12 @@ interface FlowCanvasProps {
   newNodeRequest: NewNodeRequest | null;
   onNodeAdded: () => void;
   onSettingsClick: () => void;
+  onSelectionChange: (selectedIds: string[]) => void;
+  isBacklinksPanelOpen: boolean;
+  onToggleBacklinksPanel: () => void;
 }
 
-const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: FlowCanvasProps) => {
+const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, onSelectionChange, isBacklinksPanelOpen, onToggleBacklinksPanel }: FlowCanvasProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
@@ -165,6 +170,10 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
     onDrop(event, setNodes);
   }, [onDrop, setNodes]);
 
+  const handleSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {
+    onSelectionChange(nodes.map(n => n.id));
+  }, [onSelectionChange]);
+
   const canvasActions = useMemo(() => ({ downloadNodeBranch, addNodeFromMessage }), [downloadNodeBranch, addNodeFromMessage]);
 
   if (isLoading) {
@@ -196,6 +205,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onMove={onMove}
+          onSelectionChange={handleSelectionChange}
           fitView
           zoomOnDoubleClick={false}
           panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
@@ -222,6 +232,14 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: 
         >
           <FlowControls onSettingsClick={onSettingsClick} />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#313131" />
+           <div 
+            className="absolute right-4 bottom-4 z-10"
+          >
+            <BacklinksToggleButton
+              onClick={onToggleBacklinksPanel}
+              isActive={isBacklinksPanelOpen}
+            />
+          </div>
         </ReactFlow>
       </CanvasActionsProvider>
       <CanvasToolbar

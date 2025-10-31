@@ -245,11 +245,18 @@ export const useAI = () => {
 
   const generateNodeChatResponse = useCallback(async (
     noteContent: string,
-    history: { role: 'user' | 'assistant', content: string }[]
+    history: { role: 'user' | 'assistant', content: string }[],
+    connectedNotesContext?: string,
   ): Promise<string> => {
+    let systemContent = `You are an AI assistant inside a note-taking app. The user is asking you questions about the following note. Your answers should be helpful, concise, and directly related to the user's query and the note's content. Note Content: """\n${noteContent}\n"""`;
+
+    if (connectedNotesContext && connectedNotesContext.trim().length > 0) {
+      systemContent += `\n\nFor additional context, here is the content of directly connected notes:\n"""\n${connectedNotesContext}\n"""\n\nYou can synthesize information from all available notes to provide a comprehensive answer.`;
+    }
+
     const systemPrompt = {
       role: 'system',
-      content: `You are an AI assistant inside a note-taking app. The user is asking you questions about the following note. Your answers should be helpful, concise, and directly related to the user's query and the note's content. Note Content: """\n${noteContent}\n"""`
+      content: systemContent
     };
     const messages = [systemPrompt, ...history];
     const payload = {

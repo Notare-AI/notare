@@ -77,7 +77,7 @@ export const useNodeLogic = (nodeId: string, color?: string) => {
   const nodeStyles = useMemo(() => {
     if (!color || !colorMap[color]) {
       return {
-        background: 'hsl(var(--card))',
+        background: 'hsl(var(--note-background))',
         borderColor: 'hsl(var(--border))',
       };
     }

@@ -16,6 +16,8 @@ import SettingsModal from "@/components/SettingsModal";
 import { showSuccess, showLoading, dismissToast, showError } from "@/utils/toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { supabase } from "@/integrations/supabase/client";
+import WhatsNewModal from "@/components/WhatsNewModal";
+import { LATEST_UPDATE_VERSION } from "@/lib/updates";
 
 interface Canvas {
   id: string;
@@ -39,6 +41,14 @@ const Index = () => {
   const [activeSettingsTab, setActiveSettingsTab] = useState('account');
   const [searchParams, setSearchParams] = useSearchParams();
   const { refetchProfile } = useUserProfile();
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
+
+  useEffect(() => {
+    const seenVersion = localStorage.getItem('notare-update-version');
+    if (seenVersion !== LATEST_UPDATE_VERSION) {
+      setIsWhatsNewOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     const verifySession = async (sessionId: string) => {
@@ -81,6 +91,11 @@ const Index = () => {
     setIsSettingsOpen(true);
   };
 
+  const handleCloseWhatsNew = () => {
+    localStorage.setItem('notare-update-version', LATEST_UPDATE_VERSION);
+    setIsWhatsNewOpen(false);
+  };
+
   return (
     <>
       <div className="flex h-screen w-screen bg-background text-foreground">
@@ -95,17 +110,17 @@ const Index = () => {
           <ResizablePanel defaultSize={isPdfSidebarOpen ? 70 : 100}>
             <main className="flex-grow flex flex-col relative h-full">
               {isSidebarCollapsed && (
-                <div className="flex items-center p-2 border-b border-gray-700 text-white flex-shrink-0 h-[57px]">
+                <div className="flex items-center p-2 border-b border-border flex-shrink-0 h-[57px]">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsSidebarCollapsed(false)}
-                    className="mr-2 hover:bg-gray-700"
+                    className="mr-2 hover:bg-muted"
                   >
                     <PanelLeftOpen size={20} />
                   </Button>
                   {selectedCanvas && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-foreground">
                       <FileText size={16} />
                       <span className="font-medium">{selectedCanvas.title}</span>
                     </div>
@@ -153,6 +168,11 @@ const Index = () => {
         isOpen={isSettingsOpen} 
         onOpenChange={setIsSettingsOpen} 
         activeTab={activeSettingsTab}
+      />
+      <WhatsNewModal
+        isOpen={isWhatsNewOpen}
+        onOpenChange={setIsWhatsNewOpen}
+        onClose={handleCloseWhatsNew}
       />
     </>
   );

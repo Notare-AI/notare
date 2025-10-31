@@ -11,6 +11,8 @@
     --card-foreground: 215 28% 21%;
     --card-header: 0 0% 96%;
 
+    --note-background: 0 0% 100%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 215 28% 21%;
 
@@ -40,12 +42,14 @@
   }
 
   .dark {
-    --background: 0 0% 9%; /* #171717 */
+    --background: 0 0% 13%; /* #202020 */
     --foreground: 210 40% 98%;
 
-    --card: 0 0% 9%; /* #171717 */
+    --card: 0 0% 4%; /* #0B0B0B */
     --card-foreground: 210 40% 98%;
     --card-header: 0 0% 12%; /* #1f1f1f */
+
+    --note-background: 0 0% 16%; /* #292929 */
 
     --popover: 0 0% 9%; /* #171717 */
     --popover-foreground: 210 40% 98%;
