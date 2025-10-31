@@ -13,7 +13,7 @@ const benefits = [
   {
     image: aiInsights,
     title: "Reading isn’t the hard part. Synthesizing is.",
-    description: "One-click summaries, smart highlights, and an AI assistant in every note. Spend less time reading, more time understanding."
+    description: "Whether you’re writing a dissertation or an essay, the real struggle is turning dozens of PDFs into a coherent argument. Notare helps you cut through the noise — extracting key insights and mapping connections automatically."
   },
   {
     image: pdfNoteTaking,
