@@ -26,6 +26,7 @@ import {
   $createHeadingNode,
   $isHeadingNode,
   $createQuoteNode,
+  $isQuoteNode,
   HeadingTagType,
 } from '@lexical/rich-text';
 import { $createCodeNode, $isCodeNode } from '@lexical/code';
@@ -207,6 +208,9 @@ export default function ToolbarPlugin() {
           }
           if ($isCodeNode(element)) {
             setBlockType('code');
+          }
+          if ($isQuoteNode(element)) {
+            setBlockType('quote');
           }
         }
       }
