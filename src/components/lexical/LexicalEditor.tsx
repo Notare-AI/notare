@@ -14,16 +14,13 @@ import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
-import { CodeNode, CodeHighlightNode } from '@lexical/code';
+import { CodeNode } from '@lexical/code';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { EditorState } from 'lexical';
 import { cn } from '@/lib/utils';
 
 import { theme } from './theme';
 import ToolbarPlugin from './ToolbarPlugin';
-import { CodeHighlightPlugin } from './plugins/CodeHighlightPlugin';
-import { HorizontalRuleNode } from './nodes/HorizontalRuleNode';
-import HorizontalRulePlugin from './plugins/HorizontalRulePlugin';
 
 const editorConfig = {
   namespace: 'NotareEditor',
@@ -37,10 +34,8 @@ const editorConfig = {
     ListItemNode,
     QuoteNode,
     CodeNode,
-    CodeHighlightNode,
     AutoLinkNode,
     LinkNode,
-    HorizontalRuleNode,
   ],
 };
 
@@ -103,8 +98,6 @@ export default function LexicalEditor({
           <ListPlugin />
           <CheckListPlugin />
           <LinkPlugin />
-          <CodeHighlightPlugin />
-          <HorizontalRulePlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <AutoFocusOnEditPlugin editable={isEditable} />
           {onChange && <OnChangePlugin onChange={handleOnChange} ignoreSelectionChange />}

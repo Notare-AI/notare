@@ -11,9 +11,6 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
-import { useReactFlow, Node } from '@xyflow/react';
-import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
-import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -34,7 +31,6 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
   const { generateNodeChatResponse, isGenerating } = useAI();
   const { addNodeFromMessage } = useCanvasActions();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { getNodes, getEdges } = useReactFlow();
 
   useEffect(() => {
     if (isOpen) {
@@ -52,52 +48,6 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
     }
   }, [messages]);
 
-  const getConnectedNotesContext = () => {
-    const allNodes = getNodes();
-    const allEdges = getEdges();
-    
-    const branchNodes: Node[] = [];
-    const queue: string[] = [nodeId];
-    const visited = new Set<string>([nodeId]);
-
-    // Traverse the graph (BFS) to find all connected nodes
-    while (queue.length > 0) {
-      const currentId = queue.shift()!;
-      const currentNode = allNodes.find(n => n.id === currentId);
-      if (currentNode) {
-        branchNodes.push(currentNode);
-      }
-
-      allEdges.forEach(edge => {
-        let neighborId: string | null = null;
-        if (edge.source === currentId) neighborId = edge.target;
-        if (edge.target === currentId) neighborId = edge.source;
-
-        if (neighborId && !visited.has(neighborId)) {
-          visited.add(neighborId);
-          queue.push(neighborId);
-        }
-      });
-    }
-
-    // Filter out the current node and format the context
-    const contextParts = branchNodes
-      .filter(node => node.id !== nodeId && node.data?.label)
-      .map(node => {
-        const content = node.data.label;
-        const textContent = isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
-        
-        let nodeTitle = `Note (${node.type})`;
-        if (textContent.length > 0) {
-          nodeTitle = textContent.split('\n')[0].replace(/#/g, '').trim();
-        }
-
-        return `--- Connected Note: "${nodeTitle}" ---\n${textContent}`;
-      });
-
-    return contextParts.join('\n\n');
-  };
-
   const handleSendMessage = async () => {
     if (!prompt.trim() || isGenerating) return;
 
@@ -107,8 +57,7 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
     setPrompt('');
 
     try {
-      const connectedNotesContext = getConnectedNotesContext();
-      const responseText = await generateNodeChatResponse(currentContent, newMessages, connectedNotesContext);
+      const responseText = await generateNodeChatResponse(currentContent, newMessages);
       const assistantMessage: Message = { role: 'assistant', content: responseText };
       const finalMessages = [...newMessages, assistantMessage];
       setMessages(finalMessages);

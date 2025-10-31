@@ -26,10 +26,6 @@ export const theme: EditorThemeClasses = {
     strikethrough: 'line-through',
     underlineStrikethrough: 'underline line-through',
     code: 'bg-gray-100 dark:bg-gray-800 text-sm font-mono px-1 py-0.5 rounded',
-    highlight: 'bg-yellow-200 dark:bg-yellow-800',
-    subscript: 'align-sub',
-    superscript: 'align-super',
   },
   code: 'bg-gray-100 dark:bg-gray-800 text-sm font-mono p-4 block rounded-md overflow-x-auto',
-  hr: 'my-4 border-border',
 };
