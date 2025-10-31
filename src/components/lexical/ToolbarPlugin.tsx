@@ -27,7 +27,6 @@ import {
   $isHeadingNode,
   $createQuoteNode,
   HeadingTagType,
-  $setBlocksType,
 } from '@lexical/rich-text';
 import { $createCodeNode, $isCodeNode } from '@lexical/code';
 import {
@@ -71,7 +70,7 @@ const BlockFormatDropdown = ({
       editor.update(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-          $setBlocksType(selection, () => $createParagraphNode());
+          $createParagraphNode().select();
         }
       });
     }
@@ -82,7 +81,7 @@ const BlockFormatDropdown = ({
       editor.update(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-          $setBlocksType(selection, () => $createHeadingNode(tag));
+          $createHeadingNode(tag).select();
         }
       });
     }
@@ -117,7 +116,7 @@ const BlockFormatDropdown = ({
       editor.update(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-          $setBlocksType(selection, () => $createQuoteNode());
+          $createQuoteNode().select();
         }
       });
     }
