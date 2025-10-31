@@ -14,7 +14,7 @@ const Hero = () => {
         </p>
         <div className="flex justify-center">
           <Button asChild size="lg">
-            <Link to="/dashboard">Start Mapping for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
+            <Link to="/dashboard">Start Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
           </Button>
         </div>
       </div>
