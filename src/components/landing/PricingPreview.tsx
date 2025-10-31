@@ -7,29 +7,20 @@ const plans = [
     name: 'Free',
     price: '£0',
     features: [
-      '50 AI Credits/Month',
-      '3 Canvases',
-      '5 PDF Uploads'
+      'Process 5 PDFs with AI',
+      'Visual knowledge maps',
+      'Sync across devices',
     ]
   },
   {
-    name: 'Personal',
-    price: '£8/month',
+    name: 'Research Pro',
+    price: '£10/month',
     features: [
-      '250 AI Credits/Month',
-      'Unlimited Canvases',
-      '20 PDF Uploads'
+      'Unlimited PDF processing',
+      'Full AI synthesis features',
+      'Unlimited visual canvases',
     ],
     isFeatured: true
-  },
-  {
-    name: 'Professional',
-    price: '£20/month',
-    features: [
-      '500 AI Credits/Month',
-      'Unlimited Canvases',
-      'Unlimited PDF Uploads'
-    ]
   }
 ];
 
@@ -37,9 +28,9 @@ const PricingPreview = () => {
   return (
     <section id="pricing-preview" className="container py-20 md:py-24">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold">Simple, Transparent Pricing</h2>
+        <h2 className="text-3xl md:text-4xl font-bold">Simple pricing for serious research.</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
         {plans.map((plan) => (
           <div key={plan.name} className={`border rounded-lg p-8 flex flex-col ${plan.isFeatured ? 'border-primary ring-2 ring-primary' : ''}`}>
             <h3 className="text-2xl font-semibold">{plan.name}</h3>
@@ -57,7 +48,7 @@ const PricingPreview = () => {
       </div>
       <div className="text-center mt-12">
         <Button asChild variant="outline" size="lg">
-          <Link to="/pricing">Compare All Plans</Link>
+          <Link to="/pricing">View Plan Details</Link>
         </Button>
       </div>
     </section>
