@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 import { EditorState } from 'lexical';
 
-import ToolbarPlugin from './ToolbarPlugin';
+import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 
 const theme = {
