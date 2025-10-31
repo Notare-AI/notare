@@ -10,7 +10,7 @@ const Hero = () => {
           Accelerate your literature review
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto">
-          Notare is an <strong className="font-semibold">AI-powered visual knowledge platform</strong> that helps students, researchers, and professionals <strong className="font-semibold">summarize PDFs, extract key insights, and build interconnected mind maps</strong>—all on an infinite canvas.
+          Upload papers, extract AI insights, and build your synthesis visually — all in one place
         </p>
         <div className="flex justify-center">
           <Button asChild size="lg">
