@@ -65,7 +65,7 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
     }
   };
 
-  const handleUpgrade = (planId: 'free' | 'personal' | 'professional') => {
+  const handleUpgrade = (planId: 'free' | 'research-pro') => {
     if (planId === 'free') return;
     navigate(`/checkout?plan=${planId}`);
     onOpenChange(false);
@@ -183,15 +183,15 @@ const SettingsModal = ({ isOpen, onOpenChange, activeTab = 'account' }: Settings
                   
                   <div>
                     <h3 className="font-semibold text-lg mb-4">All plans</h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {plans.map((plan) => (
                         <div key={plan.planId} className={`p-6 rounded-lg bg-muted/50 border ${profile.subscription_plan === plan.planId ? 'border-primary' : ''} flex flex-col`}>
                           <h4 className="font-semibold text-xl">{plan.name}</h4>
-                          <p className="text-muted-foreground mt-1">{plan.price}<span className="text-sm">/ month</span></p>
+                          <p className="text-muted-foreground mt-1">{plan.price}<span className="text-sm">{plan.price !== '£0' ? '/ month' : ''}</span></p>
                           <p className="text-sm text-muted-foreground mt-2 flex-grow">{plan.description}</p>
                           
                           <ul className="mt-6 space-y-3 text-sm flex-grow">
-                            {plan.features.slice(0, 4).map(feature => (
+                            {plan.features.map(feature => (
                               <li key={feature} className="flex items-start gap-2">
                                 <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                                 <span>{feature}</span>

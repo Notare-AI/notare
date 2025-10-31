@@ -10,11 +10,10 @@ import StripeConfigurationNotice from '@/components/StripeConfigurationNotice';
 const stripePromise = getStripe();
 
 const planToPriceId: Record<string, string | undefined> = {
-  personal: import.meta.env.VITE_STRIPE_PRICE_ID_PERSONAL,
-  professional: import.meta.env.VITE_STRIPE_PRICE_ID_PROFESSIONAL,
+  'research-pro': import.meta.env.VITE_STRIPE_PRICE_ID_RESEARCH_PRO,
 };
 
-const areStripeKeysMissing = !import.meta.env.VITE_STRIPE_PRICE_ID_PERSONAL || !import.meta.env.VITE_STRIPE_PRICE_ID_PROFESSIONAL;
+const areStripeKeysMissing = !import.meta.env.VITE_STRIPE_PRICE_ID_RESEARCH_PRO;
 
 const CheckoutPage = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
