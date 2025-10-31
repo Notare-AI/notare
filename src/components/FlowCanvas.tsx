@@ -60,11 +60,9 @@ interface FlowCanvasProps {
   onNodeAdded: () => void;
   onSettingsClick: () => void;
   onSelectionChange: (selectedIds: string[]) => void;
-  isBacklinksPanelOpen: boolean;
-  onToggleBacklinksPanel: () => void;
 }
 
-const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, onSelectionChange, isBacklinksPanelOpen, onToggleBacklinksPanel }: FlowCanvasProps) => {
+const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, onSelectionChange }: FlowCanvasProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
@@ -240,8 +238,6 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick, on
         activeTool={activeTool}
         onToolChange={setActiveTool}
         onImageUpload={uploadAndAddImageNode}
-        isBacklinksPanelOpen={isBacklinksPanelOpen}
-        onToggleBacklinksPanel={onToggleBacklinksPanel}
       />
     </div>
   );

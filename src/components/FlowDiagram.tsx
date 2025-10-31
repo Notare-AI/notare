@@ -23,7 +23,6 @@ interface FlowDiagramProps {
 
 const FlowDiagram = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }: FlowDiagramProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [isBacklinksPanelOpen, setIsBacklinksPanelOpen] = useState(true);
 
   return (
     <ReactFlowProvider>
@@ -36,19 +35,10 @@ const FlowDiagram = ({ canvasId, newNodeRequest, onNodeAdded, onSettingsClick }:
               onNodeAdded={onNodeAdded}
               onSettingsClick={onSettingsClick}
               onSelectionChange={(selectedIds) => setSelectedNodeId(selectedIds[0] || null)}
-              isBacklinksPanelOpen={isBacklinksPanelOpen}
-              onToggleBacklinksPanel={() => setIsBacklinksPanelOpen(prev => !prev)}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel
-            defaultSize={25}
-            minSize={10}
-            collapsible={true}
-            collapsed={!isBacklinksPanelOpen}
-            onCollapse={() => setIsBacklinksPanelOpen(false)}
-            onExpand={() => setIsBacklinksPanelOpen(true)}
-          >
+          <ResizablePanel defaultSize={25} minSize={10}>
             <BacklinksPanel selectedNodeId={selectedNodeId} />
           </ResizablePanel>
         </ResizablePanelGroup>

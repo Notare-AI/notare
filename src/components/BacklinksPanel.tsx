@@ -3,7 +3,6 @@ import { useReactFlow, Node } from '@xyflow/react';
 import { Link } from 'lucide-react';
 import { isLexicalJSON } from '@/lib/convertTipTapToLexical';
 import { lexicalToMarkdown } from '@/lib/lexicalToMarkdown';
-import { cn } from '@/lib/utils';
 
 interface BacklinksPanelProps {
   selectedNodeId: string | null;
@@ -23,8 +22,7 @@ const getReadableTitle = (label: string | undefined): string => {
 
 const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
   const [backlinks, setBacklinks] = useState<Node[]>([]);
-  const [recentlyClicked, setRecentlyClicked] = useState<string | null>(null);
-  const { getNodes, getEdges, setNodes, fitView } = useReactFlow();
+  const { getNodes, getEdges, fitView } = useReactFlow();
 
   useEffect(() => {
     if (!selectedNodeId) {
@@ -44,24 +42,7 @@ const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
   }, [selectedNodeId, getNodes, getEdges]);
 
   const handleBacklinkClick = (nodeId: string) => {
-    // Provide visual feedback in the list
-    setRecentlyClicked(nodeId);
-    setTimeout(() => setRecentlyClicked(null), 1000);
-
-    // Ensure the target node is not hidden by viewport culling, but do not change the selection.
-    setNodes((nds) =>
-      nds.map((n) => {
-        if (n.id === nodeId) {
-          return { ...n, hidden: false };
-        }
-        return n;
-      })
-    );
-
-    // Use a timeout to ensure the node is rendered before fitting the view
-    setTimeout(() => {
-      fitView({ nodes: [{ id: nodeId }], duration: 800, padding: 0.2 });
-    }, 0);
+    fitView({ nodes: [{ id: nodeId }], duration: 500, padding: 0.2 });
   };
 
   return (
@@ -80,10 +61,7 @@ const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
                 <li key={node.id}>
                   <button
                     onClick={() => handleBacklinkClick(node.id)}
-                    className={cn(
-                      "w-full text-left text-sm p-2 rounded-md hover:bg-muted/50 transition-colors",
-                      recentlyClicked === node.id && "bg-primary/10"
-                    )}
+                    className="w-full text-left text-sm p-2 rounded-md hover:bg-muted/50 transition-colors"
                   >
                     {getReadableTitle(node.data.label)}
                   </button>
