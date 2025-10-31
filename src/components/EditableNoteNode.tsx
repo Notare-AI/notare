@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, memo } from 'react';
 import { NodeResizer, Handle, Position, useReactFlow } from '@xyflow/react';
 import NodeToolbarComponent from './NodeToolbar';
-import { Pen, Eye, Expand } from 'lucide-react';
+import { Pen, Eye } from 'lucide-react';
 import { useHighlight } from '@/contexts/HighlightContext';
 import NodeAIEditor from './NodeAIEditor';
 import { cn } from '@/lib/utils';
@@ -9,7 +9,6 @@ import { useNodeLogic } from '@/hooks/useNodeLogic';
 import { useCanvasActions } from '@/contexts/CanvasActionsContext';
 import LexicalEditor from './lexical/LexicalEditor';
 import { convertTipTapToLexical, isTipTapJSON, isLexicalJSON } from '@/lib/convertTipTapToLexical';
-import { useFocusEditor } from '@/contexts/FocusEditorContext';
 
 interface Source {
   text: string;
@@ -41,7 +40,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
   const { highlightedText, setHighlightedText, isPdfSidebarOpen, setIsPdfSidebarOpen, setTargetPage } = useHighlight();
   const { handleDelete: originalHandleDelete, handleColorChange, handleZoomToNode, handleDownloadAsMarkdown, nodeStyles } = useNodeLogic(id, data.color);
   const { downloadNodeBranch } = useCanvasActions();
-  const { openFocusEditor } = useFocusEditor();
 
   const title = data.isAiGenerated ? 'AI Note' : 'Note';
 
@@ -160,13 +158,6 @@ function EditableNoteNode({ id, data, selected }: EditableNoteProps) {
             {data.sources && data.sources.length > 0 && (
               <button onClick={handleViewSourcesClick} className={cn("p-1 text-muted-foreground rounded hover:bg-accent hover:text-accent-foreground", isActive && "bg-blue-500/10 text-blue-600 dark:text-blue-300")} title="View sources in PDF"><Eye size={16} /></button>
             )}
-            <button
-              onClick={() => openFocusEditor(id, getLexicalContent(data.label || ''))}
-              className="p-1 text-gray-400 rounded hover:bg-gray-700 hover:text-white"
-              title="Focus Mode"
-            >
-              <Expand size={16} />
-            </button>
             <NodeAIEditor
               nodeId={id}
               currentContent={data.label}
