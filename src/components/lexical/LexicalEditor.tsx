@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 
 import { theme } from './theme';
 import ToolbarPlugin from './ToolbarPlugin';
-import { CodeHighlightPlugin } from '@lexical/react/LexicalCodeHighlightPlugin';
+import { CodeHighlightPlugin } from './plugins/CodeHighlightPlugin';
 import { HorizontalRuleNode } from './nodes/HorizontalRuleNode';
 import HorizontalRulePlugin from './plugins/HorizontalRulePlugin';
 
