@@ -4,7 +4,7 @@ export const theme: EditorThemeClasses = {
   ltr: 'text-left',
   rtl: 'text-right',
   paragraph: 'mb-2',
-  quote: 'ml-4 border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic',
+  quote: 'ml-4 border-l-4 border-primary pl-4 italic text-muted-foreground',
   heading: {
     h1: 'text-3xl font-bold mb-4',
     h2: 'text-2xl font-semibold mb-3',
