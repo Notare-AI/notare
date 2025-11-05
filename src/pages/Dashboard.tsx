@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 import WhatsNewModal from "@/components/WhatsNewModal";
 import { LATEST_UPDATE_VERSION } from "@/lib/updates";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useCanvasImport } from "@/hooks/useCanvasImport";
 
 interface Canvas {
   id: string;
@@ -46,9 +45,54 @@ const Index = () => {
   const { user, refetchProfile } = useUserProfile();
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
   const [sidebarRefetchTrigger, setSidebarRefetchTrigger] = useState(0);
-  
-  // Use the new hook
-  const { importCanvasById } = useCanvasImport(user);
+  const [canvasToImportId, setCanvasToImportId] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+
+  // Core logic for importing a canvas by ID
+  const importCanvasById = useCallback(async (canvasId: string) => {
+    if (!user) {
+      throw new Error("User not authenticated.");
+    }
+    
+    // 1. Fetch the public canvas data
+    const { data: publicCanvas, error: fetchError } = await supabase
+      .from('canvases')
+      .select('title, canvas_data')
+      .eq('id', canvasId)
+      .eq('is_public', true)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Could not find the shared canvas: ${fetchError.message}`);
+    }
+
+    if (!publicCanvas || !publicCanvas.canvas_data) {
+      throw new Error('Canvas not found or has no data to copy.');
+    }
+
+    // 2. Create a new canvas for the current user
+    const newTitle = `Copy of ${publicCanvas.title}`;
+    
+    const { data: newCanvas, error: insertError } = await supabase
+      .from('canvases')
+      .insert({
+        title: newTitle,
+        canvas_data: publicCanvas.canvas_data,
+        owner_id: user.id,
+      })
+      .select('id, title, is_public')
+      .single();
+
+    if (insertError) {
+      throw new Error(`Failed to copy canvas: ${insertError.message}`);
+    }
+
+    if (!newCanvas) {
+      throw new Error('No canvas data returned after creation');
+    }
+
+    return newCanvas;
+  }, [user]);
 
   // 1. Check for update version on load
   useEffect(() => {
@@ -91,14 +135,52 @@ const Index = () => {
     }
   }, [searchParams, setSearchParams, refetchProfile]);
 
-  // 3. Handler for the modal (passed to Sidebar)
+  // 3. Check for canvas copy parameter (for banner display)
+  useEffect(() => {
+    const canvasIdFromUrl = searchParams.get('copyCanvas');
+    if (canvasIdFromUrl) {
+      setCanvasToImportId(canvasIdFromUrl);
+    }
+  }, [searchParams]);
+
+  // 4. Handler for the banner button
+  const handleImportCanvas = useCallback(async () => {
+    if (!canvasToImportId || !user) return;
+
+    setIsImporting(true);
+    const toastId = showLoading('Copying canvas to your account...');
+    
+    try {
+      const newCanvas = await importCanvasById(canvasToImportId);
+      
+      dismissToast(toastId);
+      showSuccess('Canvas copied to your account!');
+      
+      setSelectedCanvas(newCanvas);
+      setSidebarRefetchTrigger(prev => prev + 1); // Trigger sidebar refresh
+      
+    } catch (error: any) {
+      console.error('Error in canvas copy:', error);
+      dismissToast(toastId);
+      showError(error.message);
+    } finally {
+      setIsImporting(false);
+      setCanvasToImportId(null);
+      // Clean up the URL parameter
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('copyCanvas');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [canvasToImportId, user, searchParams, setSearchParams, importCanvasById]);
+
+  // 5. Handler for the modal (passed to Sidebar)
   const handleImportCanvasFromUrl = useCallback(async (url: string) => {
     const urlParts = url.split('/');
     const canvasId = urlParts.find(part => part.length === 36); // Simple heuristic for UUID
     
     if (!canvasId) {
       showError("Invalid URL. Please ensure it's a valid Notare public canvas link.");
-      return false;
+      return;
     }
 
     const toastId = showLoading('Importing canvas...');
@@ -167,7 +249,30 @@ const Index = () => {
                 </div>
               )}
               
-              {/* Removed Import Canvas Banner - now handled automatically in context */}
+              {/* Import Canvas Banner */}
+              {canvasToImportId && (
+                <div className="p-2 border-b border-border flex-shrink-0">
+                  <Alert className="bg-primary/10 border-primary/20 text-primary">
+                    <Copy className="h-4 w-4" />
+                    <AlertTitle>Canvas Shared With You</AlertTitle>
+                    <AlertDescription className="flex items-center justify-between">
+                      <span>Click below to import a copy of this public canvas into your account.</span>
+                      <Button 
+                        onClick={handleImportCanvas} 
+                        disabled={isImporting}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                      >
+                        {isImporting ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Copy className="mr-2 h-4 w-4" />
+                        )}
+                        Import Canvas
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
 
               <div className="flex-grow">
                 {selectedCanvas ? (

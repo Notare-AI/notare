@@ -2,8 +2,6 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCanvasImport } from '@/hooks/useCanvasImport';
-import { showSuccess, showError } from '@/utils/toast';
 
 interface Profile {
   subscription_plan: string;
@@ -31,40 +29,17 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { importCanvasById } = useCanvasImport(user);
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       setSessionLoading(false);
 
-      if (_event === 'SIGNED_IN' && currentUser) {
-        const searchParams = new URLSearchParams(location.search);
-        const canvasIdToCopy = searchParams.get('copyCanvas');
-        
-        let redirectTo = location.state?.from;
-        
-        if (canvasIdToCopy) {
-          try {
-            await importCanvasById(canvasIdToCopy);
-            showSuccess('Canvas copied to your account!');
-            // Ensure redirection goes to dashboard without the copyCanvas param
-            redirectTo = '/dashboard';
-          } catch (e: any) {
-            showError(e.message || 'Failed to automatically copy canvas.');
-            // Still redirect to dashboard, but keep the original path if it was set
-            redirectTo = redirectTo || '/dashboard';
-          }
-        }
-
-        const finalRedirect = redirectTo ? `${redirectTo.pathname || redirectTo}${redirectTo.search || ''}` : '/dashboard';
-        
-        // Clean up URL parameters before redirecting
-        const finalUrl = new URL(finalRedirect, window.location.origin);
-        finalUrl.searchParams.delete('copyCanvas');
-
-        navigate(finalUrl.pathname + finalUrl.search, { replace: true });
+      if (_event === 'SIGNED_IN') {
+        const from = location.state?.from;
+        const redirectTo = from ? `${from.pathname}${from.search}` : '/dashboard';
+        navigate(redirectTo, { replace: true });
       } else if (_event === 'SIGNED_OUT') {
         setProfile(null);
         navigate('/');
@@ -81,7 +56,7 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [navigate, location, importCanvasById]);
+  }, [navigate, location]);
 
   const fetchProfile = useCallback(async () => {
     if (!user) {
