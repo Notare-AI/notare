@@ -127,7 +127,7 @@ const Index = () => {
           .insert({
             title: newTitle,
             canvas_data: publicCanvas.canvas_data,
-            user_id: user.id, // Changed from owner_id to user_id
+            owner_id: user.id, // FIX: Changed from user_id to owner_id
           })
           .select('id, title, is_public')
           .single();
