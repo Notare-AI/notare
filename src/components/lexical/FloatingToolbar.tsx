@@ -7,7 +7,6 @@ import {
   Code, 
   Plus, 
   X, 
-  Highlighter,
   Eraser,
   List,
   ListOrdered,
@@ -15,7 +14,6 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
-  Quote
 } from 'lucide-react';
 
 interface FloatingToolbarProps {
@@ -136,11 +134,6 @@ export default function FloatingToolbar({
       icon: AlignJustify,
       title: 'Justify text',
     },
-    {
-      format: 'quote',
-      icon: Quote,
-      title: 'Quote block',
-    }
   ];
 
   const handleFormatClick = (format: string) => {
