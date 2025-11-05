@@ -219,7 +219,7 @@ const Index = () => {
       <div className="flex h-screen w-screen bg-background text-foreground">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
-          onCollapse={() => setIsSidebarCollapsed(false)}
+          onCollapse={() => setIsSidebarCollapsed(true)}
           selectedCanvasId={selectedCanvas?.id || null}
           onSelectCanvas={(canvas) => setSelectedCanvas(canvas as Canvas)}
           onUpgradeClick={() => openSettings('billing')}
