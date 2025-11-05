@@ -1,0 +1,263 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 28% 98%; /* #F9FAFB */
+    --foreground: 215 28% 21%; /* #1F2937 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 21%;
+    --card-header: 0 0% 96%;
+
+    --note-background: 0 0% 100%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 21%;
+
+    /* Application Primary Color (Blue/Indigo) */
+    --primary: 221.2 83.2% 53.3%; /* #3b82f6 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 160 82% 32%; /* #10B981 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 13% 94%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 38 92% 50%; /* #F59E0B */
+    --accent-foreground: 215 28% 21%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    
+    /* Application Ring Color (Blue/Indigo) */
+    --ring: 221.2 83.2% 53.3%; /* #3b82f6 */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 13%; /* #202020 */
+    --foreground: 210 40% 98%;
+
+    --card: 0 0% 4%; /* #0B0B0B */
+    --card-foreground: 210 40% 98%;
+    --card-header: 0 0% 12%; /* #1f1f1f */
+
+    --note-background: 0 0% 16%; /* #292929 */
+
+    --popover: 0 0% 9%; /* #171717 */
+    --popover-foreground: 210 40% 98%;
+
+    /* Application Primary Color (Blue/Indigo) */
+    --primary: 217.2 91.2% 59.8%; /* #3b82f6 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 160 82% 42%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%; /* #262626 */
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 38 92% 60%;
+    --accent-foreground: 38 92% 10%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 0 0% 20%; /* #333333 */
+    --input: 0 0% 20%; /* #333333 */
+    
+    /* Application Ring Color (Blue/Indigo) */
+    --ring: 217.2 91.2% 59.8%; /* #3b82f6 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ReactFlow dark mode styles */
+.react-flow__controls-button {
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+}
+.react-flow__controls-button:hover {
+  background: hsl(var(--muted)); /* Changed from accent to muted for greyscale hover */
+}
+.react-flow__controls-button svg {
+  fill: hsl(var(--foreground));
+}
+
+/* Custom Scrollbar Styles */
+@layer base {
+  /* For Webkit-based browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #4A4A4A;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #616161;
+  }
+
+  /* For Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #4A4A4A transparent;
+  }
+}
+
+/* Custom Highlight Styles */
+@layer components {
+  mark {
+    @apply bg-yellow-300 text-black px-0.5 rounded-sm;
+  }
+}
+
+/* Tiptap Editor Styles */
+@layer components {
+  .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* Reset heading margins within the editor to prevent layout issues */
+  .tiptap h1,
+  .tiptap h2,
+  .tiptap h3 {
+    @apply mt-4 mb-2;
+  }
+
+  /* Task List Styles */
+  .tiptap ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+  }
+
+  .tiptap ul[data-type="taskList"] li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tiptap ul[data-type="taskList"] li > label {
+    flex: 0 0 auto;
+    margin-right: 0.5rem;
+    user-select: none;
+  }
+
+  .tiptap ul[data-type="taskList"] li > div {
+    flex: 1 1 auto;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"] {
+    appearance: none;
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"]:checked {
+    background-color: hsl(var(--primary));
+    border-color: hsl(var(--primary));
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: hsl(var(--primary-foreground));
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+  }
+}
+
+/* Lexical Checkbox Styles */
+@layer components {
+  .lexical-container li.listitem-checklist {
+    @apply list-none flex items-start my-1 p-0;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"] {
+    @apply appearance-none w-4 h-4 border border-border rounded-sm bg-background mt-1 mr-2 cursor-pointer flex-shrink-0;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"]:focus {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"]:checked {
+    @apply bg-primary border-primary;
+  }
+
+  .lexical-container li.listitem-checklist > input[type="checkbox"]:checked::after {
+    content: '✓';
+    @apply block w-full h-full text-center text-xs text-primary-foreground leading-4;
+  }
+
+  .lexical-container li.listitem-checklist-checked > div {
+    @apply line-through text-muted-foreground;
+  }
+}
+
+
+/* Custom override for Supabase Auth UI to show Microsoft icon and text */
+button[aria-label="Continue with Azure"] {
+  font-size: 0; /* Hide original text content */
+}
+
+button[aria-label="Continue with Azure"] svg {
+  display: none; /* Hide original Azure icon */
+}
+
+button[aria-label="Continue with Azure"]::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  vertical-align: middle;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21"><path fill="%23f25022" d="M1 1h9v9H1z"/><path fill="%2300a4ef" d="M1 11h9v9H1z"/><path fill="%237fba00" d="M11 1h9v9h-9z"/><path fill="%23ffb900" d="M11 11h9v9h-9z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+button[aria-label="Continue with Azure"]::after {
+  content: 'Continue with Microsoft';
+  font-size: 14px; /* Restore font size for new text */
+  vertical-align: middle;
+}
