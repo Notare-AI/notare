@@ -55,6 +55,7 @@ interface SidebarProps {
   onUpgradeClick: () => void;
   onSettingsClick: (tab?: 'account' | 'billing' | 'theme') => void;
   refetchTrigger: number; // New prop to trigger refetch from parent
+  onImportCanvasFromUrl: (url: string) => Promise<boolean>; // New prop
 }
 
 const Sidebar = ({
@@ -65,6 +66,7 @@ const Sidebar = ({
   onUpgradeClick,
   onSettingsClick,
   refetchTrigger,
+  onImportCanvasFromUrl,
 }: SidebarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [canvases, setCanvases] = useState<Canvas[]>([]);
@@ -117,7 +119,7 @@ const Sidebar = ({
     if (user) {
       fetchCanvases();
     }
-  }, [user, fetchCanvases, refetchTrigger]); // Added refetchTrigger dependency
+  }, [user, fetchCanvases, refetchTrigger]);
 
   useEffect(() => {
     if (editingCanvasId && inputRef.current) {
@@ -139,13 +141,14 @@ const Sidebar = ({
     if (error) {
       showError("Failed to add canvas.");
       console.error(error);
+      return false;
     } else {
       showSuccess("Canvas added successfully!");
       fetchCanvases();
       if (data) {
         onSelectCanvas(data);
       }
-      setIsModalOpen(false);
+      return true;
     }
   };
 
@@ -448,6 +451,7 @@ const Sidebar = ({
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
         onAddCanvas={handleAddCanvas}
+        onImportCanvasFromUrl={onImportCanvasFromUrl}
       />
       <AlertDialog
         open={!!canvasToDelete}

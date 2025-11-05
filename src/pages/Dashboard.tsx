@@ -48,6 +48,52 @@ const Index = () => {
   const [canvasToImportId, setCanvasToImportId] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
 
+  // Core logic for importing a canvas by ID
+  const importCanvasById = useCallback(async (canvasId: string) => {
+    if (!user) {
+      throw new Error("User not authenticated.");
+    }
+    
+    // 1. Fetch the public canvas data
+    const { data: publicCanvas, error: fetchError } = await supabase
+      .from('canvases')
+      .select('title, canvas_data')
+      .eq('id', canvasId)
+      .eq('is_public', true)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Could not find the shared canvas: ${fetchError.message}`);
+    }
+
+    if (!publicCanvas || !publicCanvas.canvas_data) {
+      throw new Error('Canvas not found or has no data to copy.');
+    }
+
+    // 2. Create a new canvas for the current user
+    const newTitle = `Copy of ${publicCanvas.title}`;
+    
+    const { data: newCanvas, error: insertError } = await supabase
+      .from('canvases')
+      .insert({
+        title: newTitle,
+        canvas_data: publicCanvas.canvas_data,
+        owner_id: user.id,
+      })
+      .select('id, title, is_public')
+      .single();
+
+    if (insertError) {
+      throw new Error(`Failed to copy canvas: ${insertError.message}`);
+    }
+
+    if (!newCanvas) {
+      throw new Error('No canvas data returned after creation');
+    }
+
+    return newCanvas;
+  }, [user]);
+
   // 1. Check for update version on load
   useEffect(() => {
     const seenVersion = localStorage.getItem('notare-update-version');
@@ -89,7 +135,7 @@ const Index = () => {
     }
   }, [searchParams, setSearchParams, refetchProfile]);
 
-  // 3. Check for canvas copy parameter
+  // 3. Check for canvas copy parameter (for banner display)
   useEffect(() => {
     const canvasIdFromUrl = searchParams.get('copyCanvas');
     if (canvasIdFromUrl) {
@@ -97,6 +143,7 @@ const Index = () => {
     }
   }, [searchParams]);
 
+  // 4. Handler for the banner button
   const handleImportCanvas = useCallback(async () => {
     if (!canvasToImportId || !user) return;
 
@@ -104,43 +151,8 @@ const Index = () => {
     const toastId = showLoading('Copying canvas to your account...');
     
     try {
-      // 1. Fetch the public canvas data
-      const { data: publicCanvas, error: fetchError } = await supabase
-        .from('canvases')
-        .select('title, canvas_data')
-        .eq('id', canvasToImportId)
-        .eq('is_public', true)
-        .single();
-
-      if (fetchError) {
-        throw new Error(`Could not find the shared canvas: ${fetchError.message}`);
-      }
-
-      if (!publicCanvas || !publicCanvas.canvas_data) {
-        throw new Error('Canvas not found or has no data to copy.');
-      }
-
-      // 2. Create a new canvas for the current user
-      const newTitle = `Copy of ${publicCanvas.title}`;
+      const newCanvas = await importCanvasById(canvasToImportId);
       
-      const { data: newCanvas, error: insertError } = await supabase
-        .from('canvases')
-        .insert({
-          title: newTitle,
-          canvas_data: publicCanvas.canvas_data,
-          owner_id: user.id,
-        })
-        .select('id, title, is_public')
-        .single();
-
-      if (insertError) {
-        throw new Error(`Failed to copy canvas: ${insertError.message}`);
-      }
-
-      if (!newCanvas) {
-        throw new Error('No canvas data returned after creation');
-      }
-
       dismissToast(toastId);
       showSuccess('Canvas copied to your account!');
       
@@ -159,7 +171,34 @@ const Index = () => {
       newParams.delete('copyCanvas');
       setSearchParams(newParams, { replace: true });
     }
-  }, [canvasToImportId, user, searchParams, setSearchParams]);
+  }, [canvasToImportId, user, searchParams, setSearchParams, importCanvasById]);
+
+  // 5. Handler for the modal (passed to Sidebar)
+  const handleImportCanvasFromUrl = useCallback(async (url: string) => {
+    const urlParts = url.split('/');
+    const canvasId = urlParts.find(part => part.length === 36); // Simple heuristic for UUID
+    
+    if (!canvasId) {
+      showError("Invalid URL. Please ensure it's a valid Notare public canvas link.");
+      return;
+    }
+
+    const toastId = showLoading('Importing canvas...');
+    try {
+      const newCanvas = await importCanvasById(canvasId);
+      
+      dismissToast(toastId);
+      showSuccess('Canvas imported successfully!');
+      
+      setSelectedCanvas(newCanvas);
+      setSidebarRefetchTrigger(prev => prev + 1); // Trigger sidebar refresh
+      return true;
+    } catch (error: any) {
+      dismissToast(toastId);
+      showError(error.message || 'Failed to import canvas.');
+      return false;
+    }
+  }, [importCanvasById]);
 
   const handleAddNode = (nodeData: NewNodeRequest) => {
     setNewNodeRequest(nodeData);
@@ -186,6 +225,7 @@ const Index = () => {
           onUpgradeClick={() => openSettings('billing')}
           onSettingsClick={openSettings}
           refetchTrigger={sidebarRefetchTrigger}
+          onImportCanvasFromUrl={handleImportCanvasFromUrl}
         />
         <ResizablePanelGroup direction="horizontal" className="flex-grow">
           <ResizablePanel defaultSize={isPdfSidebarOpen ? 70 : 100}>
