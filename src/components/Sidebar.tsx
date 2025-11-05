@@ -58,6 +58,8 @@ interface SidebarProps {
   onImportCanvasFromUrl: (url: string) => Promise<boolean>; // New prop
 }
 
+const MAX_FREE_CANVASES = 5;
+
 const Sidebar = ({
   isCollapsed,
   selectedCanvasId,
@@ -130,8 +132,15 @@ const Sidebar = ({
   const handleAddCanvas = async (title: string) => {
     if (!user) {
       showError("You must be logged in to add a canvas.");
-      return;
+      return false;
     }
+
+    // Check for free tier limit
+    if (profile?.subscription_plan === 'free' && canvases.length >= MAX_FREE_CANVASES) {
+      showError(`Free users are limited to ${MAX_FREE_CANVASES} canvases. Please upgrade to Research Pro for unlimited canvases.`);
+      return false;
+    }
+
     const { data, error } = await supabase
       .from("canvases")
       .insert([{ title, owner_id: user.id }])

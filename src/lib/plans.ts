@@ -14,7 +14,7 @@ export const plans: Plan[] = [
     description: 'Designed for exploring.',
     features: [
       'Process 5 PDFs with AI-generated insights',
-      'Visual knowledge maps',
+      'Visual knowledge maps (Max 5)',
       'Sync across devices',
       'Export notes as Markdown',
     ],
