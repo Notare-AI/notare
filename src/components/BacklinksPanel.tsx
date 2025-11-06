@@ -64,7 +64,7 @@ const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {
                     onClick={() => handleBacklinkClick(node.id)}
                     className="w-full text-left text-sm p-2 rounded-md hover:bg-muted/50 transition-colors"
                   >
-                    {getReadableTitle(node.data.label)}
+                    {getReadableTitle(node.data.label as string | undefined)}
                   </button>
                 </li>
               ))}
