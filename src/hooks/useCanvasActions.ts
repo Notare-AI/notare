@@ -48,7 +48,7 @@ export const useCanvasActions = ({ nodes, edges }: UseCanvasActionsProps) => {
     }
 
     const getContentAsMarkdown = (node: Node): string => {
-        const content = node.data.label || '';
+        const content = (node.data.label || '') as string; // Assert as string
         return isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
     };
 

@@ -26,10 +26,15 @@ interface Canvas {
   is_public: boolean;
 }
 
+interface Source { // Define Source interface here for consistency
+  text: string;
+  page: number;
+}
+
 interface NewNodeRequest {
   type: string;
   content: string;
-  sources?: string[];
+  sources?: Source[]; // Changed to Source[]
 }
 
 const Index = () => {
@@ -40,7 +45,7 @@ const Index = () => {
     null,
   );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeSettingsTab, setActiveSettingsTab] = useState('account');
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'account' | 'billing' | 'theme'>('account'); // Explicitly type useState
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, refetchProfile } = useUserProfile();
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
@@ -91,11 +96,11 @@ const Index = () => {
         }
 
         await refetchProfile();
-        dismissToast(toastId);
+        dismissToast(toastId as string); // Cast to string
         showSuccess("Upgrade successful! Welcome to Pro.");
 
       } catch (error: any) {
-        dismissToast(toastId);
+        dismissToast(toastId as string); // Cast to string
         showError(error.message || 'Failed to verify your subscription. Please contact support.');
       } finally {
         const newParams = new URLSearchParams(searchParams);
@@ -122,7 +127,7 @@ const Index = () => {
         try {
           const newCanvas = await importCanvasById(canvasIdToCopy);
           
-          dismissToast(toastId);
+          dismissToast(toastId as string); // Cast to string
           showSuccess('Canvas copied successfully!');
           
           setSelectedCanvas(newCanvas);
@@ -130,7 +135,7 @@ const Index = () => {
           
         } catch (error: any) {
           console.error('Error in canvas copy:', error);
-          dismissToast(toastId);
+          dismissToast(toastId as string); // Cast to string
           showError(error.message || 'Failed to copy canvas.');
         } finally {
           setIsCopying(false);
@@ -160,14 +165,14 @@ const Index = () => {
     try {
       const newCanvas = await importCanvasById(canvasId);
       
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
       showSuccess('Canvas imported successfully!');
       
       setSelectedCanvas(newCanvas);
       setSidebarRefetchTrigger(prev => prev + 1); // Trigger sidebar refresh
       return true;
     } catch (error: any) {
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
       showError(error.message || 'Failed to import canvas.');
       return false;
     }

@@ -232,10 +232,10 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
       
       const pagesContent = await Promise.all(pagePromises);
       setPdfPagesContent(pagesContent);
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
       showSuccess('PDF analysis complete.');
     } catch (e) {
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
       showError('Failed to analyze PDF content.');
     }
   };
@@ -273,7 +273,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     } catch (error: any) {
       showError(error.message || 'Failed to upload PDF(s).');
     } finally {
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
     }
   };
 
@@ -294,7 +294,7 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
     } catch (error: any) {
       showError(error.message || 'Failed to remove PDF.');
     } finally {
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
     }
   };
 

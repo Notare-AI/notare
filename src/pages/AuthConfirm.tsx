@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { EmailOtpType } from '@supabase/supabase-js'; // Import EmailOtpType
 
 const AuthConfirmPage = () => {
   const [searchParams] = useSearchParams();
@@ -21,7 +22,8 @@ const AuthConfirmPage = () => {
     }
 
     const verifyUser = async () => {
-      const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+      // Cast type to EmailOtpType, assuming it will be 'email' for verification
+      const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as EmailOtpType });
 
       if (error) {
         switch (error.message) {

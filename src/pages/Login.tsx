@@ -9,10 +9,10 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   const canvasIdToCopy = searchParams.get('copyCanvas');
 
-  // Construct the redirect URL, preserving the copyCanvas parameter if present
+  // Construct the redirect URL - send canvas signups back to the public canvas
   let redirectTo = `${window.location.origin}/dashboard`;
   if (canvasIdToCopy) {
-    redirectTo = `${redirectTo}?copyCanvas=${canvasIdToCopy}`;
+    redirectTo = `${window.location.origin}/canvas/view/${canvasIdToCopy}?justSignedUp=true`;
   }
 
   return (

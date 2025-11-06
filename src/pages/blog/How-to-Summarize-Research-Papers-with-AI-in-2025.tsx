@@ -2,7 +2,7 @@ import BlogLayout from '@/components/blog/BlogLayout';
 import { posts } from '@/lib/blog';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'react-markdown';
+import remarkGfm from 'remark-gfm'; // Corrected import path
 import { Link } from 'react-router-dom';
 
 const post = posts.find(p => p.slug === 'how-to-summarize-research-papers-with-ai-in-2025');

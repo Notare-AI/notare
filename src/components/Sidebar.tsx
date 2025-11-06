@@ -40,6 +40,7 @@ import { Input } from "./ui/input";
 import CreditUsageIndicator from "./CreditUsageIndicator";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import ShareCanvasModal from "./ShareCanvasModal";
+import { checkIfUserNeedsTutorial, createTutorialCanvas } from "@/lib/tutorial";
 
 interface Canvas {
   id: string;
@@ -95,6 +96,7 @@ const Sidebar = ({
       setCanvases([]);
       return;
     }
+    
     const { data, error } = await supabase
       .from("canvases")
       .select("id, title, is_public")
@@ -104,16 +106,43 @@ const Sidebar = ({
     if (error) {
       showError("Could not fetch your canvases.");
       console.error(error);
-    } else {
-      setCanvases(data);
-      if (!selectedCanvasId && data && data.length > 0) {
-        onSelectCanvas(data[0]);
-      } else if (
-        selectedCanvasId &&
-        !data.some((c) => c.id === selectedCanvasId)
-      ) {
-        onSelectCanvas(data.length > 0 ? data[0] : null);
+      return;
+    }
+
+    // Check if this is a first-time user (no canvases)
+    if (data.length === 0) {
+      try {
+        const { data: tutorialCanvas, error: tutorialError } = await createTutorialCanvas(user.id);
+        if (tutorialError) {
+          console.error('Failed to create tutorial canvas:', tutorialError);
+        } else if (tutorialCanvas) {
+          // Re-fetch canvases to include the new tutorial
+          const { data: updatedCanvases } = await supabase
+            .from("canvases")
+            .select("id, title, is_public")
+            .eq("owner_id", user.id)
+            .order("created_at", { ascending: false });
+          
+          if (updatedCanvases) {
+            setCanvases(updatedCanvases);
+            onSelectCanvas(updatedCanvases[0]); // Auto-select the tutorial canvas
+            showSuccess("🎉 Welcome to Notare! We've created a tutorial canvas to get you started.");
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error creating tutorial canvas:', error);
       }
+    }
+
+    setCanvases(data);
+    if (!selectedCanvasId && data && data.length > 0) {
+      onSelectCanvas(data[0]);
+    } else if (
+      selectedCanvasId &&
+      !data.some((c) => c.id === selectedCanvasId)
+    ) {
+      onSelectCanvas(data.length > 0 ? data[0] : null);
     }
   }, [user, selectedCanvasId, onSelectCanvas]);
 

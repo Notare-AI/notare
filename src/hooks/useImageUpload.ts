@@ -51,7 +51,7 @@ export const useImageUpload = ({ canvasId, setNodes, reactFlowWrapper }: UseImag
           style: { width: defaultWidth, height: defaultHeight },
         };
         setNodes((nds) => nds.concat(newNode));
-        dismissToast(toastId);
+        dismissToast(toastId as string); // Cast to string
         showSuccess('Image uploaded successfully!');
       };
       image.onerror = () => {
@@ -62,13 +62,13 @@ export const useImageUpload = ({ canvasId, setNodes, reactFlowWrapper }: UseImag
           style: { width: 400, height: 300 },
         };
         setNodes((nds) => nds.concat(newNode));
-        dismissToast(toastId);
+        dismissToast(toastId as string); // Cast to string
         showSuccess('Image uploaded successfully!');
       };
       image.src = publicUrl;
 
     } catch (error: any) {
-      dismissToast(toastId);
+      dismissToast(toastId as string); // Cast to string
       showError(error.message || 'Failed to upload image.');
     }
   }, [canvasId, screenToFlowPosition, setNodes, reactFlowWrapper]);

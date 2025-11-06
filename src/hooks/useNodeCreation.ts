@@ -12,7 +12,7 @@ interface Source {
 interface NewNodeRequest {
   type: string;
   content: string;
-  sources?: Source[];
+  sources?: Source[]; // Changed to Source[]
 }
 
 const getNodeTypeFromRequest = (requestType: string): string => {
@@ -72,7 +72,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
       position,
       data,
       style,
-      selected: true,
+      selected: true, // Explicitly set selected to true
     };
 
     setNodes((nds) => nds.map(n => ({...n, selected: false})).concat(newNode));

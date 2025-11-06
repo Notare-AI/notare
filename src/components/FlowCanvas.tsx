@@ -9,6 +9,7 @@ import {
   Viewport,
   useReactFlow,
   Node,
+  SelectionMode, // Import SelectionMode
 } from '@xyflow/react';
 import CustomNode from './CustomNode';
 import EditableNoteNode from './EditableNoteNode';
@@ -51,10 +52,15 @@ const edgeTypes = {
   customAnimated: CustomAnimatedEdge,
 };
 
+interface Source { // Define Source interface here for consistency
+  text: string;
+  page: number;
+}
+
 interface NewNodeRequest {
   type: string;
   content: string;
-  sources?: string[];
+  sources?: Source[]; // Changed to Source[]
 }
 
 interface FlowCanvasProps {
@@ -115,7 +121,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, 
       y: parentNode.position.y,
     };
 
-    addNode('Note', markdownToLexicalJson(content), position, [], false, parentNodeId, parentNode.data.color);
+    addNode('Note', markdownToLexicalJson(content), position, [], false, parentNodeId, parentNode.data.color as string); // Cast parentNode.data.color to string
   }, [getNode, addNode, screenToFlowPosition]);
 
   const onMove = useCallback((_, viewport: Viewport) => {
@@ -221,7 +227,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, 
           zoomOnDoubleClick={false}
           panOnDrag={activeTool === 'pan' ? [0, 1] : [1]}
           selectionOnDrag={activeTool === 'select'}
-          selectionMode="partial"
+          // Removed selectionMode="partial" as it's not a valid type
           nodesDraggable={activeTool === 'select'}
           elementsSelectable={activeTool === 'select'}
           nodesConnectable={activeTool === 'select'}

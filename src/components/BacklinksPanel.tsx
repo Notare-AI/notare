@@ -12,12 +12,13 @@ const getReadableTitle = (label: string | undefined): string => {
   if (!label) {
     return 'Untitled Note';
   }
-  if (isLexicalJSON(label)) {
-    const markdown = lexicalToMarkdown(label);
+  const content = label as string; // Assert as string
+  if (isLexicalJSON(content)) {
+    const markdown = lexicalToMarkdown(content);
     const firstLine = markdown.split('\n')[0].replace(/^[#\s*>-]+/, '').trim();
     return firstLine || 'Untitled Note';
   }
-  return label.split('\n')[0] || 'Untitled Note';
+  return content.split('\n')[0] || 'Untitled Note';
 };
 
 const BacklinksPanel = ({ selectedNodeId }: BacklinksPanelProps) => {

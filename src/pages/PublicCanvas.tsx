@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ReactFlow, Background, BackgroundVariant, Node, Edge, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, PenSquare, Lock, Copy, Users, Sparkles } from 'lucide-react';
@@ -48,6 +48,8 @@ const dummyCanvasActions = {
 
 const PublicCanvas = () => {
   const { canvasId } = useParams();
+  const [searchParams] = useSearchParams();
+  const justSignedUp = searchParams.get('justSignedUp') === 'true';
   const [canvasData, setCanvasData] = useState<{ title: string; nodes: Node[]; edges: Edge[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -152,18 +154,55 @@ const PublicCanvas = () => {
             </Link>
           </Button>
         ) : (
-          <Button asChild size="lg" variant="outline">
-            <Link 
-              to={`/dashboard?copyCanvas=${canvasId}`} 
-              className="flex items-center gap-2"
-              onClick={() => console.log('👤 Logged-in user clicking copy with canvasId:', canvasId)}
-            >
-              <Copy className="w-4 h-4" />
-              Copy to My Account
-            </Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            {justSignedUp && (
+              <div className="flex items-center gap-2 text-sm text-primary bg-primary/10 px-3 py-1 rounded-full">
+                <Sparkles className="w-4 h-4" />
+                Welcome to Notare!
+              </div>
+            )}
+            <Button asChild size="lg" variant={justSignedUp ? "default" : "outline"} className={justSignedUp ? "shadow-md animate-pulse" : ""}>
+              <Link 
+                to={`/dashboard?copyCanvas=${canvasId}`} 
+                className="flex items-center gap-2"
+                onClick={() => console.log('👤 Logged-in user clicking copy with canvasId:', canvasId)}
+              >
+                <Copy className="w-4 h-4" />
+                {justSignedUp ? "Copy This Canvas Now!" : "Copy to My Account"}
+              </Link>
+            </Button>
+          </div>
         )}
       </header>
+
+      {/* Welcome banner for newly signed up users */}
+      {user && justSignedUp && (
+        <div className="bg-primary/10 border-b border-primary/20 p-4">
+          <div className="max-w-4xl mx-auto">
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/20">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary">🎉 Welcome to Notare!</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Your account is ready! Click the button above to copy this canvas and start editing.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-primary bg-primary/20 px-2 py-1 rounded">
+                    <Copy className="w-3 h-3" />
+                    Ready to copy
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       <div className="flex-grow relative">
         <ReactFlowProvider>

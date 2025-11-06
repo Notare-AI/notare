@@ -84,11 +84,11 @@ const NodeAIEditor = ({ nodeId, currentContent, chatHistory, onHistoryChange }: 
     const contextParts = branchNodes
       .filter(node => node.id !== nodeId && node.data?.label)
       .map(node => {
-        const content = node.data.label;
+        const content = node.data.label as string; // Assert as string
         const textContent = isLexicalJSON(content) ? lexicalToMarkdown(content) : content;
         
         let nodeTitle = `Note (${node.type})`;
-        if (textContent.length > 0) {
+        if (textContent && textContent.length > 0) { // Check textContent is not null/undefined before using length
           nodeTitle = textContent.split('\n')[0].replace(/#/g, '').trim();
         }
 
