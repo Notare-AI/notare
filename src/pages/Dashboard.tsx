@@ -45,8 +45,7 @@ const Index = () => {
   const { user, refetchProfile } = useUserProfile();
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
   const [sidebarRefetchTrigger, setSidebarRefetchTrigger] = useState(0);
-  const [canvasToImportId, setCanvasToImportId] = useState<string | null>(null);
-  const [isImporting, setIsImporting] = useState(false);
+  const [isCopying, setIsCopying] = useState(false); // New state for copying status
 
   // Core logic for importing a canvas by ID by calling the edge function
   const importCanvasById = useCallback(async (canvasId: string) => {
@@ -111,45 +110,43 @@ const Index = () => {
     }
   }, [searchParams, setSearchParams, refetchProfile]);
 
-  // 3. Check for canvas copy parameter (for banner display)
+  // 3. AUTOMATIC CANVAS COPY LOGIC
   useEffect(() => {
-    const canvasIdFromUrl = searchParams.get('copyCanvas');
-    if (canvasIdFromUrl) {
-      setCanvasToImportId(canvasIdFromUrl);
-    }
-  }, [searchParams]);
-
-  // 4. Handler for the banner button
-  const handleImportCanvas = useCallback(async () => {
-    if (!canvasToImportId || !user) return;
-
-    setIsImporting(true);
-    const toastId = showLoading('Copying canvas to your account...');
+    const canvasIdToCopy = searchParams.get('copyCanvas');
     
-    try {
-      const newCanvas = await importCanvasById(canvasToImportId);
-      
-      dismissToast(toastId);
-      showSuccess('Canvas copied to your account!');
-      
-      setSelectedCanvas(newCanvas);
-      setSidebarRefetchTrigger(prev => prev + 1); // Trigger sidebar refresh
-      
-    } catch (error: any) {
-      console.error('Error in canvas copy:', error);
-      dismissToast(toastId);
-      showError(error.message);
-    } finally {
-      setIsImporting(false);
-      setCanvasToImportId(null);
-      // Clean up the URL parameter
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('copyCanvas');
-      setSearchParams(newParams, { replace: true });
-    }
-  }, [canvasToImportId, user, searchParams, setSearchParams, importCanvasById]);
+    if (canvasIdToCopy && user && !isCopying) {
+      setIsCopying(true);
+      const toastId = showLoading('Copying shared canvas to your account...');
 
-  // 5. Handler for the modal (passed to Sidebar)
+      const performCopy = async () => {
+        try {
+          const newCanvas = await importCanvasById(canvasIdToCopy);
+          
+          dismissToast(toastId);
+          showSuccess('Canvas copied successfully!');
+          
+          setSelectedCanvas(newCanvas);
+          setSidebarRefetchTrigger(prev => prev + 1); // Trigger sidebar refresh
+          
+        } catch (error: any) {
+          console.error('Error in canvas copy:', error);
+          dismissToast(toastId);
+          showError(error.message || 'Failed to copy canvas.');
+        } finally {
+          setIsCopying(false);
+          // Clean up the URL parameter
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete('copyCanvas');
+          setSearchParams(newParams, { replace: true });
+        }
+      };
+      
+      performCopy();
+    }
+  }, [searchParams, user, isCopying, importCanvasById, setSearchParams]);
+
+
+  // 4. Handler for the modal (passed to Sidebar)
   const handleImportCanvasFromUrl = useCallback(async (url: string) => {
     const urlParts = url.split('/');
     const canvasId = urlParts.find(part => part.length === 36); // Simple heuristic for UUID
@@ -195,7 +192,7 @@ const Index = () => {
       <div className="flex h-screen w-screen bg-background text-foreground">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
-          onCollapse={() => setIsSidebarCollapsed(true)}
+          onCollapse={() => setIsSidebarCollapsed(false)}
           selectedCanvasId={selectedCanvas?.id || null}
           onSelectCanvas={(canvas) => setSelectedCanvas(canvas as Canvas)}
           onUpgradeClick={() => openSettings('billing')}
@@ -225,26 +222,15 @@ const Index = () => {
                 </div>
               )}
               
-              {/* Import Canvas Banner */}
-              {canvasToImportId && (
+              {/* Display copying status if active */}
+              {isCopying && (
                 <div className="p-2 border-b border-border flex-shrink-0">
                   <Alert className="bg-primary/10 border-primary/20 text-primary">
                     <Copy className="h-4 w-4" />
-                    <AlertTitle>Canvas Shared With You</AlertTitle>
-                    <AlertDescription className="flex items-center justify-between">
-                      <span>Click below to import a copy of this public canvas into your account.</span>
-                      <Button 
-                        onClick={handleImportCanvas} 
-                        disabled={isImporting}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                      >
-                        {isImporting ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Copy className="mr-2 h-4 w-4" />
-                        )}
-                        Import Canvas
-                      </Button>
+                    <AlertTitle>Copying Canvas...</AlertTitle>
+                    <AlertDescription className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Please wait while we duplicate the shared canvas to your account.</span>
                     </AlertDescription>
                   </Alert>
                 </div>
