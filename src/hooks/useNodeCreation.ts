@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Node, useReactFlow } from '@xyflow/react';
+import { Node, useReactFlow, XYPosition } from '@xyflow/react';
 
 let idCounter = 0;
 const getId = () => `node_${+new Date()}_${idCounter++}`;
@@ -34,8 +34,11 @@ const getNodeTypeFromRequest = (requestType: string): string => {
   }
 };
 
+// Define a type that ensures 'selected' is always present
+type NodeWithSelected = Node & { selected: boolean };
+
 interface UseNodeCreationProps {
-  setNodes: (nodes: Node[] | ((nds: Node[]) => Node[])) => void;
+  setNodes: (nodes: NodeWithSelected[] | ((nds: NodeWithSelected[]) => NodeWithSelected[])) => void;
   onNodeAdded: () => void;
 }
 
@@ -45,7 +48,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
   const addNode = useCallback((
     type: string,
     content: string, // For YouTube, this will be the videoId
-    position: { x: number; y: number },
+    position: XYPosition,
     sources: Source[] = [],
     isAiGenerated: boolean = false,
     parentNodeId?: string, // Optional: for AI-generated nodes
@@ -66,7 +69,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
       style = { width: 560, height: 315 }; // Standard YouTube embed dimensions
     }
 
-    const newNode: Node = {
+    const newNode: NodeWithSelected = {
       id: getId(),
       type: nodeType,
       position,
@@ -75,7 +78,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
       selected: true, // Explicitly set selected to true
     };
 
-    setNodes((nds) => nds.map(n => ({...n, selected: false})).concat(newNode));
+    setNodes((nds) => nds.map(n => ({...n, selected: false} as NodeWithSelected)).concat(newNode));
     onNodeAdded();
 
     setTimeout(() => {

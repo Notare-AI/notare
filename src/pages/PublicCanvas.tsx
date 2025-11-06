@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ReactFlow, Background, BackgroundVariant, Node, Edge, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, PenSquare, Lock, Copy, Users, Sparkles } from 'lucide-react';
+import { Loader2, PenSquare, Lock, Copy, Users, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +55,7 @@ const PublicCanvas = () => {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [nodeCount, setNodeCount] = useState(0);
+  const [showCTACard, setShowCTACard] = useState(true);
 
   // Check if user is authenticated
   useEffect(() => {
@@ -226,10 +227,17 @@ const PublicCanvas = () => {
         </ReactFlowProvider>
 
         {/* Enhanced CTA for anonymous users */}
-        {!user && (
+        {!user && showCTACard && (
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
             <Card className="w-96 shadow-2xl border-2">
-              <CardHeader className="text-center pb-3">
+              <CardHeader className="text-center pb-3 relative">
+                <button
+                  onClick={() => setShowCTACard(false)}
+                  className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
                 <CardTitle className="flex items-center justify-center gap-2 text-lg">
                   <Sparkles className="w-5 h-5 text-primary" />
                   Love this canvas?
@@ -258,6 +266,20 @@ const PublicCanvas = () => {
                 </p>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* Minimized CTA button when card is closed */}
+        {!user && !showCTACard && (
+          <div className="absolute bottom-6 right-6 z-20">
+            <Button
+              onClick={() => setShowCTACard(true)}
+              size="lg"
+              className="shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Copy Canvas
+            </Button>
           </div>
         )}
       </div>

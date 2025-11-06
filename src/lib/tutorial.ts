@@ -1,11 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
+import { markdownToLexicalJson } from '@/lib/markdownToLexical';
 
 interface TutorialNode {
   id: string;
   type: string;
   position: { x: number; y: number };
   data: {
-    content: string;
+    label: string;
     color?: string;
   };
 }
@@ -19,159 +20,265 @@ interface TutorialEdge {
 
 export const createTutorialCanvasContent = (): { nodes: TutorialNode[]; edges: TutorialEdge[] } => {
   const nodes: TutorialNode[] = [
+    // Sequential left-to-right layout
     {
       id: 'welcome',
       type: 'editableNote',
       position: { x: 100, y: 100 },
       data: {
-        content: `# 🎯 Welcome to Notare!
+        label: markdownToLexicalJson(`# 👋 Welcome to Notare!
 
-Your AI-powered research assistant is ready to help you:
+Your AI-powered research assistant for PDFs and note-taking.
 
-**✨ Key Features:**
-- Upload PDFs and get instant insights
-- Create visual knowledge maps  
-- Ask AI questions about your documents
-- Connect ideas with visual links
-- Export everything as Markdown
+## What you'll learn:
+✅ How to upload and process PDFs  
+✅ Creating and organizing notes  
+✅ Using AI to analyze documents  
+✅ Building visual knowledge maps  
+✅ Exporting your research  
 
-**👋 Let's get started!**
-Follow this tutorial to learn the basics.`,
+**👉 Follow the numbered arrows to get started!**`),
         color: 'blue'
       }
     },
+
     {
-      id: 'pdf-processing',
+      id: 'pdf-upload',
       type: 'editableNote',
-      position: { x: 500, y: 100 },
+      position: { x: 650, y: 100 },
       data: {
-        content: `## 📄 PDF Processing Magic
+        label: markdownToLexicalJson(`# 📄 Step 1: Upload PDFs
 
-**How to upload documents:**
-1. Look for the sidebar on the left
-2. Drag & drop PDF files directly
-3. Or use the upload button
+## How to add documents:
+1. **Drag & drop** PDF files onto the sidebar
+2. Or click **"Add Document"** button
+3. Wait for AI processing (usually 30-60 seconds)
 
-**What happens next:**
-- AI reads your entire document
-- Extracts key insights automatically
-- Generates summary nodes
-- Creates reference nodes for citations
+## What happens next:
+- AI extracts key information
+- Generates automatic summary
+- Creates searchable content
+- Enables Q&A with your document
 
-Try uploading a research paper to see the magic! 🪄`,
+**Try it:** Upload a research paper or document now!
+
+*💡 Tip: Start with shorter documents (5-20 pages) for faster processing*`),
         color: 'green'
       }
     },
+
     {
-      id: 'canvas-features',
+      id: 'creating-notes',
       type: 'editableNote',
-      position: { x: 100, y: 350 },
+      position: { x: 1200, y: 100 },
       data: {
-        content: `## 🗺️ Canvas Features
+        label: markdownToLexicalJson(`# ✏️ Step 2: Creating Notes
 
-**Navigation:**
-- **Zoom:** Mouse wheel or trackpad
-- **Pan:** Drag with mouse/trackpad
-- **Fit View:** Reset zoom to see everything
+## How to make notes:
+- **Select** the note button from the toolbar or press n on your keyboard
+- **Type directly** to add content
+- **Drag** notes to move them around
+- **Resize** by dragging corners
+- **Highlight text** to edit text through the popup toolbar
 
-**Creating Notes:**
-- **Double-click** anywhere to create a note
-- Edit notes by clicking on them
-- Use **Markdown** for formatting
+## Markdown Support:
+\`\`\`
+# Headers
+**Bold text**
+*Italic text*
+- Bullet points
+1. Numbered lists
+[Links](https://example.com)
+> quotes
+\`\`\`
 
-**Organizing:**
-- Drag notes to arrange them
-- Use different colors for categories
-- Group related ideas together`,
+## Organization Tips:
+🔵 **Blue** - Main concepts  
+🟢 **Green** - Supporting evidence  
+🟡 **Yellow** - Questions/todos  
+🔴 **Red** - Important warnings  
+
+**Try it:** Double-click this note to create your first note!`),
         color: 'purple'
       }
     },
+
     {
       id: 'ai-features',
       type: 'editableNote',
-      position: { x: 500, y: 350 },
+      position: { x: 1750, y: 100 },
       data: {
-        content: `## 🤖 AI-Powered Features
+        label: markdownToLexicalJson(`# 🤖 Step 3: AI-Powered Analysis
 
-**Ask Questions:**
-- Click the AI button on any note
-- Ask about your uploaded documents
-- Get instant, contextual answers
+## Ask Questions About Your PDFs:
+- "What are the main findings?"
+- "Summarize the methodology"
+- "What are the limitations?"
+- "How does this relate to [topic]?"
 
-**Content Generation:**
-- Create summaries (TL;DR nodes)
-- Extract key points
-- Generate reference lists
+## AI Can Help You:
+📝 **Summarize** long sections  
+🔍 **Extract** key quotes  
+🧠 **Explain** complex concepts  
+🔗 **Find** connections between ideas  
+💡 **Generate** research questions  
 
-**Smart Connections:**
-- AI suggests related content
-- Auto-links similar concepts
-- Helps you discover patterns
+## How to Use AI:
+1. Select text from a PDF/reader (if uploaded) to create a note
+2. Use the AI chat button, every note has one
+3. Ask specific questions about your notes
+4. Copy AI responses onto the canvas for later
+5. Connect notes together to build knowledge maps and context for your AI assistant
 
-The more documents you upload, the smarter your research becomes! 🧠`,
+**Try it:** Upload a PDF and ask "What is this document about?"`),
         color: 'orange'
       }
     },
+
     {
-      id: 'getting-started',
+      id: 'canvas-navigation',
       type: 'editableNote',
-      position: { x: 300, y: 600 },
+      position: { x: 2300, y: 100 },
       data: {
-        content: `## 🚀 Ready to Start?
+        label: markdownToLexicalJson(`# 🗺️ Step 4: Canvas Navigation
 
-**Your Next Steps:**
-1. **Upload a PDF** - Try a research paper or article
-2. **Create your first note** - Double-click anywhere
-3. **Connect ideas** - Drag from one note to another
-4. **Ask the AI** - Click the sparkle button and ask questions
+## Moving Around:
+- **Mouse wheel** to zoom in/out
+- **Click & drag** empty space to pan
+- **Left Click + drag** to select multiple notes
 
-**Pro Tips:**
-- Use descriptive canvas titles for easy finding
-- Color-code notes by topic or importance
-- Export to Markdown to backup your work
+## View Controls:
+🔍 **Zoom to node** - Zooms to selected note 
+📍 **Center view** - Return to middle   
 
-**Need Help?**
-- Check the settings for themes and preferences
-- Visit our FAQ for common questions
-- Join our Discord community for support
+## Connecting Ideas:
+- **Drag** from note edge to another note
+- Creates visual connections
+- Shows relationships between concepts
+- Helps build knowledge maps
 
-Happy researching! 🎓`,
+## Canvas Tips:
+- Spread notes out for clarity
+- Group related concepts nearby
+- Use colors to categorize themes
+- Connect notes to show relationships
+
+**Try it:** Zoom in/out and drag this canvas around!`),
         color: 'pink'
+      }
+    },
+
+    {
+      id: 'organizing-research',
+      type: 'editableNote',
+      position: { x: 2850, y: 100 },
+      data: {
+        label: markdownToLexicalJson(`# 📊 Step 5: Organizing Your Research
+
+## Best Practices:
+1. **One canvas per project** or topic
+2. **Color-code** by theme or source
+3. **Connect** related ideas with lines
+4. **Linked References** - Link notes together to show relationships
+5. **Group** similar concepts together
+6. **Use headers** to structure content
+
+## Canvas Organization Ideas:
+📚 **Literature Review** - One note per paper  
+🧪 **Methodology** - Steps and procedures  
+📈 **Results** - Findings and data  
+💭 **Ideas** - Questions and hypotheses  
+📝 **Writing** - Outline and drafts  
+
+## Collaboration:
+- **Share canvas** with teammates
+- **Export** notes as Markdown
+- **Copy** important insights
+- **Sync** across all your devices
+
+**Pro tip:** Create a "Table of Contents" note with links to different sections!`),
+        color: 'cyan'
+      }
+    },
+
+    {
+      id: 'export-sharing',
+      type: 'editableNote',
+      position: { x: 3400, y: 100 },
+      data: {
+        label: markdownToLexicalJson(`# 🚀 Step 6: Export & Share Your Work
+
+## Exporting Options:
+📄 **Markdown** - For writing and documentation  
+🔗 **Copy notes** - Paste into other apps  
+🌐 **Share canvas** - Collaborate with others  
+💾 **Auto-sync** - Access from any device  
+
+## Sharing Your Canvas:
+1. Click **Share** button in top toolbar
+2. Toggle **"Make canvas public"**
+3. **Copy link** to share with others
+4. Others can **view and copy** your canvas
+
+## Integration Workflow:
+- Export notes to **Notion, Obsidian, etc.**
+- Copy insights to **research papers**
+- Share findings with **collaborators**
+- Build **knowledge base** over time
+
+## You Own Your Data:
+✅ Export anytime in standard formats  
+✅ No vendor lock-in   
+✅ Privacy-focused design  
+
+**You're ready to start your research journey! 🎓**`),
+        color: 'lime'
+      }
+    },
+
+    {
+      id: 'next-steps',
+      type: 'editableNote',
+      position: { x: 3950, y: 100 },
+      data: {
+        label: markdownToLexicalJson(`# 🎯 Next Steps - Start Your Research!
+
+## Ready to Begin:
+1. ✅ **Create your first canvas** (+ New Canvas)
+2. ✅ **Upload a PDF** you want to analyze
+3. ✅ **Ask AI questions** about your document
+4. ✅ **Take notes** on key insights
+5. ✅ **Connect ideas** with visual links
+
+## Need Help?
+📧 **Support** - Contact us anytime via email: NotareAI@outlook.com 
+📚 **Documentation** - Detailed guides here: https://www.notare.uk/blog
+💬 **Community** - Tips and best practices via Discord: https://discord.gg/FKqKpcy3
+
+## Quick Shortcuts:
+- **View Controls:** → V
+- **Pan Canvas:** → H
+- **New Note:** → N 
+- **Ctrl+Z** → Undo/Redo
+- **Mouse wheel** → Zoom
+- **Space+drag** → Pan canvas
+- **Delete** → Remove selected items
+
+**Happy researching! 🔬📚✨**`),
+        color: 'orange'
       }
     }
   ];
 
   const edges: TutorialEdge[] = [
-    {
-      id: 'e1-2',
-      source: 'welcome',
-      target: 'pdf-processing',
-      type: 'smoothstep'
-    },
-    {
-      id: 'e1-3',
-      source: 'welcome',
-      target: 'canvas-features',
-      type: 'smoothstep'
-    },
-    {
-      id: 'e2-4',
-      source: 'pdf-processing',
-      target: 'ai-features',
-      type: 'smoothstep'
-    },
-    {
-      id: 'e3-5',
-      source: 'canvas-features',
-      target: 'getting-started',
-      type: 'smoothstep'
-    },
-    {
-      id: 'e4-5',
-      source: 'ai-features',
-      target: 'getting-started',
-      type: 'smoothstep'
-    }
+    // Simple left-to-right sequential flow
+    { id: 'e1', source: 'welcome', target: 'pdf-upload', type: 'smoothstep' },
+    { id: 'e2', source: 'pdf-upload', target: 'creating-notes', type: 'smoothstep' },
+    { id: 'e3', source: 'creating-notes', target: 'ai-features', type: 'smoothstep' },
+    { id: 'e4', source: 'ai-features', target: 'canvas-navigation', type: 'smoothstep' },
+    { id: 'e5', source: 'canvas-navigation', target: 'organizing-research', type: 'smoothstep' },
+    { id: 'e6', source: 'organizing-research', target: 'export-sharing', type: 'smoothstep' },
+    { id: 'e7', source: 'export-sharing', target: 'next-steps', type: 'smoothstep' }
   ];
 
   return { nodes, edges };
@@ -183,7 +290,7 @@ export const createTutorialCanvas = async (userId: string): Promise<{ data: any;
   const { data, error } = await supabase
     .from('canvases')
     .insert([{
-      title: '🎯 Notare Tutorial - Learn the Basics',
+      title: '🎯 Notare Tutorial - Learn How to Use Your Research Assistant',
       canvas_data: tutorialContent,
       owner_id: userId
       // Note: Removed is_tutorial field as it may not exist in schema

@@ -10,7 +10,7 @@ export const testTutorialContent = () => {
   
   // Validate nodes structure
   nodes.forEach((node, index) => {
-    if (!node.id || !node.type || !node.position || !node.data?.content) {
+    if (!node.id || !node.type || !node.position || !node.data?.label) { // Corrected from .content to .label
       console.error(`❌ Invalid node at index ${index}:`, node);
       return;
     }

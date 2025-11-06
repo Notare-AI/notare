@@ -63,6 +63,9 @@ interface NewNodeRequest {
   sources?: Source[]; // Changed to Source[]
 }
 
+// Define a type that ensures 'selected' is always present
+type NodeWithSelected = Node & { selected: boolean };
+
 interface FlowCanvasProps {
   canvasId: string;
   newNodeRequest: NewNodeRequest | null;
@@ -73,7 +76,7 @@ interface FlowCanvasProps {
 }
 
 const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, isBacklinksPanelOpen, onToggleBacklinksPanel }: FlowCanvasProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeWithSelected[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const reactFlowWrapper = useRef<HTMLDivElement>(null);

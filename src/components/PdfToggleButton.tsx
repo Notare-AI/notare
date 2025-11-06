@@ -17,7 +17,7 @@ const PdfToggleButton = ({ onClick, isActive }: PdfToggleButtonProps) => {
         'bg-white text-black hover:bg-gray-200 border-gray-300 shadow-sm',
         isActive && 'bg-primary/10 border-primary text-primary hover:bg-primary/20'
       )}
-      title={isActive ? "Close PDF Viewer" : "Open PDF Viewer"}
+      title={isActive ? "Close Reader" : "Open Reader (PDF & Web Articles)"}
     >
       <FileText size={20} />
     </Button>

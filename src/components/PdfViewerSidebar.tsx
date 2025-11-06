@@ -113,9 +113,10 @@ interface PdfPageContent {
 interface PdfViewerSidebarProps {
   canvasId: string | null;
   onAddNode: (nodeData: { type: string; content: string; sources?: Source[] }) => void;
+  showHeader?: boolean; // New prop to control header visibility
 }
 
-const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
+const PdfViewerSidebar = ({ canvasId, onAddNode, showHeader = true }: PdfViewerSidebarProps) => {
   const [pdfs, setPdfs] = useState<PdfFile[]>([]);
   const [activePdf, setActivePdf] = useState<PdfFile | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -454,34 +455,61 @@ const PdfViewerSidebar = ({ canvasId, onAddNode }: PdfViewerSidebarProps) => {
   return (
     <div className="h-full w-full bg-background text-foreground">
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
-          {pdfs.length > 0 && activePdf ? (
-            <Select onValueChange={(pdfId) => setActivePdf(pdfs.find(p => p.id === pdfId) || null)} value={activePdf.id}>
-              <SelectTrigger className="w-[250px] truncate">
-                <SelectValue placeholder="Select a PDF" />
-              </SelectTrigger>
-              <SelectContent>
-                {pdfs.map(pdf => (
-                  <SelectItem key={pdf.id} value={pdf.id}>
-                    {pdf.file_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <h2 className="text-lg font-semibold">PDF Reference</h2>
-          )}
-          <div className="flex items-center gap-1">
-            {canvasId && (
-              <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)} title="Upload new PDF">
-                <FilePlus2 size={20} />
-              </Button>
+        {showHeader && (
+          <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
+            {pdfs.length > 0 && activePdf ? (
+              <Select onValueChange={(pdfId) => setActivePdf(pdfs.find(p => p.id === pdfId) || null)} value={activePdf.id}>
+                <SelectTrigger className="w-[250px] truncate">
+                  <SelectValue placeholder="Select a PDF" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pdfs.map(pdf => (
+                    <SelectItem key={pdf.id} value={pdf.id}>
+                      {pdf.file_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <h2 className="text-lg font-semibold">PDF Reference</h2>
             )}
-            <Button variant="ghost" size="icon" onClick={() => setIsPdfSidebarOpen(false)}>
-              <X size={20} />
-            </Button>
+            <div className="flex items-center gap-1">
+              {canvasId && (
+                <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)} title="Upload new PDF">
+                  <FilePlus2 size={20} />
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" onClick={() => setIsPdfSidebarOpen(false)}>
+                <X size={20} />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* PDF selector for when header is hidden */}
+        {!showHeader && pdfs.length > 0 && activePdf && (
+          <div className="p-4 border-b border-border flex-shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <Select onValueChange={(pdfId) => setActivePdf(pdfs.find(p => p.id === pdfId) || null)} value={activePdf.id}>
+                <SelectTrigger className="flex-grow">
+                  <SelectValue placeholder="Select a PDF" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pdfs.map(pdf => (
+                    <SelectItem key={pdf.id} value={pdf.id}>
+                      {pdf.file_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {canvasId && (
+                <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)} title="Upload new PDF">
+                  <FilePlus2 size={20} />
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         <div ref={viewerRef} onMouseUp={handleMouseUp} className="flex-grow p-4 overflow-auto relative">
           {pdfs.length === 0 ? (

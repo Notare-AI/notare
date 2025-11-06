@@ -4,7 +4,7 @@ import FlowDiagram from "@/components/FlowDiagram";
 import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { PanelLeftOpen, FileText, Copy, Loader2 } from "lucide-react";
-import PdfViewerSidebar from "@/components/PdfViewerSidebar";
+import ReaderSidebar from "@/components/ReaderSidebar";
 import PdfToggleButton from "@/components/PdfToggleButton";
 import {
   ResizablePanelGroup,
@@ -197,7 +197,7 @@ const Index = () => {
       <div className="flex h-screen w-screen bg-background text-foreground">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
-          onCollapse={() => setIsSidebarCollapsed(false)}
+          onCollapse={() => setIsSidebarCollapsed(true)}
           selectedCanvasId={selectedCanvas?.id || null}
           onSelectCanvas={(canvas) => setSelectedCanvas(canvas as Canvas)}
           onUpgradeClick={() => openSettings('billing')}
@@ -268,9 +268,10 @@ const Index = () => {
             <>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={30} minSize={28} maxSize={50}>
-                <PdfViewerSidebar
+                <ReaderSidebar
                   canvasId={selectedCanvas?.id || null}
                   onAddNode={handleAddNode}
+                  userId={user?.id}
                 />
               </ResizablePanel>
             </>
