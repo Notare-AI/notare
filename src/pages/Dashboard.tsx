@@ -48,50 +48,26 @@ const Index = () => {
   const [canvasToImportId, setCanvasToImportId] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
 
-  // Core logic for importing a canvas by ID
+  // Core logic for importing a canvas by ID by calling the edge function
   const importCanvasById = useCallback(async (canvasId: string) => {
     if (!user) {
       throw new Error("User not authenticated.");
     }
     
-    // 1. Fetch the public canvas data
-    const { data: publicCanvas, error: fetchError } = await supabase
-      .from('canvases')
-      .select('title, canvas_data')
-      .eq('id', canvasId)
-      .eq('is_public', true)
-      .single();
+    const { data, error } = await supabase.functions.invoke('copy-canvas', {
+      body: { canvas_id: canvasId },
+    });
 
-    if (fetchError) {
-      throw new Error(`Could not find the shared canvas: ${fetchError.message}`);
+    if (error) {
+      throw new Error(error.message || 'An unknown error occurred while copying the canvas.');
     }
-
-    if (!publicCanvas || !publicCanvas.canvas_data) {
-      throw new Error('Canvas not found or has no data to copy.');
-    }
-
-    // 2. Create a new canvas for the current user
-    const newTitle = `Copy of ${publicCanvas.title}`;
     
-    const { data: newCanvas, error: insertError } = await supabase
-      .from('canvases')
-      .insert({
-        title: newTitle,
-        canvas_data: publicCanvas.canvas_data,
-        owner_id: user.id,
-      })
-      .select('id, title, is_public')
-      .single();
-
-    if (insertError) {
-      throw new Error(`Failed to copy canvas: ${insertError.message}`);
+    // The edge function might return a structured error
+    if (data.error) {
+      throw new Error(data.error);
     }
 
-    if (!newCanvas) {
-      throw new Error('No canvas data returned after creation');
-    }
-
-    return newCanvas;
+    return data;
   }, [user]);
 
   // 1. Check for update version on load
@@ -180,7 +156,7 @@ const Index = () => {
     
     if (!canvasId) {
       showError("Invalid URL. Please ensure it's a valid Notare public canvas link.");
-      return;
+      return false;
     }
 
     const toastId = showLoading('Importing canvas...');
