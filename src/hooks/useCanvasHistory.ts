@@ -59,9 +59,8 @@ export const useCanvasHistory = ({
     }
 
     const newHistory = history.current.slice(0, historyIndex.current + 1);
-    newHistory.push({ nodes, edges });
-    history.current = newHistory;
-    historyIndex.current = newHistory.length - 1;
+    history.current = [...newHistory, { nodes, edges }];
+    historyIndex.current = history.current.length - 1;
   }, [nodes, edges, isInitializedRef]);
 
   return { handleUndo, handleRedo, setInitialHistory };

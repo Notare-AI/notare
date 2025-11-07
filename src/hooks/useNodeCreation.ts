@@ -38,7 +38,7 @@ const getNodeTypeFromRequest = (requestType: string): string => {
 type NodeWithSelected = Node & { selected: boolean };
 
 interface UseNodeCreationProps {
-  setNodes: (nodes: NodeWithSelected[] | ((nds: NodeWithSelected[]) => NodeWithSelected[])) => void;
+  setNodes: (nodes: Node[] | ((nds: Node[]) => Node[])) => void;
   onNodeAdded: () => void;
 }
 
@@ -69,7 +69,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
       style = { width: 560, height: 315 }; // Standard YouTube embed dimensions
     }
 
-    const newNode: NodeWithSelected = {
+    const newNode: Node = {
       id: getId(),
       type: nodeType,
       position,
@@ -78,7 +78,7 @@ export const useNodeCreation = ({ setNodes, onNodeAdded }: UseNodeCreationProps)
       selected: true, // Explicitly set selected to true
     };
 
-    setNodes((nds) => nds.map(n => ({...n, selected: false} as NodeWithSelected)).concat(newNode));
+    setNodes((nds) => nds.map(n => ({...n, selected: false} as Node)).concat(newNode));
     onNodeAdded();
 
     setTimeout(() => {

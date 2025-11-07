@@ -29,7 +29,7 @@ export const useCanvasKeyboardShortcuts = ({
 }: UseCanvasKeyboardShortcutsProps) => {
   const clipboardRef = useRef<Node[]>([]);
   const { getNodes } = useReactFlow();
-  const { addNode } = useNodeCreation({ setNodes, onNodeAdded });
+  const { addNode } = useNodeCreation({ setNodes: setNodes as any, onNodeAdded });
   const { uploadAndAddImageNode } = useImageUpload({ canvasId, setNodes, reactFlowWrapper });
 
   const getId = useCallback(() => `node_${+new Date()}_${Math.random().toString(36).substring(2, 9)}`, []);

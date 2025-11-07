@@ -76,7 +76,8 @@ interface FlowCanvasProps {
 }
 
 const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, isBacklinksPanelOpen, onToggleBacklinksPanel }: FlowCanvasProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<NodeWithSelected[]>([]);
+  // Corrected: Pass NodeWithSelected as the generic type
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeWithSelected>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -86,13 +87,14 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, 
   const [isAddYoutubeVideoModalOpen, setIsAddYoutubeVideoModalOpen] = useState(false); // New state
 
   // --- Hooks for modularity ---
-  const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes, edges, setNodes, setEdges, isInitializedRef });
-  const { isLoading } = useCanvasData({ canvasId, nodes, edges, setNodes, setEdges, setInitialHistory, isInitializedRef });
-  const { addNode, addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes, onNodeAdded });
+  // Passed nodes and setNodes directly, relying on the generic type inference
+  const { handleUndo, handleRedo, setInitialHistory } = useCanvasHistory({ nodes: nodes as Node[], edges, setNodes: setNodes as any, setEdges, isInitializedRef });
+  const { isLoading } = useCanvasData({ canvasId, nodes: nodes as Node[], edges, setNodes: setNodes as any, setEdges, setInitialHistory, isInitializedRef });
+  const { addNode, addNodeFromRequest, addNodeOnPaneClick } = useNodeCreation({ setNodes: setNodes as any, onNodeAdded });
   const { onDragOver, onDrop, onDragLeave, isDragOver } = useCanvasDragAndDrop({ onNodeAdded });
-  useCanvasKeyboardShortcuts({ nodes, setNodes, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded, setActiveTool });
-  const { downloadNodeBranch } = useCanvasActions({ nodes, edges });
-  const { uploadAndAddImageNode } = useImageUpload({ canvasId, setNodes, reactFlowWrapper });
+  useCanvasKeyboardShortcuts({ nodes: nodes as Node[], setNodes: setNodes as any, setEdges, handleUndo, handleRedo, canvasId, reactFlowWrapper, onNodeAdded, setActiveTool });
+  const { downloadNodeBranch } = useCanvasActions({ nodes: nodes as Node[], edges });
+  const { uploadAndAddImageNode } = useImageUpload({ canvasId, setNodes: setNodes as any, reactFlowWrapper });
 
   // --- Effects ---
   useEffect(() => {
@@ -150,6 +152,7 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, 
         const buffer = 200;
 
         return nds.map((node) => {
+          // Node is now of type NodeWithSelected, so properties exist
           const nodeWidth = node.width || 300;
           const nodeHeight = node.height || 200;
 
@@ -179,7 +182,8 @@ const FlowCanvas = ({ canvasId, newNodeRequest, onNodeAdded, onSelectionChange, 
   );
 
   const handleDrop = useCallback((event: React.DragEvent) => {
-    onDrop(event, setNodes);
+    // Cast setNodes to the expected type for onDrop
+    onDrop(event, setNodes as (nodes: Node[] | ((nds: Node[]) => Node[])) => void);
   }, [onDrop, setNodes]);
 
   const handleSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {

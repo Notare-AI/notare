@@ -112,22 +112,29 @@ const Sidebar = ({
     // Check if this is a first-time user (no canvases)
     if (data.length === 0) {
       try {
-        const { data: tutorialCanvas, error: tutorialError } = await createTutorialCanvas(user.id);
-        if (tutorialError) {
-          console.error('Failed to create tutorial canvas:', tutorialError);
-        } else if (tutorialCanvas) {
-          // Re-fetch canvases to include the new tutorial
-          const { data: updatedCanvases } = await supabase
-            .from("canvases")
-            .select("id, title, is_public")
-            .eq("owner_id", user.id)
-            .order("created_at", { ascending: false });
-          
-          if (updatedCanvases) {
-            setCanvases(updatedCanvases);
-            onSelectCanvas(updatedCanvases[0]); // Auto-select the tutorial canvas
-            showSuccess("🎉 Welcome to Notare! We've created a tutorial canvas to get you started.");
-            return;
+        const needsTutorial = await checkIfUserNeedsTutorial(user.id);
+        if (needsTutorial) {
+          const { data: tutorialCanvas, error: tutorialError } = await createTutorialCanvas(user.id);
+          if (tutorialError) {
+            // Only log specific errors that aren't race condition related
+            if (!tutorialError.message?.includes('already in progress') && 
+                !tutorialError.message?.includes('already has canvases')) {
+              console.error('Failed to create tutorial canvas:', tutorialError);
+            }
+          } else if (tutorialCanvas) {
+            // Re-fetch canvases to include the new tutorial
+            const { data: updatedCanvases } = await supabase
+              .from("canvases")
+              .select("id, title, is_public")
+              .eq("owner_id", user.id)
+              .order("created_at", { ascending: false });
+            
+            if (updatedCanvases) {
+              setCanvases(updatedCanvases);
+              onSelectCanvas(updatedCanvases[0]); // Auto-select the tutorial canvas
+              showSuccess("🎉 Welcome to Notare! We've created a tutorial canvas to get you started.");
+              return;
+            }
           }
         }
       } catch (error) {

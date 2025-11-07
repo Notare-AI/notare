@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 
 interface Source {
   text: string;
@@ -9,6 +10,7 @@ interface Source {
 export const useAI = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { refreshAfterAIOperation } = useUserProfile();
 
   const _generateContent = useCallback(async (payload: any): Promise<string> => {
     setIsGenerating(true);
@@ -70,6 +72,11 @@ export const useAI = () => {
           throw new Error('Received an invalid response from the AI service.');
         }
         
+        // Refresh profile to update credits in real-time (production only)
+        if (!isLocal) {
+          refreshAfterAIOperation();
+        }
+        
         return content.trim();
       }
     } catch (err: any) {
@@ -83,7 +90,7 @@ export const useAI = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, []);
+  }, [refreshAfterAIOperation]);
 
   const _parseJsonResponse = (responseText: string, objectKey: string) => {
     try {

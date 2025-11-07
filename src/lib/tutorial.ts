@@ -1,6 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { markdownToLexicalJson } from '@/lib/markdownToLexical';
 
+// Set to track ongoing tutorial canvas creations to prevent race conditions
+const pendingTutorialCreations = new Set<string>();
+
 interface TutorialNode {
   id: string;
   type: string;
@@ -20,7 +23,7 @@ interface TutorialEdge {
 
 export const createTutorialCanvasContent = (): { nodes: TutorialNode[]; edges: TutorialEdge[] } => {
   const nodes: TutorialNode[] = [
-    // Sequential left-to-right layout
+    // Sequential left-to-right layout with proper spacing to prevent overlapping
     {
       id: 'welcome',
       type: 'editableNote',
@@ -45,7 +48,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'pdf-upload',
       type: 'editableNote',
-      position: { x: 650, y: 100 },
+      position: { x: 800, y: 100 },
       data: {
         label: markdownToLexicalJson(`# 📄 Step 1: Upload PDFs
 
@@ -70,7 +73,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'creating-notes',
       type: 'editableNote',
-      position: { x: 1200, y: 100 },
+      position: { x: 1500, y: 100 },
       data: {
         label: markdownToLexicalJson(`# ✏️ Step 2: Creating Notes
 
@@ -106,7 +109,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'ai-features',
       type: 'editableNote',
-      position: { x: 1750, y: 100 },
+      position: { x: 2200, y: 100 },
       data: {
         label: markdownToLexicalJson(`# 🤖 Step 3: AI-Powered Analysis
 
@@ -138,7 +141,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'canvas-navigation',
       type: 'editableNote',
-      position: { x: 2300, y: 100 },
+      position: { x: 2900, y: 100 },
       data: {
         label: markdownToLexicalJson(`# 🗺️ Step 4: Canvas Navigation
 
@@ -171,7 +174,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'organizing-research',
       type: 'editableNote',
-      position: { x: 2850, y: 100 },
+      position: { x: 3600, y: 100 },
       data: {
         label: markdownToLexicalJson(`# 📊 Step 5: Organizing Your Research
 
@@ -204,7 +207,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'export-sharing',
       type: 'editableNote',
-      position: { x: 3400, y: 100 },
+      position: { x: 4300, y: 100 },
       data: {
         label: markdownToLexicalJson(`# 🚀 Step 6: Export & Share Your Work
 
@@ -239,7 +242,7 @@ Your AI-powered research assistant for PDFs and note-taking.
     {
       id: 'next-steps',
       type: 'editableNote',
-      position: { x: 3950, y: 100 },
+      position: { x: 5000, y: 100 },
       data: {
         label: markdownToLexicalJson(`# 🎯 Next Steps - Start Your Research!
 
@@ -285,34 +288,64 @@ Your AI-powered research assistant for PDFs and note-taking.
 };
 
 export const createTutorialCanvas = async (userId: string): Promise<{ data: any; error: any }> => {
-  const tutorialContent = createTutorialCanvasContent();
-  
-  const { data, error } = await supabase
-    .from('canvases')
-    .insert([{
-      title: '🎯 Notare Tutorial - Learn How to Use Your Research Assistant',
-      canvas_data: tutorialContent,
-      owner_id: userId
-      // Note: Removed is_tutorial field as it may not exist in schema
-    }])
-    .select('id, title, is_public')
-    .single();
+  // Prevent concurrent tutorial canvas creation for the same user
+  if (pendingTutorialCreations.has(userId)) {
+    return { data: null, error: { message: 'Tutorial canvas creation already in progress' } };
+  }
 
-  return { data, error };
+  // Add user to pending set
+  pendingTutorialCreations.add(userId);
+
+  try {
+    // Double-check that user still needs a tutorial (no canvases exist)
+    const needsTutorial = await checkIfUserNeedsTutorial(userId);
+    if (!needsTutorial) {
+      return { data: null, error: { message: 'User already has canvases, tutorial not needed' } };
+    }
+
+    const tutorialContent = createTutorialCanvasContent();
+    
+    const { data, error } = await supabase
+      .from('canvases')
+      .insert([{
+        title: '🎯 Notare Tutorial - Learn How to Use Your Research Assistant',
+        canvas_data: tutorialContent,
+        owner_id: userId
+        // Note: Removed is_tutorial field as it may not exist in schema
+      }])
+      .select('id, title, is_public')
+      .single();
+
+    return { data, error };
+  } finally {
+    // Always remove user from pending set, even if there was an error
+    pendingTutorialCreations.delete(userId);
+  }
 };
 
 export const checkIfUserNeedsTutorial = async (userId: string): Promise<boolean> => {
-  const { data: canvases, error } = await supabase
-    .from('canvases')
-    .select('id')
-    .eq('owner_id', userId)
-    .limit(1);
+  try {
+    const { data: canvases, error } = await supabase
+      .from('canvases')
+      .select('id, title')
+      .eq('owner_id', userId)
+      .limit(5); // Check first few canvases to see if any exist
 
-  if (error) {
-    console.error('Error checking user canvases:', error);
-    return false;
+    if (error) {
+      console.error('Error checking user canvases:', error);
+      return false; // On error, don't create tutorial to be safe
+    }
+
+    // If user has no canvases, they need the tutorial
+    // Also check if there's already a tutorial canvas to prevent duplicates
+    const hasTutorialCanvas = canvases?.some(canvas => 
+      canvas.title.includes('Tutorial') || 
+      canvas.title.includes('🎯')
+    );
+
+    return !canvases || (canvases.length === 0 && !hasTutorialCanvas);
+  } catch (error) {
+    console.error('Exception in checkIfUserNeedsTutorial:', error);
+    return false; // On exception, don't create tutorial to be safe
   }
-
-  // If user has no canvases, they need the tutorial
-  return !canvases || canvases.length === 0;
 };

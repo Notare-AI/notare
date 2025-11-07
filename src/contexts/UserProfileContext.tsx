@@ -17,6 +17,8 @@ interface UserProfileContextType {
   loading: boolean;
   error: string | null;
   refetchProfile: () => void;
+  refreshAfterAIOperation: () => Promise<void>;
+  forceRefreshCredits: () => Promise<void>;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -88,23 +90,29 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
       fetchProfile();
 
+      // Set up real-time subscription for profile changes
       const channel = supabase
         .channel(`profile-updates-${user.id}`)
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
             table: 'profiles',
             filter: `id=eq.${user.id}`,
           },
           (payload) => {
-            setProfile(payload.new as Profile);
+            console.log('Profile updated via real-time subscription:', payload.new);
+            const newProfile = payload.new as Profile;
+            setProfile(newProfile);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Real-time subscription status:', status);
+        });
 
       return () => {
+        console.log('Cleaning up real-time subscription');
         supabase.removeChannel(channel);
       };
     } else {
@@ -113,8 +121,24 @@ export const UserProfileProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, fetchProfile]);
 
+  // Force refresh profile after AI operations to ensure credits are updated
+  const refreshAfterAIOperation = useCallback(async () => {
+    if (user) {
+      // Small delay to ensure database operations are completed
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await fetchProfile();
+    }
+  }, [user, fetchProfile]);
+
+  // Manual force refresh for credits (can be called from components if needed)
+  const forceRefreshCredits = useCallback(async () => {
+    if (user) {
+      await fetchProfile();
+    }
+  }, [user, fetchProfile]);
+
   return (
-    <UserProfileContext.Provider value={{ user, sessionLoading, profile, loading: profileLoading, error, refetchProfile: fetchProfile }}>
+    <UserProfileContext.Provider value={{ user, sessionLoading, profile, loading: profileLoading, error, refetchProfile: fetchProfile, refreshAfterAIOperation, forceRefreshCredits }}>
       {children}
     </UserProfileContext.Provider>
   );
